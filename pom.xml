@@ -35,9 +35,9 @@
     <description>Mock implementation of selected OSGi APIs.</description>
 
     <scm>
-        <connection>scm:svn:http://svn.apache.org/repos/asf/sling/trunk/testing/mocks/osgi-mock</connection>
-        <developerConnection>scm:svn:https://svn.apache.org/repos/asf/sling/trunk/testing/mocks/osgi-mock</developerConnection>
-        <url>http://svn.apache.org/viewvc/sling/trunk/testing/mocks/osgi-mock</url>
+        <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</conncetion>
+        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</developerConnection>
+        <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-testing-osgi-mock.git</url>
     </scm>
     
     <dependencies>
