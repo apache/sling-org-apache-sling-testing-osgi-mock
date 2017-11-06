@@ -18,7 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
-import org.osgi.annotation.versioning.ConsumerType;
+import aQute.bnd.annotation.ConsumerType;
 
 /**
  * Default implementation of {@link ContextPlugin}.

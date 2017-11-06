@@ -153,7 +153,7 @@ final class OsgiMetadataUtil {
      * @return Cache map
      */
     private static Map<String,Document> initMetadataDocumentCache() {
-        Map<String,Document> cacheMap = new HashMap<>();
+        Map<String,Document> cacheMap = new HashMap<String,Document>();
         
         XPath xpath = XPATH_FACTORY.newXPath();
         xpath.setNamespaceContext(NAMESPACE_CONTEXT);
@@ -179,8 +179,20 @@ final class OsgiMetadataUtil {
             Enumeration<URL> resourceUrls = OsgiMetadataUtil.class.getClassLoader().getResources(resourcePath);
             while (resourceUrls.hasMoreElements()) {
                 URL resourceUrl = resourceUrls.nextElement();
-                try (InputStream fileStream = resourceUrl.openStream()) {
+                InputStream fileStream = null;
+                try {
+                    fileStream = resourceUrl.openStream();
                     parseMetadataDocument(cacheMap, resourcePath, fileStream, xpathExpression);
+                }
+                finally {
+                    if (fileStream != null) {
+                        try {
+                            fileStream.close();
+                        }
+                        catch (IOException e) {
+                            // ignore
+                        }
+                    }
                 }
             }
         }
@@ -545,7 +557,7 @@ final class OsgiMetadataUtil {
             return this.target;
         }
         
-        public boolean matchesTargetFilter(ServiceReference<?> serviceReference) {
+        public boolean matchesTargetFilter(ServiceReference serviceReference) {
             if (targetFilter == null) {
                 return true;
             }

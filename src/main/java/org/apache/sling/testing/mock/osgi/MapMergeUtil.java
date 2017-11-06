@@ -31,25 +31,15 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * Map util merge methods.
+ * Map merge util methods.
  */
 final class MapMergeUtil {
-
+    
     private MapMergeUtil() {
         // static methods only
     }
-    
-    /**
-     * Merge service properties from three sources (with this precedence):
-     * 1. Properties defined in calling unit test code
-     * 2. Properties from ConfigurationAdmin
-     * 3. Properties from OSGi SCR metadata
-     * @param target Target service
-     * @param configAdmin Configuration admin or null if none is registered
-     * @param properties Properties from unit test code or null if none where passed
-     * @return Merged properties
-     */
-    static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Object target, 
+
+    public static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Object target, 
             ConfigurationAdmin configAdmin, 
             Dictionary<String, Object> properties) {
         return toDictionary(propertiesMergeWithOsgiMetadata(target, configAdmin, toMap(properties)));
@@ -65,7 +55,8 @@ final class MapMergeUtil {
      * @param properties Properties from unit test code or null if none where passed
      * @return Merged properties
      */
-    static Map<String, Object> propertiesMergeWithOsgiMetadata(Object target,
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> propertiesMergeWithOsgiMetadata(Object target,
             ConfigurationAdmin configAdmin,
             Map<String, Object> properties) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();

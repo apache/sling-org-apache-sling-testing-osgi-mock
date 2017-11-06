@@ -75,7 +75,7 @@ public class OsgiContextImplTest {
         Set<String> myService = new HashSet<String>();
         context.registerService(Set.class, myService, props);
 
-        ServiceReference<?> serviceReference = context.bundleContext().getServiceReference(Set.class.getName());
+        ServiceReference serviceReference = context.bundleContext().getServiceReference(Set.class.getName());
         Object serviceResult = context.bundleContext().getService(serviceReference);
         assertSame(myService, serviceResult);
         assertEquals("value1", serviceReference.getProperty("prop1"));
@@ -86,7 +86,7 @@ public class OsgiContextImplTest {
         Set<String> myService = new HashSet<String>();
         context.registerService(Set.class, myService, "prop1", "value1");
 
-        ServiceReference<?> serviceReference = context.bundleContext().getServiceReference(Set.class.getName());
+        ServiceReference serviceReference = context.bundleContext().getServiceReference(Set.class.getName());
         Object serviceResult = context.bundleContext().getService(serviceReference);
         assertSame(myService, serviceResult);
         assertEquals("value1", serviceReference.getProperty("prop1"));
@@ -101,8 +101,6 @@ public class OsgiContextImplTest {
         context.registerService(Set.class, myService1);
         Set<String> myService2 = new HashSet<String>();
         context.registerService(Set.class, myService2);
-        
-        assertSame(myService1, context.getService(Set.class));
 
         // expected: ascending order because ordering ascending by service ID
         serviceResults = context.getServices(Set.class, null);
@@ -142,7 +140,7 @@ public class OsgiContextImplTest {
     public void testRegisterInjectActivateWithPropertyMapNulls() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        Map<String,Object> props = new HashMap<>();
+        Map<String,Object> props = new HashMap<String,Object>();
         props.put("prop1", "value3");
         props.put("prop2", null);
         props.put(null, "value4");

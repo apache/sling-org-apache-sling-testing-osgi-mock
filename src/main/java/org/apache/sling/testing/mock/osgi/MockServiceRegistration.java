@@ -38,25 +38,24 @@ import com.google.common.collect.ImmutableList;
 /**
  * Mock {@link ServiceRegistration} implementation.
  */
-class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<MockServiceRegistration<T>> {
+class MockServiceRegistration implements ServiceRegistration, Comparable<MockServiceRegistration> {
 
     private static volatile long serviceCounter;
 
     private final Long serviceId;
     private final Set<String> clazzes;
-    private final T service;
+    private final Object service;
     private Dictionary<String, Object> properties;
-    private final ServiceReference<T> serviceReference;
+    private final ServiceReference serviceReference;
     private final MockBundleContext bundleContext;
 
-    @SuppressWarnings("unchecked")
-    public MockServiceRegistration(final Bundle bundle, final String[] clazzes, final T service,
+    public MockServiceRegistration(final Bundle bundle, final String[] clazzes, final Object service,
             final Dictionary<String, Object> properties, MockBundleContext bundleContext) {
         this.serviceId = ++serviceCounter;
         this.clazzes = new HashSet<String>(ImmutableList.copyOf(clazzes));
         
         if (service instanceof ServiceFactory) {
-            this.service = ((ServiceFactory<T>)service).getService(bundleContext.getBundle(), this);
+            this.service = ((ServiceFactory)service).getService(bundleContext.getBundle(), this);
         }
         else {
             this.service = service;
@@ -65,14 +64,14 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         this.properties = properties != null ? properties : new Hashtable<String,Object>();
         this.properties.put(Constants.SERVICE_ID, this.serviceId);
         this.properties.put(Constants.OBJECTCLASS, clazzes);
-        this.serviceReference = new MockServiceReference<T>(bundle, this);
+        this.serviceReference = new MockServiceReference(bundle, this);
         this.bundleContext = bundleContext;
         
         readOsgiMetadata();
     }
 
     @Override
-    public ServiceReference<T> getReference() {
+    public ServiceReference getReference() {
         return this.serviceReference;
     }
 
@@ -101,15 +100,8 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         return clazzes;
     }
 
-    @SuppressWarnings("unchecked")
-    T getService() {
-        if (this.service instanceof ServiceFactory) {
-            ServiceFactory<T> factory = (ServiceFactory<T>)this.service;
-            return factory.getService(this.bundleContext.getBundle(), this);
-        }
-        else {
-            return this.service;
-        }
+    Object getService() {
+        return this.service;
     }
     
     @Override
@@ -126,7 +118,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     }
 
     @Override
-    public int compareTo(MockServiceRegistration<T> obj) {
+    public int compareTo(MockServiceRegistration obj) {
         return serviceId.compareTo(obj.serviceId);
     }
 

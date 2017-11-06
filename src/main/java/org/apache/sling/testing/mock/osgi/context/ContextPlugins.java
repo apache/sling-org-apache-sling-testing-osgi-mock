@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.osgi.annotation.versioning.ProviderType;
+import aQute.bnd.annotation.ProviderType;
 
 /**
  * Collects list of context plugins.
@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public final class ContextPlugins {
     
-    private List<ContextPlugin<? extends OsgiContextImpl>> plugins = new ArrayList<>();
+    private List<ContextPlugin<? extends OsgiContextImpl>> plugins = new ArrayList<ContextPlugin<? extends OsgiContextImpl>>();
 
     /**
      * Start with empty list.
@@ -44,6 +44,7 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      */
+    @SuppressWarnings("unchecked")
     public <T extends OsgiContextImpl> ContextPlugins(final ContextCallback<T> afterSetUpCallback) {
         addAfterSetUpCallback(afterSetUpCallback);
     }
@@ -55,6 +56,7 @@ public final class ContextPlugins {
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
+    @SuppressWarnings("unchecked")
     public <U extends OsgiContextImpl, V extends OsgiContextImpl> ContextPlugins(final ContextCallback<U> afterSetUpCallback, final ContextCallback<V> beforeTearDownCallback) {
         addAfterSetUpCallback(afterSetUpCallback);
         addBeforeTearDownCallback(beforeTearDownCallback);

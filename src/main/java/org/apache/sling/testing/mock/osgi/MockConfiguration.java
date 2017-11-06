@@ -46,7 +46,7 @@ class MockConfiguration implements Configuration {
     }
 
     @Override
-    public Dictionary<String, Object> getProperties() {
+    public Dictionary getProperties() {
         // return copy of dictionary
         return new Hashtable<String,Object>(MapUtil.toMap(props));
     }
@@ -97,11 +97,6 @@ class MockConfiguration implements Configuration {
 
     @Override
     public String getFactoryPid() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long getChangeCount() {
         throw new UnsupportedOperationException();
     }
 

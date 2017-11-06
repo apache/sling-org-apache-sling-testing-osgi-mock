@@ -179,7 +179,7 @@ public class MockBundleContextStaticGreedyReferencesTest {
     }
     
     private Service3StaticGreedy getService() {
-        ServiceReference<?> serviceRef = bundleContext.getServiceReference(Service3StaticGreedy.class.getName());
+        ServiceReference serviceRef = bundleContext.getServiceReference(Service3StaticGreedy.class.getName());
         return (Service3StaticGreedy)bundleContext.getService(serviceRef);
     }
     

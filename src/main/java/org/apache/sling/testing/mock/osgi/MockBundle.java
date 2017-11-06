@@ -31,7 +31,6 @@ import java.util.Vector;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
@@ -47,26 +46,16 @@ public final class MockBundle implements Bundle {
     private final long bundleId;
     private final BundleContext bundleContext;
     private Map<String, String> headers = ImmutableMap.<String, String>of();
-    private String symbolicName;
+    private String symbolicName = "mock-bundle";
     private long lastModified;
-
-    /**
-     * Constructor
-     * @param bundleContext Bundle context
-     * @param bundleId Bundle ID
-     */
-    MockBundle(BundleContext bundleContext, long bundleId) {
-        this.bundleId = bundleId;
-        this.bundleContext = bundleContext;
-        this.symbolicName = (bundleId == Constants.SYSTEM_BUNDLE_ID ? Constants.SYSTEM_BUNDLE_SYMBOLICNAME : "mock-bundle");
-    }
 
     /**
      * Constructor
      * @param bundleContext Bundle context
      */
     public MockBundle(BundleContext bundleContext) {
-        this(bundleContext, ++bundleCounter);
+        this.bundleId = ++bundleCounter;
+        this.bundleContext = bundleContext;
     }
 
     @Override
@@ -185,16 +174,6 @@ public final class MockBundle implements Bundle {
         return queryPath;
     }
     
-    @Override
-    public String getLocation() {
-        if (bundleId == Constants.SYSTEM_BUNDLE_ID) {
-            return Constants.SYSTEM_BUNDLE_LOCATION;
-        }
-        else {
-            return null;
-        }
-    }
-
     // --- unsupported operations ---
     @Override
     public Enumeration<URL> findEntries(final String path, final String filePattern, final boolean recurse) {
@@ -202,7 +181,12 @@ public final class MockBundle implements Bundle {
     }
 
     @Override
-    public ServiceReference<?>[] getRegisteredServices() {
+    public String getLocation() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ServiceReference[] getRegisteredServices() {
         throw new UnsupportedOperationException();
     }
 
@@ -217,7 +201,7 @@ public final class MockBundle implements Bundle {
     }
 
     @Override
-    public ServiceReference<?>[] getServicesInUse() {
+    public ServiceReference[] getServicesInUse() {
         throw new UnsupportedOperationException();
     }
 
@@ -266,27 +250,27 @@ public final class MockBundle implements Bundle {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    // this is part of org.osgi 4.2.0
     public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(final int signersType) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    // this is part of org.osgi 4.2.0
     public Version getVersion() {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    // this is part of org.osgi.core 6.0.0
     public int compareTo(Bundle o) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    // this is part of org.osgi.core 6.0.0
     public <A> A adapt(Class<A> type) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    // this is part of org.osgi.core 6.0.0
     public File getDataFile(String filename) {
         throw new UnsupportedOperationException();
     }

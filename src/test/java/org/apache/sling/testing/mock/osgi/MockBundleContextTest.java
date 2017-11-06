@@ -30,7 +30,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -39,7 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -47,7 +45,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -91,27 +88,27 @@ public class MockBundleContextTest {
         ServiceRegistration reg3 = bundleContext.registerService(clazz3, service3, properties3);
 
         // test get service references
-        ServiceReference<?> refString = bundleContext.getServiceReference(String.class.getName());
+        ServiceReference refString = bundleContext.getServiceReference(String.class.getName());
         assertSame(reg1.getReference(), refString);
 
-        ServiceReference<?> refInteger = bundleContext.getServiceReference(Integer.class.getName());
+        ServiceReference refInteger = bundleContext.getServiceReference(Integer.class.getName());
         assertSame(reg1.getReference(), refInteger);
 
-        ServiceReference<?>[] refsString = bundleContext.getServiceReferences(String.class.getName(), null);
+        ServiceReference[] refsString = bundleContext.getServiceReferences(String.class.getName(), null);
         assertEquals(2, refsString.length);
         assertSame(reg1.getReference(), refsString[0]);
         assertSame(reg2.getReference(), refsString[1]);
 
-        Collection<ServiceReference<String>> refColString = bundleContext.getServiceReferences(String.class, null);
-        assertEquals(2, refColString.size());
-        assertSame(reg1.getReference(), refColString.iterator().next());
+        ServiceReference[] refColString = bundleContext.getServiceReferences(String.class.getName(), null);
+        assertEquals(2, refColString.length);
+        assertSame(reg1.getReference(), refColString[0]);
 
-        ServiceReference<?>[] refsInteger = bundleContext.getServiceReferences(Integer.class.getName(), null);
+        ServiceReference[] refsInteger = bundleContext.getServiceReferences(Integer.class.getName(), null);
         assertEquals(2, refsInteger.length);
         assertSame(reg1.getReference(), refsInteger[0]);
         assertSame(reg3.getReference(), refsInteger[1]);
 
-        ServiceReference<?>[] allRefsString = bundleContext.getAllServiceReferences(String.class.getName(), null);
+        ServiceReference[] allRefsString = bundleContext.getAllServiceReferences(String.class.getName(), null);
         assertArrayEquals(refsString, allRefsString);
 
         // test get services
@@ -126,45 +123,11 @@ public class MockBundleContextTest {
     }
     
     @Test
-    public void testServiceFactoryRegistration() throws InvalidSyntaxException {
-        // prepare test services
-        Class<String> clazz = String.class;
-        final String service = "abc";
-        Dictionary<String, Object> properties1 = ranking(null);
-        ServiceRegistration reg = bundleContext.registerService(clazz, new ServiceFactory<String>() {
-            @Override
-            public String getService(Bundle bundle, ServiceRegistration<String> registration) {
-                return service;
-            }
-            @Override
-            public void ungetService(Bundle bundle, ServiceRegistration<String> registration, String service) {
-                // do nothing
-            }
-        }, properties1);
-
-        ServiceReference<String> ref = bundleContext.getServiceReference(clazz);
-        assertNotNull(ref);
-        assertSame(reg.getReference(), ref);
-        assertSame(service, bundleContext.getService(ref));
-        bundleContext.ungetService(ref);
-    }
-    
-    @Test
-    public void testNoServiceReferences() throws InvalidSyntaxException {
-        ServiceReference<?>[] refs = bundleContext.getServiceReferences(String.class.getName(), null);
-        assertNull(refs);
-
-        Collection<ServiceReference<String>> refCol = bundleContext.getServiceReferences(String.class, null);
-        assertNotNull(refCol);
-        assertTrue(refCol.isEmpty());
-    }
-    
-    @Test
     public void testServiceUnregistration() {
         // prepare test services
         String clazz1 = String.class.getName();
         Object service1 = new Object();
-        Dictionary<String, Object> properties1 = ranking(null);
+        Dictionary properties1 = ranking(null);
         ServiceRegistration reg1 = bundleContext.registerService(clazz1, service1, properties1);
         
         assertNotNull(bundleContext.getServiceReference(clazz1));
@@ -174,7 +137,6 @@ public class MockBundleContextTest {
         assertNull(bundleContext.getServiceReference(clazz1));
     }
     
-
     @Test
     public void testGetBundles() throws Exception {
         assertEquals(0, bundleContext.getBundles().length);
@@ -253,32 +215,14 @@ public class MockBundleContextTest {
     }
 
     @Test
-    public void testSystemBundleById() {
-        Bundle systemBundle = bundleContext.getBundle(Constants.SYSTEM_BUNDLE_ID);
-        assertNotNull(systemBundle);
-        assertEquals(Constants.SYSTEM_BUNDLE_ID, systemBundle.getBundleId());
-        assertEquals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, systemBundle.getSymbolicName());
-        assertEquals(Constants.SYSTEM_BUNDLE_LOCATION, systemBundle.getLocation());
-    }
-
-    @Test
-    public void testSystemBundleByLocation() {
-        Bundle systemBundle = bundleContext.getBundle(Constants.SYSTEM_BUNDLE_LOCATION);
-        assertNotNull(systemBundle);
-        assertEquals(Constants.SYSTEM_BUNDLE_ID, systemBundle.getBundleId());
-        assertEquals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME, systemBundle.getSymbolicName());
-        assertEquals(Constants.SYSTEM_BUNDLE_LOCATION, systemBundle.getLocation());
-    }
-
-    @Test
     public void testGetServiceOrderWithRanking() {
-        bundleContext.registerService(String.class, "service1", ranking(10));
-        bundleContext.registerService(String.class, "service2", ranking(20));
-        bundleContext.registerService(String.class, "service3", ranking(5));
+        bundleContext.registerService(String.class.getName(), "service1", ranking(10));
+        bundleContext.registerService(String.class.getName(), "service2", ranking(20));
+        bundleContext.registerService(String.class.getName(), "service3", ranking(5));
         
         // should return service with highest ranking
-        ServiceReference<String> ref = bundleContext.getServiceReference(String.class);
-        String service = bundleContext.getService(ref);
+        ServiceReference ref = bundleContext.getServiceReference(String.class.getName());
+        String service = (String)bundleContext.getService(ref);
         assertEquals("service2", service);
         
         bundleContext.ungetService(ref);
@@ -286,13 +230,13 @@ public class MockBundleContextTest {
 
     @Test
     public void testGetServiceOrderWithoutRanking() {
-        bundleContext.registerService(String.class, "service1", ranking(null));
-        bundleContext.registerService(String.class, "service2", ranking(null));
-        bundleContext.registerService(String.class, "service3", ranking(null));
+        bundleContext.registerService(String.class.getName(), "service1", ranking(null));
+        bundleContext.registerService(String.class.getName(), "service2", ranking(null));
+        bundleContext.registerService(String.class.getName(), "service3", ranking(null));
         
         // should return service with lowest service id = which was registered first
-        ServiceReference<String> ref = bundleContext.getServiceReference(String.class);
-        String service = bundleContext.getService(ref);
+        ServiceReference ref = bundleContext.getServiceReference(String.class.getName());
+        String service = (String)bundleContext.getService(ref);
         assertEquals("service1", service);
         
         bundleContext.ungetService(ref);

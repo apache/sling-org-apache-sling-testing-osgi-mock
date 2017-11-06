@@ -44,14 +44,12 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
-import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -70,11 +68,8 @@ class MockBundleContext implements BundleContext {
     private final Queue<BundleListener> bundleListeners = new ConcurrentLinkedQueue<BundleListener>();
     private final ConfigurationAdmin configAdmin = new MockConfigurationAdmin();
     private File dataFileBaseDir;
-    
-    private final Bundle systemBundle;
 
     public MockBundleContext() {
-        this.systemBundle = new MockBundle(this, Constants.SYSTEM_BUNDLE_ID);
         this.bundle = new MockBundle(this);
         
         // register configuration admin by default
@@ -96,7 +91,6 @@ class MockBundleContext implements BundleContext {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceRegistration registerService(final String clazz, final Object service, final Dictionary properties) {
         String[] clazzes;
@@ -108,9 +102,8 @@ class MockBundleContext implements BundleContext {
         return registerService(clazzes, service, properties);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
+    // this is part of org.osgi.core 6.0.0
+    public <S> ServiceRegistration registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
         return registerService(clazz.getName(), service, properties);
     }
 
@@ -125,12 +118,6 @@ class MockBundleContext implements BundleContext {
         return registration;
     }
     
-    @SuppressWarnings("unchecked")
-    @Override
-    public <S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory, Dictionary<String, ?> properties) {
-        return registerService(clazz.getName(), factory, properties);
-    }
-    
     /**
      * Check for already registered services that may be affected by the service registration - either
      * adding by additional optional references, or creating a conflict in the dependencies.
@@ -142,20 +129,18 @@ class MockBundleContext implements BundleContext {
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
         for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
-            if (reference.matchesTargetFilter(registration.getReference())) {
-                switch (reference.getCardinality()) {
-                case MANDATORY_UNARY:
-                    throw new ReferenceViolationException("Mandatory unary reference of type " + reference.getInterfaceType() + " already fulfilled "
-                            + "for service " + reference.getServiceClass().getName() + ", registration of new service with this interface failed.");
-                case MANDATORY_MULTIPLE:
-                case OPTIONAL_MULTIPLE:
-                case OPTIONAL_UNARY:
-                    OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration));
-                    break;
-                default:
-                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
-                }
+            switch (reference.getCardinality()) {
+            case MANDATORY_UNARY:
+                throw new ReferenceViolationException("Mandatory unary reference of type " + reference.getInterfaceType() + " already fulfilled "
+                        + "for service " + reference.getServiceClass().getName() + ", registration of new service with this interface failed.");
+            case MANDATORY_MULTIPLE:
+            case OPTIONAL_MULTIPLE:
+            case OPTIONAL_UNARY:
+                OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(),
+                        new ServiceInfo(registration));
+                break;
+            default:
+                throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
             }
         }
 
@@ -184,7 +169,6 @@ class MockBundleContext implements BundleContext {
         notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
     }
     
-    @SuppressWarnings("unchecked")
     void restartService(MockServiceRegistration registration) {
         // get current service properties
         Class<?> serviceClass = registration.getService().getClass();
@@ -221,22 +205,20 @@ class MockBundleContext implements BundleContext {
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
         for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
-            if (reference.matchesTargetFilter(registration.getReference())) {
-                switch (reference.getCardinality()) {
-                case MANDATORY_UNARY:
-                    throw new ReferenceViolationException("Reference of type " + reference.getInterfaceType() + " "
-                            + "for service " + reference.getServiceClass().getName() + " is mandatory unary, "
-                            + "unregistration of service with this interface failed.");
-                case MANDATORY_MULTIPLE:
-                case OPTIONAL_MULTIPLE:
-                case OPTIONAL_UNARY:
-                    // it is currently not checked if for a MANDATORY_MULTIPLE reference the last reference is removed
-                    OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration));
-                    break;
-                default:
-                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
-                }
+            switch (reference.getCardinality()) {
+            case MANDATORY_UNARY:
+                throw new ReferenceViolationException("Reference of type " + reference.getInterfaceType() + " "
+                        + "for service " + reference.getServiceClass().getName() + " is mandatory unary, "
+                        + "unregistration of service with this interface failed.");
+            case MANDATORY_MULTIPLE:
+            case OPTIONAL_MULTIPLE:
+            case OPTIONAL_UNARY:
+                // it is currently not checked if for a MANDATORY_MULTIPLE reference the last reference is removed
+                OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(),
+                        new ServiceInfo(registration));
+                break;
+            default:
+                throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
             }
         }
 
@@ -260,7 +242,6 @@ class MockBundleContext implements BundleContext {
         }
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceReference getServiceReference(final String clazz) {
         try {
@@ -275,13 +256,11 @@ class MockBundleContext implements BundleContext {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+    // this is part of org.osgi.core 6.0.0
+    public ServiceReference getServiceReference(Class clazz) {
         return getServiceReference(clazz.getName());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceReference[] getServiceReferences(final String clazz, final String filter) throws InvalidSyntaxException {
         Set<ServiceReference> result = new TreeSet<ServiceReference>(new Comparator<ServiceReference>() {
@@ -303,19 +282,11 @@ class MockBundleContext implements BundleContext {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) throws InvalidSyntaxException {
-        ServiceReference<S>[] result = getServiceReferences(clazz.getName(), filter);
-        if (result == null) {
-            return ImmutableList.<ServiceReference<S>>of();
-        }
-        else {
-            return ImmutableList.<ServiceReference<S>>copyOf(result);
-        }
+    // this is part of org.osgi.core 6.0.0
+    public Collection<ServiceReference> getServiceReferences(Class clazz, String filter) throws InvalidSyntaxException {
+        return ImmutableList.<ServiceReference>copyOf(getServiceReferences(clazz.getName(), filter));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceReference[] getAllServiceReferences(final String clazz, final String filter) throws InvalidSyntaxException {
         // for now just do the same as getServiceReferences
@@ -323,8 +294,8 @@ class MockBundleContext implements BundleContext {
     }
 
     @Override
-    public <S> S getService(final ServiceReference<S> serviceReference) {
-        return ((MockServiceReference<S>)serviceReference).getService();
+    public Object getService(final ServiceReference serviceReference) {
+        return ((MockServiceReference)serviceReference).getService();
     }
 
     @Override
@@ -390,11 +361,10 @@ class MockBundleContext implements BundleContext {
         // accept method, but ignore it
     }
 
-    @SuppressWarnings("unchecked")
-    <S> S locateService(final String name, final ServiceReference<S> reference) {
-        for (MockServiceRegistration<?> serviceRegistration : this.registeredServices) {
+    Object locateService(final String name, final ServiceReference reference) {
+        for (MockServiceRegistration serviceRegistration : this.registeredServices) {
             if (serviceRegistration.getReference() == reference) {
-                return (S)serviceRegistration.getService();
+                return serviceRegistration.getService();
             }
         }
         return null;
@@ -433,7 +403,7 @@ class MockBundleContext implements BundleContext {
      * Deactivates all bundles registered in this mocked bundle context.
      */
     public void shutdown() {
-        for (MockServiceRegistration<?> serviceRegistration : ImmutableList.copyOf(registeredServices).reverse()) {
+        for (MockServiceRegistration serviceRegistration : ImmutableList.copyOf(registeredServices).reverse()) {
             try {
                 MockOsgi.deactivate(serviceRegistration.getService(), this, serviceRegistration.getProperties());
             }
@@ -450,24 +420,6 @@ class MockBundleContext implements BundleContext {
         }
     }
 
-    @Override
-    public Bundle getBundle(final long bundleId) {
-        if (bundleId == Constants.SYSTEM_BUNDLE_ID) {
-            return systemBundle;
-        }
-        // otherwise return null - no bundle found
-        return null;
-    }
-
-    @Override
-    public Bundle getBundle(String location) {
-        if (StringUtils.equals(location, Constants.SYSTEM_BUNDLE_LOCATION)) {
-            return systemBundle;
-        }
-        // otherwise return null - no bundle found
-        return null;
-    }
-
     // --- unsupported operations ---
     @Override
     public Bundle installBundle(final String s) {
@@ -480,8 +432,25 @@ class MockBundleContext implements BundleContext {
     }
 
     @Override
-    public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
+    public Bundle getBundle(final long l) {
         throw new UnsupportedOperationException();
     }
+
+    // this is part of org.osgi.core 6.0.0
+    public Bundle getBundle(String location) {
+        throw new UnsupportedOperationException();
+    }
+
+    // this is part of org.osgi.core 6.0.0
+    public <S> ServiceRegistration registerService(Class<S> clazz, ServiceFactory factory, Dictionary<String, ?> properties) {
+        throw new UnsupportedOperationException();
+    }
+
+    // this is part of org.osgi.core 6.0.0
+    /* class org.osgi.framework.ServiceObjects does not exist in older OSGi versions
+    public ServiceObjects getServiceObjects(ServiceReference reference) {
+        throw new UnsupportedOperationException();
+    }
+    */
 
 }

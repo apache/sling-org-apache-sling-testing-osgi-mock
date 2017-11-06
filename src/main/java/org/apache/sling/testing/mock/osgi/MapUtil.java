@@ -46,7 +46,7 @@ public final class MapUtil {
         if (map == null) {
             return null;
         }
-        Hashtable<T, U> hashtable = new Hashtable<>();
+        Hashtable<T, U> hashtable = new Hashtable<T, U>();
         for (Map.Entry<T, U> entry : map.entrySet()) {
             if (entry.getKey() != null && entry.getValue() != null) {
                 hashtable.put(entry.getKey(), entry.getValue());
@@ -105,7 +105,7 @@ public final class MapUtil {
         if (args.length % 2 != 0) {
             throw new IllegalArgumentException("args must be an even number of name/values:" + Arrays.asList(args));
         }
-        final Map<String, Object> result = new HashMap<>();
+        final Map<String, Object> result = new HashMap<String, Object>();
         for (int i=0 ; i < args.length; i+=2) {
             Object key = args[i];
             Object value = args[i+1];

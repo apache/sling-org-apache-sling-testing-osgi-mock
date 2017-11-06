@@ -18,11 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
-import org.apache.sling.testing.mock.osgi.context.ContextPlugins;
-import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.apache.sling.testing.mock.osgi.context.ContextCallback;
 import org.apache.sling.testing.mock.osgi.context.ContextPlugin;
-import org.osgi.annotation.versioning.ProviderType;
+import org.apache.sling.testing.mock.osgi.context.ContextPlugins;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
+
+import aQute.bnd.annotation.ProviderType;
 
 /**
  * Builder class for creating {@link OsgiContext} instances with different sets of parameters.

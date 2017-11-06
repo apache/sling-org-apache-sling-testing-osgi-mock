@@ -26,15 +26,15 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.sling.commons.osgi.Order;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.commons.osgi.ServiceUtil;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
@@ -46,12 +46,12 @@ import org.slf4j.LoggerFactory;
  * Mock implementation of {@link EventAdmin}.
  * From {@link EventConstants} currently only {@link EventConstants#EVENT_TOPIC} is supported. 
  */
-@Component(immediate = true, service = EventAdmin.class)
+@Component(immediate = true)
+@Service(value = EventAdmin.class)
 public final class MockEventAdmin implements EventAdmin {
     
-    @Reference(name="eventHandler", service=EventHandler.class,
-            cardinality=ReferenceCardinality.MULTIPLE, policy=ReferencePolicy.DYNAMIC,
-            bind="bindEventHandler", unbind="unbindEventHandler")
+    @Reference(name="eventHandler", referenceInterface=EventHandler.class,
+            cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE, policy=ReferencePolicy.DYNAMIC)
     private final Map<Object, EventHandlerItem> eventHandlers = new TreeMap<Object, EventHandlerItem>();
 
     private ExecutorService asyncHandler;
@@ -106,13 +106,13 @@ public final class MockEventAdmin implements EventAdmin {
     
     protected void bindEventHandler(EventHandler eventHandler, Map<String, Object> props) {
         synchronized (eventHandlers) {
-            eventHandlers.put(ServiceUtil.getComparableForServiceRanking(props, Order.DESCENDING), new EventHandlerItem(eventHandler, props));
+            eventHandlers.put(ServiceUtil.getComparableForServiceRanking(props), new EventHandlerItem(eventHandler, props));
         }
     }
 
     protected void unbindEventHandler(EventHandler eventHandler, Map<String, Object> props) {
         synchronized (eventHandlers) {
-            eventHandlers.remove(ServiceUtil.getComparableForServiceRanking(props, Order.DESCENDING));
+            eventHandlers.remove(ServiceUtil.getComparableForServiceRanking(props));
         }
     }
     

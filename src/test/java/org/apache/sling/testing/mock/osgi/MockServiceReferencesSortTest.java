@@ -22,8 +22,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,9 +36,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-/** 
- * Test the service-ranking based sorting of mock service references
- */
+/** Test the service-ranking based sorting of mock service references */
 public class MockServiceReferencesSortTest {
     
     private BundleContext bundleContext;
@@ -52,70 +52,46 @@ public class MockServiceReferencesSortTest {
     }
 
     @Test
-    public void testAllWithRanking() {
-        registerStringServiceWithRanking("A", 3);
-        registerStringServiceWithRanking("B", 5);
-        registerStringServiceWithRanking("C", 4);
-        registerStringServiceWithRanking("D", 1);
-        registerStringServiceWithRanking("E", 2);
-        
-        assertEquals("DEACB", getSortedServicesString());
-        assertEquals("B", bundleContext.getService(bundleContext.getServiceReference(String.class)));
+    public void testServicesOrder() {
+        assertEquals("12345", getSortedServicesString(bundleContext));
     }
 
-    @Test
-    public void testAllWithoutRanking() {
-        registerStringServiceWithoutRanking("A");
-        registerStringServiceWithoutRanking("B");
-        registerStringServiceWithoutRanking("C");
-        registerStringServiceWithoutRanking("D");
-        registerStringServiceWithoutRanking("E");
-        
-        assertEquals("EDCBA", getSortedServicesString());
-        assertEquals("A", bundleContext.getService(bundleContext.getServiceReference(String.class)));
-    }
-
-    @Test
-    public void testMixed() {
-        registerStringServiceWithoutRanking("A");
-        registerStringServiceWithRanking("B", 5);
-        registerStringServiceWithoutRanking("C");
-        registerStringServiceWithRanking("D", 10);
-        registerStringServiceWithoutRanking("E");
-        
-        assertEquals("ECABD", getSortedServicesString());
-        assertEquals("D", bundleContext.getService(bundleContext.getServiceReference(String.class)));
-    }
-
-    private ServiceRegistration<?> registerStringServiceWithoutRanking(String serviceValue) {
-        return bundleContext.registerService(String.class, serviceValue, new Hashtable<String, Object>());
-    }
-
-    private ServiceRegistration<?> registerStringServiceWithRanking(String serviceValue, int index) {
+    private static ServiceRegistration registerStringService(BundleContext ctx, int index) {
         final Hashtable<String, Object> props = new Hashtable<String, Object>();
         props.put(Constants.SERVICE_RANKING, new Integer(index));
-        return bundleContext.registerService(String.class, serviceValue, props);
+        return ctx.registerService(String.class.getName(), String.valueOf(index), props);
     }
     
     /** Register services with a specific ranking, sort their references and 
      *  return their concatenated toString() values.
      *  Use to test service references sorting.
      */
-    private String getSortedServicesString() {
-        ServiceReference<?>[] refs = null;
+    private static String getSortedServicesString(BundleContext ctx) {
+        final List<ServiceRegistration> toCleanup = new ArrayList<ServiceRegistration>();
+        
+        toCleanup.add(registerStringService(ctx, 3));
+        toCleanup.add(registerStringService(ctx, 5));
+        toCleanup.add(registerStringService(ctx, 4));
+        toCleanup.add(registerStringService(ctx, 1));
+        toCleanup.add(registerStringService(ctx, 2));
+        
+        ServiceReference [] refs = null;
         try {
-            refs = bundleContext.getServiceReferences(String.class.getName(), null);
-        }
-        catch (InvalidSyntaxException ise) {
+            refs = ctx.getServiceReferences(String.class.getName(), null);
+        } catch(InvalidSyntaxException ise) {
             fail("Unexpected InvalidSyntaxException");
         }
         assertNotNull("Expecting our service references", refs);
         Arrays.sort(refs);
         
         final StringBuilder sb = new StringBuilder();
-        for(ServiceReference<?> ref : refs) {
-            sb.append(bundleContext.getService(ref).toString());
-            bundleContext.ungetService(ref);
+        for(ServiceReference ref : refs) {
+            sb.append(ctx.getService(ref).toString());
+            ctx.ungetService(ref);
+        }
+        
+        for(ServiceRegistration reg : toCleanup) {
+            reg.unregister();
         }
         
         return sb.toString();

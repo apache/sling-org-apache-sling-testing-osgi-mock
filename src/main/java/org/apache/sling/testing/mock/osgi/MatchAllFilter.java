@@ -19,7 +19,6 @@
 package org.apache.sling.testing.mock.osgi;
 
 import java.util.Dictionary;
-import java.util.Map;
 
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
@@ -41,11 +40,6 @@ class MatchAllFilter implements Filter {
 
     @Override
     public boolean matchCase(Dictionary dictionary) {
-        return true;
-    }
-
-    @Override
-    public boolean matches(Map<String, ?> map) {
         return true;
     }
 
