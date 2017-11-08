@@ -78,14 +78,15 @@ final class MapMergeUtil {
 
                 // merge with configuration from config admin
                 if (configAdmin != null) {
-                    Object pid = metadata.getPID();
-                    if (pid != null) {
-                        try {
-                            Configuration config = configAdmin.getConfiguration(pid.toString());
-                            mergedProperties.putAll(toMap(config.getProperties()));
-                        }
-                        catch (IOException ex) {
-                            throw new RuntimeException("Unable to read config for pid " + pid, ex);
+                    for (String pid : metadata.getConfigurationPID()) {
+                        if (pid != null) {
+                            try {
+                                Configuration config = configAdmin.getConfiguration(pid);
+                                mergedProperties.putAll(toMap(config.getProperties()));
+                            }
+                            catch (IOException ex) {
+                                throw new RuntimeException("Unable to read config for pid " + pid, ex);
+                            }
                         }
                     }
                 }

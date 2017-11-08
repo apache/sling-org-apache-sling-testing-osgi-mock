@@ -263,7 +263,20 @@ final class OsgiMetadataUtil {
         if (nodes != null && nodes.getLength() > 0) {
             return getAttributeValue(nodes.item(0), "name");
         }
-        return null;
+        return clazz.getName();
+    }
+
+    private static String[] getConfigurationPID(Class clazz, Document metadata) {
+        String value = null;
+        String query = getComponentXPathQuery(clazz);
+        NodeList nodes = queryNodes(metadata, query);
+        if (nodes != null && nodes.getLength() > 0) {
+            value = getAttributeValue(nodes.item(0), "configuration-pid");
+        }
+        if (value == null) {
+            value = getComponentName(clazz, metadata);
+        }
+        return StringUtils.split(value);
     }
 
     private static Set<String> getServiceInterfaces(Class clazz, Document metadata) {
@@ -377,6 +390,7 @@ final class OsgiMetadataUtil {
 
         private final Class<?> clazz;
         private final String name;
+        private final String[] configurationPID;
         private final Set<String> serviceInterfaces;
         private final Map<String, Object> properties;
         private final List<Reference> references;
@@ -387,6 +401,7 @@ final class OsgiMetadataUtil {
         private OsgiMetadata(Class<?> clazz, Document metadataDocument) {
             this.clazz = clazz;
             this.name = OsgiMetadataUtil.getComponentName(clazz, metadataDocument);
+            this.configurationPID = OsgiMetadataUtil.getConfigurationPID(clazz, metadataDocument);
             this.serviceInterfaces = OsgiMetadataUtil.getServiceInterfaces(clazz, metadataDocument);
             this.properties = OsgiMetadataUtil.getProperties(clazz, metadataDocument);
             this.references = OsgiMetadataUtil.getReferences(clazz, metadataDocument);
@@ -398,6 +413,7 @@ final class OsgiMetadataUtil {
         private OsgiMetadata() {
             this.clazz = null;
             this.name = null;
+            this.configurationPID = null;
             this.serviceInterfaces = null;
             this.properties = null;
             this.references = null;
@@ -420,6 +436,10 @@ final class OsgiMetadataUtil {
                 pid = (String)properties.get(Constants.SERVICE_PID);
             }
             return StringUtils.defaultString(pid, name);
+        }
+
+        public String[] getConfigurationPID() {
+            return configurationPID;
         }
 
         public Set<String> getServiceInterfaces() {

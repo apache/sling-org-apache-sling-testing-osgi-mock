@@ -69,4 +69,39 @@ public class MockConfigurationAdminTest {
         assertEquals("org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata", reference.getProperty(Constants.SERVICE_PID));
     }
 
+    @Test
+    public void testConfigurationPID() throws IOException {
+        MockOsgi.setConfigForPid(context.bundleContext(), ServiceWithConfigurationPID.class.getSimpleName(),
+                "prop1", 1);
+
+        context.registerInjectActivateService(new ServiceWithConfigurationPID(), ImmutableMap.<String, Object>builder()
+                .put("prop2", 2)
+                .build());
+
+        ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
+
+        assertEquals(1, reference.getProperty("prop1"));
+        assertEquals(2, reference.getProperty("prop2"));
+    }
+
+    @Test
+    public void testMultipleConfigurationPID() throws IOException {
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration1",
+                "prop1", 1);
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration2",
+                "prop1", 2);
+
+        context.registerInjectActivateService(new ServiceWithMultipleConfigurationPID(), ImmutableMap.<String, Object>builder()
+                .put("prop2", 2)
+                .build());
+
+        ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
+
+        assertEquals(2, reference.getProperty("prop1"));
+        assertEquals(2, reference.getProperty("prop2"));
+    }
+
+    static class ServiceWithConfigurationPID {}
+
+    static class ServiceWithMultipleConfigurationPID {}
 }
