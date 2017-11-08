@@ -18,10 +18,10 @@
   under the License.
 -->
 <!-- This file follows the old SCR convention using a fixed name "serviceComponents.xml" -->
-<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+<components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0">
   <scr:component name="org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata">
     <implementation class="org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata"/>
-    <service servicefactory="false">
+    <service>
       <provide interface="org.apache.sling.models.spi.Injector"/>
       <provide interface="org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory"/>
       <provide interface="java.lang.Comparable"/>
@@ -32,5 +32,19 @@
        org.apache.sling.api.resource.Resource
        org.apache.sling.api.resource.ResourceResolver
     </property>
+  </scr:component>
+  <scr:component name="org.apache.sling.testing.mock.osgi.MockConfigurationAdminTest$ServiceWithConfigurationPID"
+                 configuration-pid="ServiceWithConfigurationPID">
+    <implementation class="org.apache.sling.testing.mock.osgi.MockConfigurationAdminTest$ServiceWithConfigurationPID"/>
+    <service>
+      <provide interface="java.lang.Comparable"/>
+    </service>
+  </scr:component>
+  <scr:component name="org.apache.sling.testing.mock.osgi.MockConfigurationAdminTest$ServiceWithMultipleConfigurationPID"
+                 configuration-pid="Configuration1 Configuration2">
+    <implementation class="org.apache.sling.testing.mock.osgi.MockConfigurationAdminTest$ServiceWithMultipleConfigurationPID"/>
+    <service>
+      <provide interface="java.lang.Comparable"/>
+    </service>
   </scr:component>
 </components>
