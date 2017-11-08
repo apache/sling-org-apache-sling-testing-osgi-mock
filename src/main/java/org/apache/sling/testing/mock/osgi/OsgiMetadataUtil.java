@@ -263,7 +263,7 @@ final class OsgiMetadataUtil {
         if (nodes != null && nodes.getLength() > 0) {
             return getAttributeValue(nodes.item(0), "name");
         }
-        return null;
+        return clazz.getName();
     }
 
     private static String[] getConfigurationPID(Class clazz, Document metadata) {
@@ -274,7 +274,7 @@ final class OsgiMetadataUtil {
             value = getAttributeValue(nodes.item(0), "configuration-pid");
         }
         if (value == null) {
-            value = clazz.getName();
+            value = getComponentName(clazz, metadata);
         }
         return StringUtils.split(value);
     }
