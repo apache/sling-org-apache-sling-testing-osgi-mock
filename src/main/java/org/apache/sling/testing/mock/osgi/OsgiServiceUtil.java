@@ -458,7 +458,14 @@ final class OsgiServiceUtil {
                 invokeMethod(target, method, new Object[] { serviceInfo.getServiceInstance(), serviceInfo.getServiceConfig() });
                 return;
             }
-        
+
+            // 4. assignable from service reference plus interface
+            method = getMethodWithAssignableTypes(targetClass, methodName, new Class<?>[] {ServiceReference.class, interfaceType});
+            if (method != null) {
+                invokeMethod(target, method, new Object[] { serviceInfo.getServiceReference(), serviceInfo.getServiceInstance() });
+                return;
+            }
+
             throw new RuntimeException((bind ? "Bind" : "Unbind") + " method with name " + methodName + " not found "
                     + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
         }
