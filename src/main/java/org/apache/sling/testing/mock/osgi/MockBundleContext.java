@@ -21,9 +21,11 @@ package org.apache.sling.testing.mock.osgi;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -32,12 +34,16 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.framework.FilterImpl;
+import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
+import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferencePolicy;
+import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferencePolicyOption;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtil.ReferenceInfo;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtil.ServiceInfo;
 import org.osgi.framework.Bundle;
@@ -66,6 +72,8 @@ class MockBundleContext implements BundleContext {
 
     private final MockBundle bundle;
     private final SortedSet<MockServiceRegistration> registeredServices = new ConcurrentSkipListSet<MockServiceRegistration>();
+    private final ConcurrentMap<String,List<ReferenceInfo>> registeredServicesDynamicReferences = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String,List<ReferenceInfo>> registeredServicesStaticGreedyReferences = new ConcurrentHashMap<>();
     private final Map<ServiceListener, Filter> serviceListeners = new ConcurrentHashMap<ServiceListener, Filter>();
     private final Queue<BundleListener> bundleListeners = new ConcurrentLinkedQueue<BundleListener>();
     private final ConfigurationAdmin configAdmin = new MockConfigurationAdmin();
@@ -119,7 +127,7 @@ class MockBundleContext implements BundleContext {
     public ServiceRegistration registerService(final String[] clazzes, final Object service, final Dictionary properties) {
         Dictionary<String, Object> mergedPropertes = MapMergeUtil.propertiesMergeWithOsgiMetadata(service, configAdmin, properties);
         MockServiceRegistration registration = new MockServiceRegistration(this.bundle, clazzes, service, mergedPropertes, this);
-        this.registeredServices.add(registration);
+        addToRegisteredServices(registration);
         handleRefsUpdateOnRegister(registration);
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
         return registration;
@@ -131,6 +139,65 @@ class MockBundleContext implements BundleContext {
         return registerService(clazz.getName(), factory, properties);
     }
     
+    private void addToRegisteredServices(MockServiceRegistration registration) {
+        this.registeredServices.add(registration);
+        
+        // add dynamic and static greedy references to cache
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(registration.getService().getClass());
+        if (metadata != null) {
+            for (Reference reference : metadata.getReferences()) {
+                if (reference.getPolicy() == ReferencePolicy.DYNAMIC) {
+                    addReferenceInfo(this.registeredServicesDynamicReferences, registration, reference);
+                }
+                else if (reference.getPolicy() == ReferencePolicy.STATIC && reference.getPolicyOption() == ReferencePolicyOption.GREEDY) {
+                    addReferenceInfo(this.registeredServicesStaticGreedyReferences, registration, reference);
+                }
+            }
+        }
+    }
+    
+    private void addReferenceInfo(ConcurrentMap<String,List<ReferenceInfo>> map, MockServiceRegistration registration, Reference reference) {
+        String serviceInterface = reference.getInterfaceType();
+        map.putIfAbsent(serviceInterface, new ArrayList<ReferenceInfo>());
+        List<ReferenceInfo> references = map.get(serviceInterface);
+        references.add(new ReferenceInfo(registration, reference));
+    }
+    
+    private void remveFromRegisteredServices(MockServiceRegistration registration) {
+        this.registeredServices.remove(registration);
+        
+        // remove from reference caches
+        removeReferenceInfos(this.registeredServicesDynamicReferences, registration);
+        removeReferenceInfos(this.registeredServicesStaticGreedyReferences, registration);
+    }
+
+    private void removeReferenceInfos(ConcurrentMap<String,List<ReferenceInfo>> map, MockServiceRegistration registration) {
+        for (List<ReferenceInfo> referenceInfos : map.values()) {
+            synchronized (referenceInfos) {
+                Iterator<ReferenceInfo> referenceInfoIterator = referenceInfos.iterator();
+                while (referenceInfoIterator.hasNext()) {
+                    ReferenceInfo referenceInfo = referenceInfoIterator.next();
+                    if (referenceInfo.getServiceRegistration() == registration) {
+                        referenceInfoIterator.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    private List<ReferenceInfo> getMatchingReferences(ConcurrentMap<String,List<ReferenceInfo>> referenceInfoMaps,
+            MockServiceRegistration<?> registration) {
+
+        List<ReferenceInfo> references = new ArrayList<ReferenceInfo>();
+        for (String serviceInterface : registration.getClasses()) {
+            List<ReferenceInfo> lookedUpReferences = referenceInfoMaps.get(serviceInterface);
+            if (lookedUpReferences != null) {
+                references.addAll(lookedUpReferences);
+            }
+        }
+        return references;
+    }
+    
     /**
      * Check for already registered services that may be affected by the service registration - either
      * adding by additional optional references, or creating a conflict in the dependencies.
@@ -139,7 +206,7 @@ class MockBundleContext implements BundleContext {
     private void handleRefsUpdateOnRegister(MockServiceRegistration registration) {
         
         // handle DYNAMIC references to this registration
-        List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
+        List<ReferenceInfo> affectedDynamicReferences = getMatchingReferences(this.registeredServicesDynamicReferences, registration);
         for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
             if (reference.matchesTargetFilter(registration.getReference())) {
@@ -160,7 +227,7 @@ class MockBundleContext implements BundleContext {
         }
 
         // handle STATIC+GREEDY references to this registration
-        List<ReferenceInfo> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        List<ReferenceInfo> affectedStaticGreedyReferences = getMatchingReferences(this.registeredServicesStaticGreedyReferences, registration);
         for (ReferenceInfo referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
@@ -179,7 +246,7 @@ class MockBundleContext implements BundleContext {
     }
     
     void unregisterService(MockServiceRegistration registration) {
-        this.registeredServices.remove(registration);
+        remveFromRegisteredServices(registration);
         handleRefsUpdateOnUnregister(registration);
         notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
     }
@@ -218,7 +285,7 @@ class MockBundleContext implements BundleContext {
     private void handleRefsUpdateOnUnregister(MockServiceRegistration registration) {
 
         // handle DYNAMIC references to this registration
-        List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
+        List<ReferenceInfo> affectedDynamicReferences = getMatchingReferences(this.registeredServicesDynamicReferences, registration);
         for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
             if (reference.matchesTargetFilter(registration.getReference())) {
@@ -241,7 +308,7 @@ class MockBundleContext implements BundleContext {
         }
 
         // handle STATIC+GREEDY references to this registration
-        List<ReferenceInfo> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        List<ReferenceInfo> affectedStaticGreedyReferences = getMatchingReferences(this.registeredServicesStaticGreedyReferences, registration);
         for (ReferenceInfo referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
