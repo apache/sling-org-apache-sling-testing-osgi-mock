@@ -297,12 +297,30 @@ public class MockBundleContextTest {
         
         bundleContext.ungetService(ref);
     }
+    
+    @Test
+    public void testGetServicesWithNoClassOnlyFilter() throws InvalidSyntaxException {
+        bundleContext.registerService(String.class, "service1", testProperty());
+        bundleContext.registerService(Long.class, new Long(2), testProperty());
+        bundleContext.registerService(Integer.class, new Integer(9), testProperty());
+        
+        // should return service with lowest service id = which was registered first
+        ServiceReference[] refs = bundleContext.getServiceReferences((String)null, "(prop1=value1)");
+        assertNotNull(refs);
+        assertEquals(3, refs.length);
+    }
 
     private static Dictionary<String, Object> ranking(final Integer serviceRanking) {
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         if (serviceRanking != null) {
             props.put(Constants.SERVICE_RANKING, serviceRanking);
         }
+        return props;
+    }
+    
+    private static Dictionary<String, Object> testProperty() {
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put("prop1", "value1");
         return props;
     }
 
