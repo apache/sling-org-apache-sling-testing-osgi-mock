@@ -145,7 +145,20 @@ public final class MockOsgi {
      * @return true if all dependencies could be injected, false if the service has no dependencies.
      */
     public static boolean injectServices(Object target, BundleContext bundleContext) {
-        return OsgiServiceUtil.injectServices(target, bundleContext);
+        return MockOsgi.injectServices(target, bundleContext, (Map<String, Object>)null);
+    }
+
+    /**
+     * Simulate OSGi service dependency injection. Injects direct references and
+     * multiple references. If a some references could not be injected no error
+     * is thrown.
+     * @param target Service instance
+     * @param bundleContext Bundle context from which services are fetched to inject.
+     * @param properties Service properties (used to resolve dynamic reference properties)
+     * @return true if all dependencies could be injected, false if the service has no dependencies.
+     */
+    public static boolean injectServices(Object target, BundleContext bundleContext, Map<String, Object> properties) {
+        return OsgiServiceUtil.injectServices(target, bundleContext, properties);
     }
 
     /**
