@@ -63,6 +63,8 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
     private ServiceSuperInterface3 dependency3a;
     @Mock
     private ServiceSuperInterface3 dependency3b;
+    @Mock
+    private ServiceSuperInterface3 dependency3c;
 
     @Before
     public void setUp() {
@@ -75,7 +77,7 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
         service = new Service3OsgiR6();
         MockOsgi.injectServices(service, bundleContext);
         MockOsgi.activate(service, bundleContext);
-        bundleContext.registerService(Service3OsgiR6.class.getName(), service, null);
+        bundleContext.registerService(Service3OsgiR6.class.getName(), service, MapUtil.toDictionary(ImmutableMap.<String,Object>of("reference3DynamicFiltered.target","(prop1=def)")));
         
         assertDependency1(dependency1a);
         assertDependency1Optional(null);
@@ -152,6 +154,22 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
         assertDependencies3Filtered(dependency3a);
     }
     
+    @Test
+    public void testReferenceWithDynamicTargetFilter() {
+        assertDependencies3DynamicFiltered(null);
+        
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a, 
+                MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "abc")));
+
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b, 
+                MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "def")));
+
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3c, 
+                MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "hij")));
+        
+        assertDependencies3DynamicFiltered(dependency3b);
+    }
+
     private void assertDependency1(ServiceInterface1 instance) {
         if (instance == null) {
             assertNull(service.getReference1());
@@ -184,5 +202,9 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
         assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances), 
                 ImmutableSet.<ServiceSuperInterface3>copyOf(service.getReferences3Filtered()));
     }
-    
+
+    private void assertDependencies3DynamicFiltered(ServiceSuperInterface3 instance) {
+        assertEquals(instance,service.getReference3DynamicFiltered());
+    }
+
 }

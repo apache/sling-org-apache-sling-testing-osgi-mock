@@ -341,6 +341,7 @@ public class OsgiServiceUtilTest {
         private List<ServiceReference> references2;
         private List<ServiceSuperInterface3> references3;
         private List<ServiceSuperInterface3> references3Filtered;
+        private ServiceSuperInterface3 reference3DynamicFiltered;
 
         private ComponentContext componentContext;
         private Map<String, Object> config;
@@ -383,6 +384,11 @@ public class OsgiServiceUtilTest {
 
         public List<ServiceSuperInterface3> getReferences3Filtered() {
             return this.references3Filtered;
+        }
+
+
+        public ServiceSuperInterface3 getReference3DynamicFiltered() {
+            return this.reference3DynamicFiltered;
         }
 
         public ComponentContext getComponentContext() {

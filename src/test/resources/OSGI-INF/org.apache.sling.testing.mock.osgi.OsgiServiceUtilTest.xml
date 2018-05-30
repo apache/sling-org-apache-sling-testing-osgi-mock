@@ -51,6 +51,7 @@
     <reference name="reference2" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface2" cardinality="1..n" policy="dynamic" field="references2" field-collection-type="reference"/>
     <reference name="reference3" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface3" cardinality="0..n" policy="dynamic" field="references3" field-collection-type="service"/>
     <reference name="references3Filtered" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface3" cardinality="0..n" policy="dynamic" field="references3Filtered" field-collection-type="service" target="(prop1=abc)"/>
+    <reference name="reference3DynamicFiltered" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface3" cardinality="0..1" policy="dynamic" field="reference3DynamicFiltered" field-collection-type="service"/>
   </scr:component>
   <scr:component name="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service3StaticGreedy" activate="activate" deactivate="deactivate" modified="modified">
     <implementation class="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service3StaticGreedy"/>
