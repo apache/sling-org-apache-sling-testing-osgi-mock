@@ -166,7 +166,6 @@ public class OsgiContextImplTest {
     }
 
     @Test
-    @Ignore("SLING-7788")
     public void testServiceTracker() {
         BundleContext bundleContext = context.bundleContext();
         ServiceTracker<MyService, MyService> tracker = new ServiceTracker<>(bundleContext, MyService.class, null);
