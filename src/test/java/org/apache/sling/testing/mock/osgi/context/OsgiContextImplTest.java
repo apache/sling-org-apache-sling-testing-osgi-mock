@@ -34,8 +34,12 @@ import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface2;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.util.tracker.ServiceTracker;
 
 public class OsgiContextImplTest {
 
@@ -161,4 +165,35 @@ public class OsgiContextImplTest {
         context.registerInjectActivateService(new Object());
     }
 
+    @Test
+    @Ignore("SLING-7788")
+    public void testServiceTracker() {
+        BundleContext bundleContext = context.bundleContext();
+        ServiceTracker<MyService, MyService> tracker = new ServiceTracker<>(bundleContext, MyService.class, null);
+        tracker.open();
+
+        context.registerInjectActivateService(new MyComponent());
+
+        assertNotNull(tracker.getServiceReferences());
+        assertEquals(1, tracker.getServiceReferences().length);
+
+        tracker.close();
+    }
+
+    @Component(
+            service = MyService.class
+    )
+    public static class MyComponent implements MyService {
+
+        @Override
+        public String foo() {
+            return "bar";
+        }
+    }
+
+    public interface MyService {
+
+        String foo();
+
+    }
 }
