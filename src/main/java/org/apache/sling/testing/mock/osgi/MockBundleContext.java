@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.framework.FilterImpl;
+import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtil.ReferenceInfo;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtil.ServiceInfo;
@@ -55,6 +56,7 @@ import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentConstants;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
@@ -142,6 +144,11 @@ class MockBundleContext implements BundleContext {
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
         for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
+            // Look for a target override
+            Object o = referenceInfo.getServiceRegistration().getProperties().get(reference.getName() + ComponentConstants.REFERENCE_TARGET_SUFFIX);
+            if (o != null && o instanceof String) {
+                reference = new DynamicReference(reference,(String)o);
+            }
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
                 case MANDATORY_UNARY:

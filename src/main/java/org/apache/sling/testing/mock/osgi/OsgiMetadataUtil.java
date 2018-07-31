@@ -470,20 +470,20 @@ final class OsgiMetadataUtil {
 
     static class Reference {
 
-        private final Class<?> clazz;
-        private final String name;
-        private final String interfaceType;
-        private final ReferenceCardinality cardinality;
-        private final ReferencePolicy policy;
-        private final ReferencePolicyOption policyOption;
-        private final String bind;
-        private final String unbind;
-        private final String field;
-        private final FieldCollectionType fieldCollectionType;
-        private final String target;
-        private final Filter targetFilter;
+        protected final Class<?> clazz;
+        protected final String name;
+        protected final String interfaceType;
+        protected final ReferenceCardinality cardinality;
+        protected final ReferencePolicy policy;
+        protected final ReferencePolicyOption policyOption;
+        protected final String bind;
+        protected final String unbind;
+        protected final String field;
+        protected final FieldCollectionType fieldCollectionType;
+        protected String target;
+        protected Filter targetFilter;
 
-        private Reference(Class<?> clazz, Node node) {
+        protected Reference(Class<?> clazz, Node node) {
             this.clazz = clazz;
             this.name = getAttributeValue(node, "name");
             this.interfaceType = getAttributeValue(node, "interface");
@@ -505,6 +505,21 @@ final class OsgiMetadataUtil {
             else {
                 this.targetFilter = null;
             }
+        }
+
+        protected Reference(Reference reference) {
+            this.clazz = reference.clazz;
+            this.name = reference.name;
+            this.interfaceType = reference.interfaceType;
+            this.cardinality = reference.cardinality;
+            this.policy = reference.policy;
+            this.policyOption = reference.policyOption;
+            this.bind = reference.bind;
+            this.unbind = reference.unbind;
+            this.field = reference.field;
+            this.fieldCollectionType = reference.fieldCollectionType;
+            this.target = reference.target;
+            this.targetFilter = reference.targetFilter;
         }
 
         public Class<?> getServiceClass() {
@@ -614,6 +629,22 @@ final class OsgiMetadataUtil {
 
     }
 
+    static class DynamicReference extends Reference {
+        public DynamicReference(Reference reference, String target) {
+            super(reference);
+            this.target = target;
+            if (StringUtils.isNotEmpty(this.target)) {
+                try {
+                    this.targetFilter = new FilterImpl(this.target);
+                } catch (InvalidSyntaxException ex) {
+                    throw new RuntimeException("Invalid target filter in reference '" + this.name + "' of class " + clazz.getName(), ex);
+                }
+            }
+            else {
+                this.targetFilter = null;
+            }
+        }
+    }
 
     /**
      * Options for {@link Reference#cardinality()} property.

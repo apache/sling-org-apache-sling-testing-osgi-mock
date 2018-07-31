@@ -31,6 +31,7 @@ import java.util.SortedSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.impl.inject.Annotations;
+import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.FieldCollectionType;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
@@ -369,9 +370,10 @@ final class OsgiServiceUtil {
      * multiple references.
      * @param target Service instance
      * @param bundleContext Bundle context from which services are fetched to inject.
+     * @param properties Services properties (used to resolve dynamic reference properties)
      * @return true if all dependencies could be injected, false if the service has no dependencies.
      */
-    public static boolean injectServices(Object target, BundleContext bundleContext) {
+    public static boolean injectServices(Object target, BundleContext bundleContext, Map<String, Object> properties) {
 
         // collect all declared reference annotations on class and field level
         Class<?> targetClass = target.getClass();
@@ -387,6 +389,13 @@ final class OsgiServiceUtil {
 
         // try to inject services
         for (Reference reference : references) {
+            if (properties != null) {
+                // Look for a target override
+                Object o = properties.get(reference.getName() + ".target");
+                if (o != null && o instanceof String) {
+                    reference = new DynamicReference(reference,(String)o);
+                }
+            }
             injectServiceReference(reference, target, bundleContext);
         }
         return true;
