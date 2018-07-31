@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentConstants;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
@@ -144,7 +145,7 @@ class MockBundleContext implements BundleContext {
         for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
             // Look for a target override
-            Object o = referenceInfo.getServiceRegistration().getProperties().get(reference.getName() + ".target");
+            Object o = referenceInfo.getServiceRegistration().getProperties().get(reference.getName() + ComponentConstants.REFERENCE_TARGET_SUFFIX);
             if (o != null && o instanceof String) {
                 reference = new DynamicReference(reference,(String)o);
             }
