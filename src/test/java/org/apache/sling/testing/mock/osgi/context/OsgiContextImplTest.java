@@ -34,7 +34,6 @@ import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface2;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

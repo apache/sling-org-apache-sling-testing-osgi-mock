@@ -66,7 +66,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
 
         this.properties = properties != null ? properties : new Hashtable<String,Object>();
         this.properties.put(Constants.SERVICE_ID, this.serviceId);
-        this.properties.put(Constants.OBJECTCLASS, this.clazzes.toArray(new String[0]));
+        this.properties.put(Constants.OBJECTCLASS, this.clazzes.toArray(new String[this.clazzes.size()]));
         this.serviceReference = new MockServiceReference<T>(bundle, this);
         this.bundleContext = bundleContext;
     }
