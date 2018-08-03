@@ -33,6 +33,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
+@SuppressWarnings("null")
 public class MockComponentContextTest {
 
     private ComponentContext underTest;

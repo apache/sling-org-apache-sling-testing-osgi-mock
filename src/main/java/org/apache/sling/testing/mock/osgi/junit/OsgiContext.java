@@ -21,6 +21,7 @@ package org.apache.sling.testing.mock.osgi.junit;
 import org.apache.sling.testing.mock.osgi.context.ContextCallback;
 import org.apache.sling.testing.mock.osgi.context.ContextPlugins;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
+import org.jetbrains.annotations.NotNull;
 import org.junit.rules.ExternalResource;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -48,7 +49,7 @@ public final class OsgiContext extends OsgiContextImpl implements TestRule {
      * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      */
-    public <T extends OsgiContextImpl> OsgiContext(final ContextCallback<T> afterSetUpCallback) {
+    public <T extends OsgiContextImpl> OsgiContext(@NotNull final ContextCallback<T> afterSetUpCallback) {
         this(new ContextPlugins(afterSetUpCallback));
     }
 
@@ -59,7 +60,7 @@ public final class OsgiContext extends OsgiContextImpl implements TestRule {
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
-    public <U extends OsgiContextImpl, V extends OsgiContextImpl> OsgiContext(final ContextCallback<U> afterSetUpCallback, final ContextCallback<V> beforeTearDownCallback) {
+    public <U extends OsgiContextImpl, V extends OsgiContextImpl> OsgiContext(@NotNull final ContextCallback<U> afterSetUpCallback, @NotNull final ContextCallback<V> beforeTearDownCallback) {
         this(new ContextPlugins(afterSetUpCallback, beforeTearDownCallback));
     }
 
@@ -67,7 +68,7 @@ public final class OsgiContext extends OsgiContextImpl implements TestRule {
      * Initialize OSGi context with resource resolver type.
      * @param contextPlugins Context plugins
      */
-    OsgiContext(final ContextPlugins contextPlugins) {
+    OsgiContext(@NotNull final ContextPlugins contextPlugins) {
         this.plugins = contextPlugins;
 
         // wrap {@link ExternalResource} rule executes each test method once

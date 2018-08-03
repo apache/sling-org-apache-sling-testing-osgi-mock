@@ -191,7 +191,7 @@ class MockBundleContext implements BundleContext {
         notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
     }
     
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     void restartService(MockServiceRegistration registration) {
         // get current service properties
         Class<?> serviceClass = registration.getService().getClass();
@@ -439,6 +439,7 @@ class MockBundleContext implements BundleContext {
     /**
      * Deactivates all bundles registered in this mocked bundle context.
      */
+    @SuppressWarnings("null")
     public void shutdown() {
         for (MockServiceRegistration<?> serviceRegistration : ImmutableList.copyOf(registeredServices).reverse()) {
             try {

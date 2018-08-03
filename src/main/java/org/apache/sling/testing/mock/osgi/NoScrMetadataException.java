@@ -18,13 +18,15 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Is thrown when a OSGi mock method required SCR metadata and this is not found in the classpath.
  */
 public final class NoScrMetadataException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public NoScrMetadataException(Class<?> type) {
+    public NoScrMetadataException(@NotNull Class<?> type) {
         super("No OSGi SCR metadata found for class " + OsgiMetadataUtil.cleanupClassName(type.getName()));
     }
 

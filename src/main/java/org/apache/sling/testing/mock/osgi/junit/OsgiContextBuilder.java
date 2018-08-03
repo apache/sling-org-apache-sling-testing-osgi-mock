@@ -20,6 +20,7 @@ package org.apache.sling.testing.mock.osgi.junit;
 
 import org.apache.sling.testing.mock.osgi.context.ContextPlugins;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
+import org.jetbrains.annotations.NotNull;
 import org.apache.sling.testing.mock.osgi.context.ContextCallback;
 import org.apache.sling.testing.mock.osgi.context.ContextPlugin;
 import org.osgi.annotation.versioning.ProviderType;
@@ -30,7 +31,7 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public final class OsgiContextBuilder {
     
-    private final ContextPlugins plugins = new ContextPlugins();
+    private final @NotNull ContextPlugins plugins = new ContextPlugins();
     
     /**
      * Create builder with default resource resolver type.
@@ -43,7 +44,7 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final <T extends OsgiContextImpl> OsgiContextBuilder plugin(ContextPlugin<T>... plugin) {
+    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder plugin(@NotNull ContextPlugin<T>... plugin) {
         plugins.addPlugin(plugin);
         return this;
     }
@@ -54,7 +55,7 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final <T extends OsgiContextImpl> OsgiContextBuilder beforeSetUp(ContextCallback<T>... beforeSetUpCallback) {
+    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder beforeSetUp(@NotNull ContextCallback<T>... beforeSetUpCallback) {
         plugins.addBeforeSetUpCallback(beforeSetUpCallback);
         return this;
     }
@@ -65,7 +66,7 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final <T extends OsgiContextImpl> OsgiContextBuilder afterSetUp(ContextCallback<T>... afterSetUpCallback) {
+    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder afterSetUp(@NotNull ContextCallback<T>... afterSetUpCallback) {
         plugins.addAfterSetUpCallback(afterSetUpCallback);
         return this;
     }
@@ -76,7 +77,7 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final <T extends OsgiContextImpl> OsgiContextBuilder beforeTearDown(ContextCallback<T>... beforeTearDownCallback) {
+    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder beforeTearDown(@NotNull ContextCallback<T>... beforeTearDownCallback) {
         plugins.addBeforeTearDownCallback(beforeTearDownCallback);
         return this;
     }
@@ -87,7 +88,7 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final <T extends OsgiContextImpl> OsgiContextBuilder afterTearDown(ContextCallback<T>... afterTearDownCallback) {
+    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder afterTearDown(@NotNull ContextCallback<T>... afterTearDownCallback) {
         plugins.addAfterTearDownCallback(afterTearDownCallback);
         return this;
     }
@@ -95,7 +96,7 @@ public final class OsgiContextBuilder {
     /**
      * @return Build {@link OsgiContext} instance.
      */
-    public OsgiContext build() {
+    public @NotNull OsgiContext build() {
         return new OsgiContext(plugins);
     }
     

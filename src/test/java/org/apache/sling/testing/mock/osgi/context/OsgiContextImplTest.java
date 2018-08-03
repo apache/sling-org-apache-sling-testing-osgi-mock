@@ -40,6 +40,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.util.tracker.ServiceTracker;
 
+@SuppressWarnings("null")
 public class OsgiContextImplTest {
 
     private OsgiContextImpl context;

@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("null")
 public class OsgiContextTest {
 
     private final OsgiContextCallback contextBeforeSetup = mock(OsgiContextCallback.class);

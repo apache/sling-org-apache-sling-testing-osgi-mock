@@ -37,6 +37,7 @@ import org.osgi.service.event.EventHandler;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+@SuppressWarnings("null")
 public class MockEventAdminTest {
     
     private static final String TOPIC_SAMPLE_1 = "sample/topic1";

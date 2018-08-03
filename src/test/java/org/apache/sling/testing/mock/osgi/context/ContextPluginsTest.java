@@ -30,7 +30,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","null"})
 public class ContextPluginsTest {
     
     private OsgiContext context = new OsgiContext();

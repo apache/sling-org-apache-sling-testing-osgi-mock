@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.ServiceReference;
@@ -46,7 +48,7 @@ public final class MockOsgi {
     /**
      * @return Mocked {@link BundleContext} instance
      */
-    public static BundleContext newBundleContext() {
+    public static @NotNull BundleContext newBundleContext() {
         return new MockBundleContext();
     }
 
@@ -56,14 +58,14 @@ public final class MockOsgi {
      * @param bundleContext Bundle context
      * @param bundleEvent Bundle event
      */
-    public static void sendBundleEvent(BundleContext bundleContext, BundleEvent bundleEvent) {
+    public static void sendBundleEvent(@NotNull BundleContext bundleContext, @NotNull BundleEvent bundleEvent) {
         ((MockBundleContext) bundleContext).sendBundleEvent(bundleEvent);
     }
 
     /**
      * @return Mocked {@link ComponentContext} instance
      */
-    public static ComponentContext newComponentContext() {
+    public static @NotNull ComponentContext newComponentContext() {
         return componentContext().build();
     }
 
@@ -71,7 +73,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static ComponentContext newComponentContext(Dictionary<String, Object> properties) {
+    public static @NotNull ComponentContext newComponentContext(@Nullable Dictionary<String, Object> properties) {
         return componentContext().properties(properties).build();
     }
 
@@ -79,7 +81,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static ComponentContext newComponentContext(Map<String, Object> properties) {
+    public static @NotNull ComponentContext newComponentContext(@Nullable Map<String, Object> properties) {
         return componentContext().properties(properties).build();
     }
 
@@ -87,7 +89,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static ComponentContext newComponentContext(Object... properties) {
+    public static @NotNull ComponentContext newComponentContext(@NotNull Object... properties) {
         return componentContext().properties(properties).build();
     }
 
@@ -96,8 +98,8 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static ComponentContext newComponentContext(BundleContext bundleContext,
-            Dictionary<String, Object> properties) {
+    public static @NotNull ComponentContext newComponentContext(@NotNull BundleContext bundleContext,
+            @Nullable Dictionary<String, Object> properties) {
         return componentContext().bundleContext(bundleContext).properties(properties).build();
     }
 
@@ -106,8 +108,8 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static ComponentContext newComponentContext(BundleContext bundleContext,
-            Map<String, Object> properties) {
+    public static @NotNull ComponentContext newComponentContext(@NotNull BundleContext bundleContext,
+            @Nullable Map<String, Object> properties) {
         return componentContext().bundleContext(bundleContext).properties(properties).build();
     }
 
@@ -116,15 +118,15 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static ComponentContext newComponentContext(BundleContext bundleContext,
-            Object... properties) {
+    public static @NotNull ComponentContext newComponentContext(@NotNull BundleContext bundleContext,
+            @NotNull Object... properties) {
         return componentContext().bundleContext(bundleContext).properties(properties).build();
     }
 
     /**
      * @return {@link ComponentContextBuilder} to build a mocked {@link ComponentContext}
      */
-    public static ComponentContextBuilder componentContext() {
+    public static @NotNull ComponentContextBuilder componentContext() {
         return new ComponentContextBuilder();
     }
     
@@ -132,7 +134,7 @@ public final class MockOsgi {
      * @param loggerContext Context class for logging
      * @return Mocked {@link LogService} instance
      */
-    public static LogService newLogService(final Class<?> loggerContext) {
+    public static @NotNull LogService newLogService(@NotNull final Class<?> loggerContext) {
         return new MockLogService(loggerContext);
     }
 
@@ -144,7 +146,7 @@ public final class MockOsgi {
      * @param bundleContext Bundle context from which services are fetched to inject.
      * @return true if all dependencies could be injected, false if the service has no dependencies.
      */
-    public static boolean injectServices(Object target, BundleContext bundleContext) {
+    public static boolean injectServices(@NotNull Object target, @NotNull BundleContext bundleContext) {
         return MockOsgi.injectServices(target, bundleContext, (Map<String, Object>)null);
     }
 
@@ -157,7 +159,7 @@ public final class MockOsgi {
      * @param properties Service properties (used to resolve dynamic reference properties)
      * @return true if all dependencies could be injected, false if the service has no dependencies.
      */
-    public static boolean injectServices(Object target, BundleContext bundleContext, Map<String, Object> properties) {
+    public static boolean injectServices(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         return OsgiServiceUtil.injectServices(target, bundleContext, properties);
     }
 
@@ -167,7 +169,7 @@ public final class MockOsgi {
      * @param bundleContext Bundle context
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(Object target, BundleContext bundleContext) {
+    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext) {
         return MockOsgi.activate(target, bundleContext, (Dictionary<String, Object>)null);
     }
 
@@ -178,7 +180,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(Object target, BundleContext bundleContext, Dictionary<String, Object> properties) {
+    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
         Dictionary<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target, getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
         return OsgiServiceUtil.activateDeactivate(target, componentContext, true);
@@ -191,7 +193,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(Object target, BundleContext bundleContext, Map<String, Object> properties) {
+    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         return activate(target, bundleContext, toDictionary(properties));
     }
 
@@ -202,7 +204,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(Object target, BundleContext bundleContext, Object... properties) {
+    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object... properties) {
         return activate(target, bundleContext, toDictionary(properties));
     }
 
@@ -212,7 +214,7 @@ public final class MockOsgi {
      * @param bundleContext Bundle context.
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(Object target, BundleContext bundleContext) {
+    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext) {
         return MockOsgi.deactivate(target, bundleContext, (Dictionary<String, Object>)null);
     }
 
@@ -223,7 +225,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(Object target, BundleContext bundleContext, Dictionary<String, Object> properties) {
+    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
         Dictionary<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target, getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
         return OsgiServiceUtil.activateDeactivate(target, componentContext, false);
@@ -236,7 +238,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(Object target, BundleContext bundleContext, Map<String, Object> properties) {
+    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         return deactivate(target, bundleContext, toDictionary(properties));
     }
 
@@ -247,7 +249,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(Object target, BundleContext bundleContext, Object... properties) {
+    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object... properties) {
         return deactivate(target, bundleContext, toDictionary(properties));
     }
 
@@ -258,7 +260,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
      */
-    public static boolean modified(Object target, BundleContext bundleContext, Dictionary<String, Object> properties) {
+    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
         return modified(target, bundleContext, toMap(properties));
     }
 
@@ -269,7 +271,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
      */
-    public static boolean modified(Object target, BundleContext bundleContext, Map<String, Object> properties) {
+    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target, getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
         return OsgiServiceUtil.modified(target, componentContext, mergedProperties);
@@ -282,7 +284,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
      */
-    public static boolean modified(Object target, BundleContext bundleContext, Object... properties) {
+    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object... properties) {
         return modified(target, bundleContext, toDictionary(properties));
     }
     
@@ -292,7 +294,7 @@ public final class MockOsgi {
      * @param pid PID
      * @param properties Configuration properties
      */
-    public static void setConfigForPid(BundleContext bundleContext, String pid, Map<String,Object> properties) {
+    public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @Nullable Map<String,Object> properties) {
         setConfigForPid(bundleContext, pid, toDictionary(properties));
     }
     
@@ -302,11 +304,11 @@ public final class MockOsgi {
      * @param pid PID
      * @param properties Configuration properties
      */
-    public static void setConfigForPid(BundleContext bundleContext, String pid, Object... properties) {
+    public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @NotNull Object... properties) {
         setConfigForPid(bundleContext, pid, toDictionary(properties));
     }
     
-    private static void setConfigForPid(BundleContext bundleContext, String pid, Dictionary<String, Object> properties) {
+    private static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @Nullable Dictionary<String, Object> properties) {
         ConfigurationAdmin configAdmin = getConfigAdmin(bundleContext);
         if (configAdmin == null) {
             throw new RuntimeException("ConfigurationAdmin service is not registered in bundle context.");
@@ -324,7 +326,7 @@ public final class MockOsgi {
      * Deactivates all bundles registered in the mocked bundle context.
      * @param bundleContext Bundle context
      */
-    public static void shutdown(BundleContext bundleContext) {
+    public static void shutdown(@NotNull BundleContext bundleContext) {
         ((MockBundleContext)bundleContext).shutdown();
     }
     
@@ -333,7 +335,7 @@ public final class MockOsgi {
      * @param bundleContext Bundle context
      * @return Configuration admin or null if not registered.
      */
-    private static ConfigurationAdmin getConfigAdmin(BundleContext bundleContext) {
+    private static @Nullable ConfigurationAdmin getConfigAdmin(@NotNull BundleContext bundleContext) {
         ServiceReference<?> ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
         if (ref != null) {
             return (ConfigurationAdmin)bundleContext.getService(ref);

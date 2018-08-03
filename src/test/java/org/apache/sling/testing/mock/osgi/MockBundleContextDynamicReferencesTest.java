@@ -39,6 +39,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("null")
 public class MockBundleContextDynamicReferencesTest {
 
     private BundleContext bundleContext;

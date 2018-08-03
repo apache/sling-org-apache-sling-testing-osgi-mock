@@ -40,6 +40,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("null")
 public class MockBundleContextDynamicReferencesOsgiR6Test {
 
     private BundleContext bundleContext;
