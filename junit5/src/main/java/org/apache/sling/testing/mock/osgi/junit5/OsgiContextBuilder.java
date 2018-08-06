@@ -16,79 +16,88 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.testing.mock.osgi.junit;
+package org.apache.sling.testing.mock.osgi.junit5;
 
+import org.apache.sling.testing.mock.osgi.context.ContextCallback;
+import org.apache.sling.testing.mock.osgi.context.ContextPlugin;
 import org.apache.sling.testing.mock.osgi.context.ContextPlugins;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
-import org.apache.sling.testing.mock.osgi.context.ContextCallback;
-import org.apache.sling.testing.mock.osgi.context.ContextPlugin;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Builder class for creating {@link OsgiContext} instances with different sets of parameters.
+ * Builder class for creating {@link OsgiContext} instances with different sets
+ * of parameters.
  */
 @ProviderType
 public final class OsgiContextBuilder {
-    
+
     private final @NotNull ContextPlugins plugins = new ContextPlugins();
-    
+
     /**
      * Create builder.
      */
     public OsgiContextBuilder() {}
-    
+
     /**
      * @param <T> context type
      * @param plugin Context plugin which listens to context lifecycle events.
      * @return this
      */
     @SafeVarargs
-    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder plugin(@NotNull ContextPlugin<T> @NotNull ... plugin) {
+    public final <T extends OsgiContextImpl> OsgiContextBuilder plugin(@NotNull ContextPlugin<T> @NotNull ... plugin) {
         plugins.addPlugin(plugin);
         return this;
     }
 
     /**
      * @param <T> context type
-     * @param beforeSetUpCallback Allows the application to register an own callback function that is called before the built-in setup rules are executed.
+     * @param beforeSetUpCallback Allows the application to register an own
+     *            callback function that is called before the built-in setup
+     *            rules are executed.
      * @return this
      */
     @SafeVarargs
-    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder beforeSetUp(@NotNull ContextCallback<T> @NotNull ... beforeSetUpCallback) {
+    public final <T extends OsgiContextImpl> OsgiContextBuilder beforeSetUp(@NotNull ContextCallback<T> @NotNull ... beforeSetUpCallback) {
         plugins.addBeforeSetUpCallback(beforeSetUpCallback);
         return this;
     }
 
     /**
      * @param <T> context type
-     * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
+     * @param afterSetUpCallback Allows the application to register an own
+     *            callback function that is called after the built-in setup
+     *            rules are executed.
      * @return this
      */
     @SafeVarargs
-    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder afterSetUp(@NotNull ContextCallback<T> @NotNull ... afterSetUpCallback) {
+    public final <T extends OsgiContextImpl> OsgiContextBuilder afterSetUp(@NotNull ContextCallback<T> @NotNull ... afterSetUpCallback) {
         plugins.addAfterSetUpCallback(afterSetUpCallback);
         return this;
     }
 
     /**
      * @param <T> context type
-     * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
+     * @param beforeTearDownCallback Allows the application to register an own
+     *            callback function that is called before the built-in teardown
+     *            rules are executed.
      * @return this
      */
     @SafeVarargs
-    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder beforeTearDown(@NotNull ContextCallback<T> @NotNull ... beforeTearDownCallback) {
+    public final <T extends OsgiContextImpl> OsgiContextBuilder beforeTearDown(@NotNull ContextCallback<T> @NotNull ... beforeTearDownCallback) {
         plugins.addBeforeTearDownCallback(beforeTearDownCallback);
         return this;
     }
 
     /**
      * @param <T> context type
-     * @param afterTearDownCallback Allows the application to register an own callback function that is after before the built-in teardown rules are executed.
+     * @param afterTearDownCallback Allows the application to register an own
+     *            callback function that is after before the built-in teardown
+     *            rules are executed.
      * @return this
      */
     @SafeVarargs
-    public final @NotNull <T extends OsgiContextImpl> OsgiContextBuilder afterTearDown(@NotNull ContextCallback<T> @NotNull ... afterTearDownCallback) {
+    public final <T extends OsgiContextImpl> OsgiContextBuilder afterTearDown(@NotNull ContextCallback<T> @NotNull ... afterTearDownCallback) {
         plugins.addAfterTearDownCallback(afterTearDownCallback);
         return this;
     }
@@ -97,7 +106,7 @@ public final class OsgiContextBuilder {
      * @return Build {@link OsgiContext} instance.
      */
     public @NotNull OsgiContext build() {
-        return new OsgiContext(plugins);
+        return new OsgiContext(this.plugins);
     }
-    
+
 }
