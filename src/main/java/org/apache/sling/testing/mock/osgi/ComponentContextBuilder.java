@@ -56,7 +56,7 @@ public final class ComponentContextBuilder {
         return this;
     }
         
-    public @NotNull ComponentContextBuilder properties(@NotNull Object... properties) {
+    public @NotNull ComponentContextBuilder properties(@NotNull Object @NotNull ... properties) {
         this.properties = MapUtil.toDictionary(properties);
         return this;
     }

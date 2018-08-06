@@ -131,7 +131,7 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @NotNull final Object... properties) {
+    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @NotNull final Object @NotNull ... properties) {
         return registerService(serviceClass, service, MapUtil.toMap(properties));
     }
     
@@ -169,7 +169,7 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull final T service, @NotNull final Object... properties) {
+    public final @NotNull <T> T registerInjectActivateService(@NotNull final T service, @NotNull final Object @NotNull ... properties) {
         return registerInjectActivateService(service, MapUtil.toMap(properties));
     }
 
@@ -198,7 +198,7 @@ public class OsgiContextImpl {
      * @throws RuntimeException If the <code>filter</code> string is not a valid OSGi service filter string.
      */
     @SuppressWarnings({ "unchecked", "null" })
-    public final @NotNull <ServiceType> ServiceType[] getServices(@NotNull final Class<ServiceType> serviceType, @Nullable final String filter) {
+    public final @NotNull <ServiceType> ServiceType @NotNull [] getServices(@NotNull final Class<ServiceType> serviceType, @Nullable final String filter) {
         try {
             ServiceReference[] serviceReferences = bundleContext().getServiceReferences(serviceType.getName(), filter);
             if (serviceReferences != null) {

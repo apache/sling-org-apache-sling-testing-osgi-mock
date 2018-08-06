@@ -89,7 +89,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static @NotNull ComponentContext newComponentContext(@NotNull Object... properties) {
+    public static @NotNull ComponentContext newComponentContext(@NotNull Object @NotNull ... properties) {
         return componentContext().properties(properties).build();
     }
 
@@ -119,7 +119,7 @@ public final class MockOsgi {
      * @return Mocked {@link ComponentContext} instance
      */
     public static @NotNull ComponentContext newComponentContext(@NotNull BundleContext bundleContext,
-            @NotNull Object... properties) {
+            @NotNull Object @NotNull ... properties) {
         return componentContext().bundleContext(bundleContext).properties(properties).build();
     }
 
@@ -204,7 +204,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object... properties) {
+    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return activate(target, bundleContext, toDictionary(properties));
     }
 
@@ -249,7 +249,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object... properties) {
+    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return deactivate(target, bundleContext, toDictionary(properties));
     }
 
@@ -284,7 +284,7 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
      */
-    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object... properties) {
+    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return modified(target, bundleContext, toDictionary(properties));
     }
     
@@ -304,7 +304,7 @@ public final class MockOsgi {
      * @param pid PID
      * @param properties Configuration properties
      */
-    public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @NotNull Object... properties) {
+    public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @NotNull Object @NotNull ... properties) {
         setConfigForPid(bundleContext, pid, toDictionary(properties));
     }
     

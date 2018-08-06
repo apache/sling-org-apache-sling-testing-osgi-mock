@@ -397,7 +397,7 @@ class MockBundleContext implements BundleContext {
         // accept method, but ignore it
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     <S> S locateService(final String name, final ServiceReference<S> reference) {
         for (MockServiceRegistration<?> serviceRegistration : this.registeredServices) {
             if (serviceRegistration.getReference() == reference) {
