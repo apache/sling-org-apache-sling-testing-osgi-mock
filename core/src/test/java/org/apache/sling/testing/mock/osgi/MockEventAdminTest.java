@@ -23,8 +23,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Objects;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Before;
 import org.junit.Rule;
@@ -110,10 +110,10 @@ public class MockEventAdminTest {
         // wait until result is as expected (with timeout)
         boolean expectedResult = false;
         while (!expectedResult) {
-            expectedResult = ObjectUtils.equals(ImmutableList.of(), eventHandler1.getReceivedEvents())
-                    && ObjectUtils.equals(ImmutableList.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents())
-                    && ObjectUtils.equals(ImmutableList.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents())
-                    && ObjectUtils.equals(ImmutableList.of(EVENT_SAMPLE_2, EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
+            expectedResult = Objects.equals(ImmutableList.of(), eventHandler1.getReceivedEvents())
+                    && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents())
+                    && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents())
+                    && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2, EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
         }
     }
 

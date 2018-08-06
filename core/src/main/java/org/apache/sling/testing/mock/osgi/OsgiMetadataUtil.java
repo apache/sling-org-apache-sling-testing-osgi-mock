@@ -254,7 +254,7 @@ final class OsgiMetadataUtil {
      * @return Cleaned up class name
      */
     public static final String cleanupClassName(String className) {
-        return StringUtils.substringBefore(className, "$$Enhancer");
+        return StringUtils.substringBefore(StringUtils.substringBefore(className, "$MockitoMock$"), "$$Enhancer");
     }
     
     private static String getComponentName(Class clazz, Document metadata) {

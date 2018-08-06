@@ -27,7 +27,7 @@ import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings({"unchecked","null"})
