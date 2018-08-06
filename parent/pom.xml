@@ -22,60 +22,60 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
-        <version>2.4.0-SNAPSHOT</version>
-        <relativePath>../parent/pom.xml</relativePath>
+        <artifactId>sling</artifactId>
+        <version>34-SNAPSHOT</version>
+        <relativePath />
     </parent>
 
-    <artifactId>org.apache.sling.testing.osgi-mock.junit4</artifactId>
-    <packaging>bundle</packaging>
+    <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
+    <version>2.4.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-    <name>Apache Sling Testing OSGi Mock JUnit 4</name>
+    <name>Apache Sling Testing OSGi Mock Parent</name>
+    <description>Mock implementation of selected OSGi APIs.</description>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.annotation.versioning</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Nullability annotations -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
     
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
-            <version>2.4.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sling</groupId>
-            <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
-            <version>2.4.0-SNAPSHOT</version>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
+    <dependencyManagement>
+      <dependencies>
 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>provided</scope>
+            <version>2.21.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.logging-mock</artifactId>
-            <scope>test</scope>
+            <version>2.0.0</version>
         </dependency>
 
-    </dependencies>
-
-    <build>
-        <plugins>
-
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-
-        </plugins>
-    </build>
+      </dependencies>
+    </dependencyManagement>
 
 </project>

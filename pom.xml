@@ -22,17 +22,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>34-SNAPSHOT</version>
-        <relativePath />
+        <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
+        <version>2.4.0-SNAPSHOT</version>
+        <relativePath>parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.sling.testing.osgi-mock.root</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache Sling Testing OSGi Mock</name>
-    <description>Mock implementation of selected OSGi APIs.</description>
 
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</connection>
@@ -42,6 +40,7 @@
     </scm>
     
     <modules>
+        <module>parent</module>
         <module>core</module>
         <module>junit4</module>
         <module>junit5</module>

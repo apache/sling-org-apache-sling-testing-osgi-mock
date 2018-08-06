@@ -22,35 +22,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.apache.sling</groupId>
-        <artifactId>sling</artifactId>
-        <version>34-SNAPSHOT</version>
-        <relativePath />
+        <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
+        <version>2.4.0-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
-    <version>2.4.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Apache Sling Testing OSGi Mock Core</name>
-    <description>Mock implementation of selected OSGi APIs.</description>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.annotation.versioning</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>osgi.cmpn</artifactId>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -141,17 +123,9 @@
             </exclusions>
         </dependency>
     
-        <!-- Nullability annotations -->
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.19.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -162,7 +136,6 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.logging-mock</artifactId>
-            <version>2.0.0</version>
             <scope>test</scope>
         </dependency>
 
