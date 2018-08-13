@@ -1,0 +1,773 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.sling.testing.mock.osgi;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
+
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.framework.FilterImpl;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
+/**
+ * Helper methods to parse OSGi metadata.
+ */
+final class OsgiMetadataUtil {
+
+    private static final Logger log = LoggerFactory.getLogger(OsgiMetadataUtil.class);
+    
+    private static final String METADATA_PATH = "OSGI-INF";
+
+    private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY;
+    static {
+        DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
+        DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
+
+        // suppress log entries from Reflections library
+        Reflections.log = null;
+    }
+
+    private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
+
+    private static final BiMap<String, String> NAMESPACES = HashBiMap.create();
+    static {
+        NAMESPACES.put("scr", "http://www.osgi.org/xmlns/scr/v1.1.0");
+    }
+
+    private static final OsgiMetadata NULL_METADATA = new OsgiMetadata();
+    
+    private static final NamespaceContext NAMESPACE_CONTEXT = new NamespaceContext() {
+        @Override
+        public String getNamespaceURI(String prefix) {
+            return NAMESPACES.get(prefix);
+        }
+
+        @Override
+        public String getPrefix(String namespaceURI) {
+            return NAMESPACES.inverse().get(namespaceURI);
+        }
+
+        @Override
+        public Iterator getPrefixes(String namespaceURI) {
+            return NAMESPACES.keySet().iterator();
+        }
+    };
+
+    /*
+     * The OSGI metadata XML files do not change during the unit test runs because static part of classpath.
+     * So we can cache the parsing step if we need them multiple times.
+     */
+    private static final Map<String,Document> METADATA_DOCUMENT_CACHE = initMetadataDocumentCache();
+    private static final LoadingCache<Class, OsgiMetadata> METADATA_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<Class, OsgiMetadata>() {
+        @Override
+        public OsgiMetadata load(Class clazz) throws Exception {
+            Document metadataDocument = METADATA_DOCUMENT_CACHE.get(cleanupClassName(clazz.getName()));
+            if (metadataDocument != null) {
+                return new OsgiMetadata(clazz, metadataDocument);
+            }
+            return NULL_METADATA;
+        }
+    });
+
+    private OsgiMetadataUtil() {
+        // static methods only
+    }
+    
+    /**
+     * Try to read OSGI-metadata from /OSGI-INF and read all implemented interfaces and service properties.
+     * The metadata is cached after initial read, so it's no problem to call this method multiple time for the same class.
+     * @param clazz OSGi service implementation class
+     * @return Metadata object or null if no metadata present in classpath
+     */
+    public static OsgiMetadata getMetadata(Class clazz) {
+        try {
+            OsgiMetadata metadata = METADATA_CACHE.get(clazz);
+            if (metadata == NULL_METADATA) {
+                return null;
+            }
+            else {
+                return metadata;
+            }
+        }
+        catch (ExecutionException ex) {
+            throw new RuntimeException("Error loading OSGi metadata from loader cache.", ex);
+        }
+    }
+    
+    /**
+     * Reads all SCR metadata XML documents located at OSGI-INF/ and caches them with quick access by implementation class.
+     * @return Cache map
+     */
+    private static Map<String,Document> initMetadataDocumentCache() {
+        Map<String,Document> cacheMap = new HashMap<>();
+        
+        XPath xpath = XPATH_FACTORY.newXPath();
+        xpath.setNamespaceContext(NAMESPACE_CONTEXT);
+        XPathExpression xpathExpression;
+        try {
+            xpathExpression = xpath.compile("//*[implementation/@class]");
+        }
+        catch (XPathExpressionException ex) {
+            throw new RuntimeException("Compiling XPath expression failed.", ex);
+        }
+
+        Reflections reflections = new Reflections(METADATA_PATH, new ResourcesScanner());
+        Set<String> paths = reflections.getResources(Pattern.compile("^.*\\.xml$"));
+        for (String path : paths) {
+            parseMetadataDocuments(cacheMap, path, xpathExpression);
+        }
+        
+        return cacheMap;
+    }
+    
+    private static void parseMetadataDocuments(Map<String,Document> cacheMap, String resourcePath, XPathExpression xpathExpression) {
+        try {
+            Enumeration<URL> resourceUrls = OsgiMetadataUtil.class.getClassLoader().getResources(resourcePath);
+            while (resourceUrls.hasMoreElements()) {
+                URL resourceUrl = resourceUrls.nextElement();
+                try (InputStream fileStream = resourceUrl.openStream()) {
+                    parseMetadataDocument(cacheMap, resourcePath, fileStream, xpathExpression);
+                }
+            }
+        }
+        catch (Exception ex) {
+            log.warn("Error reading SCR metadata XML document from " + resourcePath, ex);
+        }
+    }
+    
+    private static void parseMetadataDocument(Map<String,Document> cacheMap, String resourcePath,
+            InputStream fileStream, XPathExpression xpathExpression) throws XPathExpressionException {
+        Document metadata = toXmlDocument(fileStream, resourcePath);
+        NodeList nodes = (NodeList)xpathExpression.evaluate(metadata, XPathConstants.NODESET);
+        if (nodes != null) {
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                String implementationClass = getImplementationClassName(node);
+                if (implementationClass != null) {
+                    cacheMap.put(implementationClass, metadata);
+                }
+            }
+        }                            
+    }
+
+    private static String getImplementationClassName(Node componentNode) {
+        NodeList childNodes = componentNode.getChildNodes();
+        for (int j = 0; j < childNodes.getLength(); j++) {
+            Node childNode = childNodes.item(j);
+            if (childNode.getNodeName().equals("implementation")) {
+                String implementationClass = getAttributeValue(childNode, "class");
+                if (!StringUtils.isBlank(implementationClass)) {
+                    return implementationClass;
+                }
+                break;
+            }
+        }
+        return null;
+    }
+
+    private static Document toXmlDocument(InputStream inputStream, String path) {
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            return documentBuilder.parse(inputStream);
+        } catch (ParserConfigurationException ex) {
+            throw new RuntimeException("Unable to read classpath resource: " + path, ex);
+        } catch (SAXException ex) {
+            throw new RuntimeException("Unable to read classpath resource: " + path, ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Unable to read classpath resource: " + path, ex);
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException ex) {
+                // ignore
+            }
+        }
+    }
+    
+    /**
+     * @param clazz OSGi component
+     * @return XPath query fragment to find matching XML node in SCR metadata
+     */
+    private static String getComponentXPathQuery(Class clazz) {
+        String className = cleanupClassName(clazz.getName());
+        return "//*[implementation/@class='" + className + "' or @name='" + className + "']";
+    }
+    
+    /**
+     * Remove extensions from class names added e.g. by mockito.
+     * @param className Class name
+     * @return Cleaned up class name
+     */
+    public static final String cleanupClassName(String className) {
+        return StringUtils.substringBefore(StringUtils.substringBefore(className, "$MockitoMock$"), "$$Enhancer");
+    }
+    
+    private static String getComponentName(Class clazz, Document metadata) {
+        String query = getComponentXPathQuery(clazz);
+        NodeList nodes = queryNodes(metadata, query);
+        if (nodes != null && nodes.getLength() > 0) {
+            return getAttributeValue(nodes.item(0), "name");
+        }
+        return clazz.getName();
+    }
+
+    private static String[] getConfigurationPID(Class clazz, Document metadata) {
+        String value = null;
+        String query = getComponentXPathQuery(clazz);
+        NodeList nodes = queryNodes(metadata, query);
+        if (nodes != null && nodes.getLength() > 0) {
+            value = getAttributeValue(nodes.item(0), "configuration-pid");
+        }
+        if (value == null) {
+            value = getComponentName(clazz, metadata);
+        }
+        return StringUtils.split(value);
+    }
+
+    private static Set<String> getServiceInterfaces(Class clazz, Document metadata) {
+        Set<String> serviceInterfaces = new HashSet<String>();
+        String query = getComponentXPathQuery(clazz) + "/service/provide[@interface!='']";
+        NodeList nodes = queryNodes(metadata, query);
+        if (nodes != null) {
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                String serviceInterface = getAttributeValue(node, "interface");
+                if (StringUtils.isNotBlank(serviceInterface)) {
+                    serviceInterfaces.add(serviceInterface);
+                }
+            }
+        }
+        return serviceInterfaces;
+    }
+
+    private static Map<String, Object> getProperties(Class clazz, Document metadata) {
+        Map<String, Object> props = new HashMap<String, Object>();
+        String query = getComponentXPathQuery(clazz) + "/property[@name!='' and @value!='']";
+        NodeList nodes = queryNodes(metadata, query);
+        if (nodes != null) {
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                String name = getAttributeValue(node, "name");
+                String value = getAttributeValue(node, "value");
+                String type = getAttributeValue(node, "type");
+                if (StringUtils.equals("Integer", type)) {
+                    props.put(name, Integer.parseInt(value));
+                }
+                else if (StringUtils.equals("Long", type)) {
+                    props.put(name, Long.parseLong(value));
+                }
+                else if (StringUtils.equals("Boolean", type)) {
+                    props.put(name, Boolean.parseBoolean(value));
+                }
+                else {
+                    props.put(name, value);
+                }
+            }
+        }
+        query = getComponentXPathQuery(clazz) + "/property[@name!='' and text()!='']";
+        nodes = queryNodes(metadata, query);
+        if (nodes != null) {
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                String name = getAttributeValue(node, "name");
+                String[] value = StringUtils.split(StringUtils.trim(node.getTextContent()), "\n\r");
+                for (int j = 0; j<value.length; j++) {
+                    value[j] = StringUtils.trim(value[j]);
+                }
+                props.put(name, value);
+            }
+        }
+        return props;
+    }
+
+    private static List<Reference> getReferences(Class clazz, Document metadata) {
+        List<Reference> references = new ArrayList<Reference>();
+        String query = getComponentXPathQuery(clazz) + "/reference[@name!='']";
+        NodeList nodes = queryNodes(metadata, query);
+        if (nodes != null) {
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Node node = nodes.item(i);
+                references.add(new Reference(clazz, node));
+            }
+        }
+        return references;
+    }
+
+    private static String getLifecycleMethodName(Class clazz, Document metadata, String methodName) {
+        String query = getComponentXPathQuery(clazz);
+        Node node = queryNode(metadata, query);
+        if (node != null) {
+            return getAttributeValue(node, methodName);
+        }
+        return null;
+    }
+
+    private static NodeList queryNodes(Document metadata, String xpathQuery) {
+        try {
+            XPath xpath = XPATH_FACTORY.newXPath();
+            xpath.setNamespaceContext(NAMESPACE_CONTEXT);
+            return (NodeList) xpath.evaluate(xpathQuery, metadata, XPathConstants.NODESET);
+        } catch (XPathExpressionException ex) {
+            throw new RuntimeException("Error evaluating XPath: " + xpathQuery, ex);
+        }
+    }
+
+    private static Node queryNode(Document metadata, String xpathQuery) {
+        try {
+            XPath xpath = XPATH_FACTORY.newXPath();
+            xpath.setNamespaceContext(NAMESPACE_CONTEXT);
+            return (Node) xpath.evaluate(xpathQuery, metadata, XPathConstants.NODE);
+        } catch (XPathExpressionException ex) {
+            throw new RuntimeException("Error evaluating XPath: " + xpathQuery, ex);
+        }
+    }
+
+    private static String getAttributeValue(Node node, String attributeName) {
+        Node namedItem = node.getAttributes().getNamedItem(attributeName);
+        if (namedItem != null) {
+            return namedItem.getNodeValue();
+        } else {
+            return null;
+        }
+    }
+
+    static class OsgiMetadata {
+
+        private final Class<?> clazz;
+        private final String name;
+        private final String[] configurationPID;
+        private final Set<String> serviceInterfaces;
+        private final Map<String, Object> properties;
+        private final List<Reference> references;
+        private final String activateMethodName;
+        private final String deactivateMethodName;
+        private final String modifiedMethodName;
+
+        private OsgiMetadata(Class<?> clazz, Document metadataDocument) {
+            this.clazz = clazz;
+            this.name = OsgiMetadataUtil.getComponentName(clazz, metadataDocument);
+            this.configurationPID = OsgiMetadataUtil.getConfigurationPID(clazz, metadataDocument);
+            this.serviceInterfaces = OsgiMetadataUtil.getServiceInterfaces(clazz, metadataDocument);
+            this.properties = OsgiMetadataUtil.getProperties(clazz, metadataDocument);
+            this.references = OsgiMetadataUtil.getReferences(clazz, metadataDocument);
+            this.activateMethodName = OsgiMetadataUtil.getLifecycleMethodName(clazz, metadataDocument, "activate");
+            this.deactivateMethodName = OsgiMetadataUtil.getLifecycleMethodName(clazz, metadataDocument, "deactivate");
+            this.modifiedMethodName = OsgiMetadataUtil.getLifecycleMethodName(clazz, metadataDocument, "modified");
+        }
+
+        private OsgiMetadata() {
+            this.clazz = null;
+            this.name = null;
+            this.configurationPID = null;
+            this.serviceInterfaces = null;
+            this.properties = null;
+            this.references = null;
+            this.activateMethodName = null;
+            this.deactivateMethodName = null;
+            this.modifiedMethodName = null;
+        }
+
+        public Class<?> getServiceClass() {
+            return clazz;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public String getPID() {
+            String pid = null;
+            if (properties != null) {
+                pid = (String)properties.get(Constants.SERVICE_PID);
+            }
+            return StringUtils.defaultString(pid, name);
+        }
+
+        public String[] getConfigurationPID() {
+            return configurationPID;
+        }
+
+        public Set<String> getServiceInterfaces() {
+            return serviceInterfaces;
+        }
+
+        public Map<String, Object> getProperties() {
+            return properties;
+        }
+
+        public List<Reference> getReferences() {
+            return references;
+        }
+
+        public String getActivateMethodName() {
+            return activateMethodName;
+        }
+
+        public String getDeactivateMethodName() {
+            return deactivateMethodName;
+        }
+
+        public String getModifiedMethodName() {
+            return modifiedMethodName;
+        }
+
+    }
+
+    static class Reference {
+
+        protected final Class<?> clazz;
+        protected final String name;
+        protected final String interfaceType;
+        protected final ReferenceCardinality cardinality;
+        protected final ReferencePolicy policy;
+        protected final ReferencePolicyOption policyOption;
+        protected final String bind;
+        protected final String unbind;
+        protected final String field;
+        protected final FieldCollectionType fieldCollectionType;
+        protected String target;
+        protected Filter targetFilter;
+
+        protected Reference(Class<?> clazz, Node node) {
+            this.clazz = clazz;
+            this.name = getAttributeValue(node, "name");
+            this.interfaceType = getAttributeValue(node, "interface");
+            this.cardinality = toCardinality(getAttributeValue(node, "cardinality"));
+            this.policy = toPolicy(getAttributeValue(node, "policy"));
+            this.policyOption = toPolicyOption(getAttributeValue(node, "policy-option"));
+            this.bind = getAttributeValue(node, "bind");
+            this.unbind = getAttributeValue(node, "unbind");
+            this.field = getAttributeValue(node, "field");
+            this.fieldCollectionType = toFieldCollectionType(getAttributeValue(node, "field-collection-type"));
+            this.target = getAttributeValue(node, "target");
+            if (StringUtils.isNotEmpty(this.target)) {
+                try {
+                    this.targetFilter = new FilterImpl(this.target);
+                } catch (InvalidSyntaxException ex) {
+                    throw new RuntimeException("Invalid target filter in reference '" + this.name + "' of class " + clazz.getName(), ex);
+                }
+            }
+            else {
+                this.targetFilter = null;
+            }
+        }
+
+        protected Reference(Reference reference) {
+            this.clazz = reference.clazz;
+            this.name = reference.name;
+            this.interfaceType = reference.interfaceType;
+            this.cardinality = reference.cardinality;
+            this.policy = reference.policy;
+            this.policyOption = reference.policyOption;
+            this.bind = reference.bind;
+            this.unbind = reference.unbind;
+            this.field = reference.field;
+            this.fieldCollectionType = reference.fieldCollectionType;
+            this.target = reference.target;
+            this.targetFilter = reference.targetFilter;
+        }
+
+        public Class<?> getServiceClass() {
+            return clazz;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String getInterfaceType() {
+            return this.interfaceType;
+        }
+
+        public Class getInterfaceTypeAsClass() {
+            try {
+                return Class.forName(getInterfaceType());
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Service reference type not found: " + getInterfaceType());
+            }
+        }
+
+        public ReferenceCardinality getCardinality() {
+            return this.cardinality;
+        }
+        
+        public boolean isCardinalityMultiple() {
+            return this.cardinality == ReferenceCardinality.OPTIONAL_MULTIPLE
+                    || this.cardinality == ReferenceCardinality.MANDATORY_MULTIPLE;
+        }
+
+        public boolean isCardinalityOptional() {
+            return this.cardinality == ReferenceCardinality.OPTIONAL_UNARY
+                    || this.cardinality == ReferenceCardinality.OPTIONAL_MULTIPLE;
+        }
+
+        public ReferencePolicy getPolicy() {
+            return policy;
+        }
+
+        public ReferencePolicyOption getPolicyOption() {
+            return policyOption;
+        }
+
+        public String getBind() {
+            return this.bind;
+        }
+
+        public String getUnbind() {
+            return this.unbind;
+        }
+
+        public String getField() {
+            return this.field;
+        }
+        
+        public String getTarget() {
+            return this.target;
+        }
+        
+        public boolean matchesTargetFilter(ServiceReference<?> serviceReference) {
+            if (targetFilter == null) {
+                return true;
+            }
+            return targetFilter.match(serviceReference);
+        }
+        
+        public FieldCollectionType getFieldCollectionType() {
+            return this.fieldCollectionType;
+        }
+
+        private static ReferenceCardinality toCardinality(String value) {
+            for (ReferenceCardinality item : ReferenceCardinality.values()) {
+                if (StringUtils.equals(item.getCardinalityString(), value)) {
+                    return item;
+                }
+            }
+            return ReferenceCardinality.MANDATORY_UNARY;
+        }
+
+        private static ReferencePolicy toPolicy(String value) {
+            for (ReferencePolicy item : ReferencePolicy.values()) {
+                if (StringUtils.equalsIgnoreCase(item.name(), value)) {
+                    return item;
+                }
+            }
+            return ReferencePolicy.STATIC;
+        }
+
+        private static ReferencePolicyOption toPolicyOption(String value) {
+            for (ReferencePolicyOption item : ReferencePolicyOption.values()) {
+                if (StringUtils.equalsIgnoreCase(item.name(), value)) {
+                    return item;
+                }
+            }
+            return ReferencePolicyOption.RELUCTANT;
+        }
+
+        private static FieldCollectionType toFieldCollectionType(String value) {
+            for (FieldCollectionType item : FieldCollectionType.values()) {
+                if (StringUtils.equalsIgnoreCase(item.name(), value)) {
+                    return item;
+                }
+            }
+            return FieldCollectionType.SERVICE;
+        }
+
+    }
+
+    static class DynamicReference extends Reference {
+        public DynamicReference(Reference reference, String target) {
+            super(reference);
+            this.target = target;
+            if (StringUtils.isNotEmpty(this.target)) {
+                try {
+                    this.targetFilter = new FilterImpl(this.target);
+                } catch (InvalidSyntaxException ex) {
+                    throw new RuntimeException("Invalid target filter in reference '" + this.name + "' of class " + clazz.getName(), ex);
+                }
+            }
+            else {
+                this.targetFilter = null;
+            }
+        }
+    }
+
+    /**
+     * Options for {@link Reference#cardinality()} property.
+     */
+    enum ReferenceCardinality {
+
+        /**
+         * Optional, unary reference: No service required to be available for the
+         * reference to be satisfied. Only a single service is available through this
+         * reference.
+         */
+        OPTIONAL_UNARY("0..1"),
+
+        /**
+         * Mandatory, unary reference: At least one service must be available for
+         * the reference to be satisfied. Only a single service is available through
+         * this reference.
+         */
+        MANDATORY_UNARY("1..1"),
+
+        /**
+         * Optional, multiple reference: No service required to be available for the
+         * reference to be satisfied. All matching services are available through
+         * this reference.
+         */
+        OPTIONAL_MULTIPLE("0..n"),
+
+        /**
+         * Mandatory, multiple reference: At least one service must be available for
+         * the reference to be satisfied. All matching services are available
+         * through this reference.
+         */
+        MANDATORY_MULTIPLE("1..n");
+
+        private final String cardinalityString;
+
+        private ReferenceCardinality(final String cardinalityString) {
+            this.cardinalityString = cardinalityString;
+        }
+
+        /**
+         * @return String representation of cardinality
+         */
+        public String getCardinalityString() {
+            return this.cardinalityString;
+        }
+
+    }
+
+    /**
+     * Options for {@link Reference#policy()} property.
+     */
+    enum ReferencePolicy {
+
+        /**
+         * The component will be deactivated and re-activated if the service comes
+         * and/or goes away.
+         */
+        STATIC,
+
+        /**
+         * The service will be made available to the component as it comes and goes.
+         */
+        DYNAMIC;
+    }
+
+
+    /**
+     * Options for {@link Reference#policyOption()} property.
+     */
+    enum ReferencePolicyOption {
+
+        /**
+         * The reluctant policy option is the default policy option.
+         * When a new target service for a reference becomes available,
+         * references having the reluctant policy option for the static
+         * policy or the dynamic policy with a unary cardinality will
+         * ignore the new target service. References having the dynamic
+         * policy with a multiple cardinality will bind the new
+         * target service
+         */
+        RELUCTANT,
+
+        /**
+         * When a new target service for a reference becomes available,
+         * references having the greedy policy option will bind the new
+         * target service.
+         */
+        GREEDY;
+    }
+
+    /**
+     * Options for {@link Reference#policyOption()} property.
+     */
+    enum FieldCollectionType {
+
+        /**
+         * The bound service object. This is the default field collection type.
+         */
+        SERVICE,
+
+        /**
+         * A Service Reference for the bound service.
+         */
+        REFERENCE,
+
+        /**
+         * A Component Service Objects for the bound service.
+         */
+        SERVICEOBJECTS,
+
+        /**
+         * An unmodifiable Map containing the service properties of the bound service.
+         * This Map must implement Comparable.
+         */
+        PROPERTIES,
+
+        /**
+         * An unmodifiable Map.Entry whose key is an unmodifiable Map containing the 
+         * service properties of the bound service, as above, and whose value is the 
+         * bound service object. This Map.Entry must implement Comparable.
+         */
+        TUPLE;
+    }
+
+}
