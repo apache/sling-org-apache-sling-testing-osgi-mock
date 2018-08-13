@@ -30,6 +30,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public final class ManifestScanner {
      * @param attributeName Attribute / Bundle header name.
      * @return List of values.
      */
-    public static Collection<String> getValues(final String attributeName) {
+    public static @NotNull Collection<String> getValues(@NotNull final String attributeName) {
         Set<String> values = new LinkedHashSet<String>();
         try {
             Enumeration<URL> resEnum = ManifestScanner.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);

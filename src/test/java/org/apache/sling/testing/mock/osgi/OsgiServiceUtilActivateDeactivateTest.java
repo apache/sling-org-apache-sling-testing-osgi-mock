@@ -37,6 +37,7 @@ import com.google.common.collect.ImmutableMap;
 /**
  * Test different variants of activate/deactivate methods with varying signatures.
  */
+@SuppressWarnings("null")
 public class OsgiServiceUtilActivateDeactivateTest {
 
     private Map<String,Object> map = ImmutableMap.<String, Object>of("prop1", "value1");

@@ -25,6 +25,8 @@ import java.util.Map;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -50,6 +52,7 @@ public class OsgiContextImpl {
     /**
      * Teardown actions after test method execution
      */
+    @SuppressWarnings("null")
     protected void tearDown() {
         if (componentContext != null) {
             // deactivate all services
@@ -69,7 +72,8 @@ public class OsgiContextImpl {
     /**
      * @return OSGi component context
      */
-    public final ComponentContext componentContext() {
+    @SuppressWarnings("null")
+    public final @NotNull ComponentContext componentContext() {
         if (this.componentContext == null) {
             this.componentContext = MockOsgi.newComponentContext();
         }
@@ -79,7 +83,8 @@ public class OsgiContextImpl {
     /**
      * @return OSGi Bundle context
      */
-    public final BundleContext bundleContext() {
+    @SuppressWarnings("null")
+    public final @NotNull BundleContext bundleContext() {
         return componentContext().getBundleContext();
     }
 
@@ -89,7 +94,7 @@ public class OsgiContextImpl {
      * @param service Service instance
      * @return Registered service instance
      */
-    public final <T> T registerService(final T service) {
+    public final @NotNull <T> T registerService(@NotNull final T service) {
         return registerService(null, service, (Map<String,Object>)null);
     }
 
@@ -100,7 +105,7 @@ public class OsgiContextImpl {
      * @param service Service instance
      * @return Registered service instance
      */
-    public final <T> T registerService(final Class<T> serviceClass, final T service) {
+    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service) {
         return registerService(serviceClass, service, (Map<String,Object>)null);
     }
 
@@ -112,7 +117,7 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final <T> T registerService(final Class<T> serviceClass, final T service, final Map<String, Object> properties) {
+    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @Nullable final Map<String, Object> properties) {
         Dictionary<String, Object> serviceProperties = MapUtil.toDictionary(properties);
         bundleContext().registerService(serviceClass != null ? serviceClass.getName() : null, service, serviceProperties);
         return service;
@@ -126,7 +131,7 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final <T> T registerService(final Class<T> serviceClass, final T service, final Object... properties) {
+    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @NotNull final Object @NotNull ... properties) {
         return registerService(serviceClass, service, MapUtil.toMap(properties));
     }
     
@@ -137,7 +142,7 @@ public class OsgiContextImpl {
      * @param service Service instance
      * @return Registered service instance
      */
-    public final <T> T registerInjectActivateService(final T service) {
+    public final @NotNull <T> T registerInjectActivateService(@NotNull final T service) {
         return registerInjectActivateService(service, (Map<String,Object>)null);
     }
 
@@ -149,7 +154,7 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final <T> T registerInjectActivateService(final T service, final Map<String, Object> properties) {
+    public final @NotNull <T> T registerInjectActivateService(@NotNull final T service, @Nullable final Map<String, Object> properties) {
         MockOsgi.injectServices(service, bundleContext(), properties);
         MockOsgi.activate(service, bundleContext(), properties);
         registerService(null, service, properties);
@@ -164,7 +169,7 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final <T> T registerInjectActivateService(final T service, final Object... properties) {
+    public final @NotNull <T> T registerInjectActivateService(@NotNull final T service, @NotNull final Object @NotNull ... properties) {
         return registerInjectActivateService(service, MapUtil.toMap(properties));
     }
 
@@ -175,7 +180,7 @@ public class OsgiContextImpl {
      * @return The service instance, or null if the service is not available.
      */
     @SuppressWarnings("unchecked")
-    public final <ServiceType> ServiceType getService(final Class<ServiceType> serviceType) {
+    public final @Nullable <ServiceType> ServiceType getService(@NotNull final Class<ServiceType> serviceType) {
         ServiceReference serviceReference = bundleContext().getServiceReference(serviceType.getName());
         if (serviceReference != null) {
             return (ServiceType)bundleContext().getService(serviceReference);
@@ -192,8 +197,8 @@ public class OsgiContextImpl {
      * @return The services instances or an empty array.
      * @throws RuntimeException If the <code>filter</code> string is not a valid OSGi service filter string.
      */
-    @SuppressWarnings("unchecked")
-    public final <ServiceType> ServiceType[] getServices(final Class<ServiceType> serviceType, final String filter) {
+    @SuppressWarnings({ "unchecked", "null" })
+    public final @NotNull <ServiceType> ServiceType @NotNull [] getServices(@NotNull final Class<ServiceType> serviceType, @Nullable final String filter) {
         try {
             ServiceReference[] serviceReferences = bundleContext().getServiceReferences(serviceType.getName(), filter);
             if (serviceReferences != null) {

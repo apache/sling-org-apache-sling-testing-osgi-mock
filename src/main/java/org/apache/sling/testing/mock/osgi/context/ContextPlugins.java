@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -30,7 +31,7 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public final class ContextPlugins {
     
-    private List<ContextPlugin<? extends OsgiContextImpl>> plugins = new ArrayList<>();
+    private final @NotNull List<ContextPlugin<? extends OsgiContextImpl>> plugins = new ArrayList<>();
 
     /**
      * Start with empty list.
@@ -44,7 +45,7 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      */
-    public <T extends OsgiContextImpl> ContextPlugins(final ContextCallback<T> afterSetUpCallback) {
+    public <T extends OsgiContextImpl> ContextPlugins(@NotNull final ContextCallback<T> afterSetUpCallback) {
         addAfterSetUpCallback(afterSetUpCallback);
     }
     
@@ -55,7 +56,9 @@ public final class ContextPlugins {
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
-    public <U extends OsgiContextImpl, V extends OsgiContextImpl> ContextPlugins(final ContextCallback<U> afterSetUpCallback, final ContextCallback<V> beforeTearDownCallback) {
+    public <U extends OsgiContextImpl, V extends OsgiContextImpl> ContextPlugins(
+            @NotNull final ContextCallback<U> afterSetUpCallback, 
+            @NotNull final ContextCallback<V> beforeTearDownCallback) {
         addAfterSetUpCallback(afterSetUpCallback);
         addBeforeTearDownCallback(beforeTearDownCallback);
     }
@@ -65,8 +68,9 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param plugin Plugin
      */
+    @SuppressWarnings({ "null", "unused" })
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addPlugin(ContextPlugin<T>... plugin) {
+    public final <T extends OsgiContextImpl> void addPlugin(@NotNull ContextPlugin<T> @NotNull ... plugin) {
         for (final ContextPlugin<T> item : plugin) {
             if (item == null) {
                 continue;
@@ -80,15 +84,16 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param beforeSetUpCallback Allows the application to register an own callback function that is called before the built-in setup rules are executed.
      */
+    @SuppressWarnings({ "null", "unused" })
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addBeforeSetUpCallback(final ContextCallback<T>... beforeSetUpCallback) {
+    public final <T extends OsgiContextImpl> void addBeforeSetUpCallback(@NotNull final ContextCallback<T> @NotNull ... beforeSetUpCallback) {
         for (final ContextCallback<T> item : beforeSetUpCallback) {
             if (item == null) {
                 continue;
             }
             plugins.add(new AbstractContextPlugin<T>() {
                 @Override
-                public void beforeSetUp(T context) throws Exception {
+                public void beforeSetUp(@NotNull T context) throws Exception {
                     item.execute(context);
                 }
                 @Override
@@ -104,15 +109,16 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      */
+    @SuppressWarnings({ "null", "unused" })
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addAfterSetUpCallback(final ContextCallback<T>... afterSetUpCallback) {
+    public final <T extends OsgiContextImpl> void addAfterSetUpCallback(@NotNull final ContextCallback<T> @NotNull ... afterSetUpCallback) {
         for (final ContextCallback<T> item : afterSetUpCallback) {
             if (item == null) {
                 continue;
             }
             plugins.add(new AbstractContextPlugin<T>() {
                 @Override
-                public void afterSetUp(T context) throws Exception {
+                public void afterSetUp(@NotNull T context) throws Exception {
                     item.execute(context);
                 }
                 @Override
@@ -128,15 +134,16 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
+    @SuppressWarnings({ "null", "unused" })
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addBeforeTearDownCallback(final ContextCallback<T>... beforeTearDownCallback) {
+    public final <T extends OsgiContextImpl> void addBeforeTearDownCallback(@NotNull final ContextCallback<T> @NotNull ... beforeTearDownCallback) {
         for (final ContextCallback<T> item : beforeTearDownCallback) {
             if (item == null) {
                 continue;
             }
             plugins.add(new AbstractContextPlugin<T>() {
                 @Override
-                public void beforeTearDown(T context) throws Exception {
+                public void beforeTearDown(@NotNull T context) throws Exception {
                     item.execute(context);
                 }
                 @Override
@@ -152,15 +159,16 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterTearDownCallback Allows the application to register an own callback function that is after before the built-in teardown rules are executed.
      */
+    @SuppressWarnings({ "null", "unused" })
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addAfterTearDownCallback(final ContextCallback<T>... afterTearDownCallback) {
+    public final <T extends OsgiContextImpl> void addAfterTearDownCallback(@NotNull final ContextCallback<T> @NotNull ... afterTearDownCallback) {
         for (final ContextCallback<T> item : afterTearDownCallback) {
             if (item == null) {
                 continue;
             }
             plugins.add(new AbstractContextPlugin<T>() {
                 @Override
-                public void afterTearDown(T context) throws Exception {
+                public void afterTearDown(@NotNull T context) throws Exception {
                     item.execute(context);
                 }
                 @Override
@@ -174,7 +182,7 @@ public final class ContextPlugins {
     /**
      * @return All plugins
      */
-    public Collection<ContextPlugin<? extends OsgiContextImpl>> getPlugins() {
+    public @NotNull Collection<ContextPlugin<? extends OsgiContextImpl>> getPlugins() {
         return plugins;
     }
     
@@ -184,7 +192,7 @@ public final class ContextPlugins {
      * @param context Context
      */
     @SuppressWarnings("unchecked")
-    public <T extends OsgiContextImpl> void executeBeforeSetUpCallback(final T context) {
+    public <T extends OsgiContextImpl> void executeBeforeSetUpCallback(@NotNull final T context) {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.beforeSetUp(context);
@@ -201,7 +209,7 @@ public final class ContextPlugins {
      * @param context Context
      */
     @SuppressWarnings("unchecked")
-    public <T extends OsgiContextImpl> void executeAfterSetUpCallback(final T context) {
+    public <T extends OsgiContextImpl> void executeAfterSetUpCallback(@NotNull final T context) {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.afterSetUp(context);
@@ -218,7 +226,7 @@ public final class ContextPlugins {
      * @param context Context
      */
     @SuppressWarnings("unchecked")
-    public <T extends OsgiContextImpl> void executeBeforeTearDownCallback(final T context) {
+    public <T extends OsgiContextImpl> void executeBeforeTearDownCallback(@NotNull final T context) {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.beforeTearDown(context);
@@ -235,7 +243,7 @@ public final class ContextPlugins {
      * @param context Context
      */
     @SuppressWarnings("unchecked")
-    public <T extends OsgiContextImpl> void executeAfterTearDownCallback(final T context) {
+    public <T extends OsgiContextImpl> void executeAfterTearDownCallback(@NotNull final T context) {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.afterTearDown(context);

@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
+import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
@@ -33,27 +34,27 @@ public interface ContextPlugin<T extends OsgiContextImpl> {
      * @param context OSGi context
      * @throws Exception exception
      */
-    void beforeSetUp(T context) throws Exception;
+    void beforeSetUp(@NotNull T context) throws Exception;
 
     /**
      * Is executed after the built-in setup rules are executed.
      * @param context OSGi context
      * @throws Exception exception
      */
-    void afterSetUp(T context) throws Exception;
+    void afterSetUp(@NotNull T context) throws Exception;
 
     /**
      * Is executed before the built-in teardown rules are executed.
      * @param context OSGi context
      * @throws Exception exception
      */
-    void beforeTearDown(T context) throws Exception;
+    void beforeTearDown(@NotNull T context) throws Exception;
 
     /**
      * Is executed after the built-in teardown rules are executed.
      * @param context OSGi context
      * @throws Exception exception
      */
-    void afterTearDown(T context) throws Exception;
+    void afterTearDown(@NotNull T context) throws Exception;
 
 }

@@ -100,7 +100,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         return clazzes;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     T getService() {
         if (this.service instanceof ServiceFactory) {
             ServiceFactory<T> factory = (ServiceFactory<T>)this.service;
@@ -132,6 +132,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     /**
      * Try to read OSGI-metadata from /OSGI-INF and read all implemented interfaces
      */
+    @SuppressWarnings("null")
     private void readOsgiMetadata() {
         Class<?> serviceClass = service.getClass();
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(serviceClass);
@@ -143,6 +144,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         clazzes.addAll(metadata.getServiceInterfaces());
     }
 
+    @SuppressWarnings("null")
     @Override
     public String toString() {
         return "#" + serviceId + " [" + StringUtils.join(clazzes, ",") + "]: " + service.toString();

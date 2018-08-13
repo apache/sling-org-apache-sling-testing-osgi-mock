@@ -18,13 +18,15 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Is thrown when a OSGi reference injection fails due to violated constraints.
  */
 public final class ReferenceViolationException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
-    public ReferenceViolationException(String message) {
+    public ReferenceViolationException(@NotNull String message) {
         super(message);
     }
 

@@ -25,6 +25,7 @@ import java.util.Collection;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 
+@SuppressWarnings("null")
 public class ManifestScannerTest {
 
     /**

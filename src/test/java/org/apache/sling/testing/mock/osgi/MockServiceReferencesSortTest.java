@@ -37,6 +37,7 @@ import org.osgi.framework.ServiceRegistration;
 /** 
  * Test the service-ranking based sorting of mock service references
  */
+@SuppressWarnings("null")
 public class MockServiceReferencesSortTest {
     
     private BundleContext bundleContext;

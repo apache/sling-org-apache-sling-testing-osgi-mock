@@ -22,6 +22,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -39,32 +41,32 @@ public final class ComponentContextBuilder {
         // constructor package-scope only
     }
     
-    public ComponentContextBuilder bundleContext(BundleContext bundleContext) {
+    public @NotNull ComponentContextBuilder bundleContext(@NotNull BundleContext bundleContext) {
         this.bundleContext = bundleContext;
         return this;
     }
     
-    public ComponentContextBuilder properties(Dictionary<String, Object> properties) {
+    public @NotNull ComponentContextBuilder properties(@Nullable Dictionary<String, Object> properties) {
         this.properties = properties;
         return this;
     }
     
-    public ComponentContextBuilder properties(Map<String, Object> properties) {
+    public @NotNull ComponentContextBuilder properties(@Nullable Map<String, Object> properties) {
         this.properties = MapUtil.toDictionary(properties);
         return this;
     }
         
-    public ComponentContextBuilder properties(Object... properties) {
+    public @NotNull ComponentContextBuilder properties(@NotNull Object @NotNull ... properties) {
         this.properties = MapUtil.toDictionary(properties);
         return this;
     }
         
-    public ComponentContextBuilder usingBundle(Bundle usingBundle) {
+    public @NotNull ComponentContextBuilder usingBundle(@NotNull Bundle usingBundle) {
         this.usingBundle = usingBundle;
         return this;
     }
     
-    public ComponentContext build() {
+    public @NotNull ComponentContext build() {
         if (bundleContext == null) {
             bundleContext = MockOsgi.newBundleContext();
         }

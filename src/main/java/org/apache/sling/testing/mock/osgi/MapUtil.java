@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Map util methods.
  */
@@ -42,7 +45,7 @@ public final class MapUtil {
      * @param map Map
      * @return Dictionary
      */
-    public static <T, U> Dictionary<T, U> toDictionary(Map<T, U> map) {
+    public static @Nullable <T, U> Dictionary<T, U> toDictionary(@Nullable Map<T, U> map) {
         if (map == null) {
             return null;
         }
@@ -62,7 +65,7 @@ public final class MapUtil {
      * @param dictionary Dictionary
      * @return Map
      */
-    public static <T, U> Map<T, U> toMap(Dictionary<T, U> dictionary) {
+    public static @Nullable <T, U> Map<T, U> toMap(@Nullable Dictionary<T, U> dictionary) {
         if (dictionary == null) {
             return null;
         }
@@ -80,7 +83,7 @@ public final class MapUtil {
      * @param args Key/value pairs
      * @return Dictionary
      */
-    public static Dictionary<String, Object> toDictionary(Object... args) {
+    public static @Nullable Dictionary<String, Object> toDictionary(@NotNull Object @NotNull ... args) {
         return toDictionary(toMap(args));
     }
     
@@ -89,8 +92,8 @@ public final class MapUtil {
      * @param args Key/value pairs
      * @return Map
      */
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> toMap(Object... args) {
+    @SuppressWarnings({ "unchecked", "null" })
+    public static @NotNull Map<String, Object> toMap(@NotNull Object @NotNull ... args) {
         if (args == null || args.length == 0) {
             return Collections.emptyMap();
         }

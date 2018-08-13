@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
+import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
@@ -33,6 +34,6 @@ public interface ContextCallback<T extends OsgiContextImpl> {
      * @param context OSGi context
      * @throws Exception exception
      */
-    void execute(T context) throws Exception;
+    void execute(@NotNull T context) throws Exception;
 
 }

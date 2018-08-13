@@ -51,6 +51,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import com.google.common.collect.ImmutableMap;
 
+@SuppressWarnings("null")
 public class OsgiServiceUtilTest {
 
     private BundleContext bundleContext = MockOsgi.newBundleContext();

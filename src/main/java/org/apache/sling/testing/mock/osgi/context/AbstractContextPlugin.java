@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
+import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
@@ -28,22 +29,22 @@ import org.osgi.annotation.versioning.ConsumerType;
 public abstract class AbstractContextPlugin<T extends OsgiContextImpl> implements ContextPlugin<T> {
 
     @Override
-    public void beforeSetUp(T context) throws Exception {
+    public void beforeSetUp(@NotNull T context) throws Exception {
         // can be overridden by subclasses
     }
 
     @Override
-    public void afterSetUp(T context) throws Exception {
+    public void afterSetUp(@NotNull T context) throws Exception {
         // can be overridden by subclasses
     }
 
     @Override
-    public void beforeTearDown(T context) throws Exception {
+    public void beforeTearDown(@NotNull T context) throws Exception {
         // can be overridden by subclasses
     }
 
     @Override
-    public void afterTearDown(T context) throws Exception {
+    public void afterTearDown(@NotNull T context) throws Exception {
         // can be overridden by subclasses
     }
     
