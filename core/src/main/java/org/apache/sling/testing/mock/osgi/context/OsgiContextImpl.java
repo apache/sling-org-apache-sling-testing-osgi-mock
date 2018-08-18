@@ -34,8 +34,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
 /**
- * Defines OSGi context objects and helper methods. Should not be used directly
- * but via the {@link org.apache.sling.testing.mock.osgi.junit.OsgiContext} JUnit rule.
+ * Defines OSGi context objects and helper methods.
+ * Should not be used directly but via the OsgiContext JUnit rule or extension.
  */
 @ConsumerType
 public class OsgiContextImpl {
