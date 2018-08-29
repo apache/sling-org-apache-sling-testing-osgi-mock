@@ -71,6 +71,7 @@ final class OsgiMetadataUtil {
     private static final Logger log = LoggerFactory.getLogger(OsgiMetadataUtil.class);
     
     private static final String METADATA_PATH = "OSGI-INF";
+    private static final String METADATA_METATYPE_PATH = "OSGI-INF/metatype/";
 
     private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY;
     static {
@@ -165,11 +166,16 @@ final class OsgiMetadataUtil {
             throw new RuntimeException("Compiling XPath expression failed.", ex);
         }
 
+        // get all OSGI-INF/*.xml files from classpath
         Reflections reflections = new Reflections(METADATA_PATH, new ResourcesScanner());
-        Set<String> paths = reflections.getResources(Pattern.compile("^.*\\.xml$"));
-        for (String path : paths) {
-            parseMetadataDocuments(cacheMap, path, xpathExpression);
-        }
+        Pattern xmlFilesPattern = Pattern.compile("^.*\\.xml$");
+        Set<String> paths = reflections.getResources(xmlFilesPattern);
+        
+        // filter out OSGi metatype files and parse all found XML documents
+        Pattern metatypeFilesPattern = Pattern.compile("^" + Pattern.quote(METADATA_METATYPE_PATH )+ ".*$");
+        paths.stream()
+            .filter(path -> !metatypeFilesPattern.matcher(path).matches())
+            .forEach(path -> parseMetadataDocuments(cacheMap, path, xpathExpression));
         
         return cacheMap;
     }
