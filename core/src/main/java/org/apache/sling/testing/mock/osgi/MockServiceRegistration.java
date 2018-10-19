@@ -140,8 +140,10 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
             return;
         }
 
-        // add service interfaces from OSGi metadata
-        clazzes.addAll(metadata.getServiceInterfaces());
+        // add service interfaces from OSGi metadata - but only if no explicit class(es) were given on service registration
+        if (clazzes.isEmpty()) {
+            clazzes.addAll(metadata.getServiceInterfaces());
+        }
     }
 
     @SuppressWarnings("null")

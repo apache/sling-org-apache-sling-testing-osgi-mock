@@ -51,7 +51,6 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import com.google.common.collect.ImmutableMap;
 
-@SuppressWarnings("null")
 public class OsgiServiceUtilTest {
 
     private BundleContext bundleContext = MockOsgi.newBundleContext();
@@ -64,6 +63,7 @@ public class OsgiServiceUtilTest {
         service2 = new Service2();
         bundleContext.registerService(ServiceInterface1.class.getName(), service1, null);
         bundleContext.registerService(ServiceInterface2.class.getName(), service2, null);
+        bundleContext.registerService(ServiceInterface3.class.getName(), service2, null);
     }
     
     @After
