@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -32,15 +33,15 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
-import com.google.common.collect.ImmutableMap;
-
 /**
  * Test different variants of activate/deactivate methods with varying signatures.
  */
 @SuppressWarnings("null")
 public class OsgiServiceUtilActivateDeactivateTest {
 
-    private Map<String,Object> map = ImmutableMap.<String, Object>of("prop1", "value1");
+    private Map<String,Object> map = ImmutableMap.<String, Object>of("prop1", "value1",
+            "prop2.with.periods", "value2",
+            "prop3-with-hyphens", "value3");
     private BundleContext bundleContext = MockOsgi.newBundleContext();
     
     @Test
@@ -86,7 +87,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
         assertTrue(MockOsgi.activate(service, bundleContext, map));
         assertTrue(service.isActivated());
         assertEquals(map, ImmutableMap.copyOf(service.getMap()));
-        
+
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
@@ -125,7 +126,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
         assertSame(bundleContext, service.getComponentContext().getBundleContext());
         assertSame(bundleContext, service.getBundleContext());
         assertEquals(map, ImmutableMap.copyOf(service.getMap()));
-        
+
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
@@ -133,6 +134,14 @@ public class OsgiServiceUtilActivateDeactivateTest {
     
     public @interface ServiceConfig {
         String prop1();
+        String prop2_with_periods();
+        String prop3$_$with$_$hyphens();
+    }
+
+    static Map<String, Object> readAnnotationToMap(final ServiceConfig config) {
+        return ImmutableMap.of("prop1", config.prop1(),
+                "prop2.with.periods", config.prop2_with_periods(),
+                "prop3-with-hyphens", config.prop3$_$with$_$hyphens());
     }
 
     @Component
@@ -228,7 +237,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
         @Activate
         private void activate(ServiceConfig config) {
             this.activated = true;
-            map = ImmutableMap.<String, Object>of("prop1", config.prop1());
+            map = readAnnotationToMap(config);
         }
 
         @Deactivate
@@ -322,7 +331,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
             this.activated = true;
             this.componentContext = componentContext;
             this.bundleContext = bundleContext;
-            this.map = ImmutableMap.<String, Object>of("prop1", config.prop1());;
+            this.map = readAnnotationToMap(config);
         }
 
         @Deactivate
