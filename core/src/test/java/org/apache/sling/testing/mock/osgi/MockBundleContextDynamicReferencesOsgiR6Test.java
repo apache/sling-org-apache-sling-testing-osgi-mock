@@ -40,7 +40,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings("null")
 public class MockBundleContextDynamicReferencesOsgiR6Test {
 
     private BundleContext bundleContext;
@@ -104,13 +103,15 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
         assertDependency1Optional(dependency1bOptional);
     }
     
-    @Test(expected = ReferenceViolationException.class)
+    @Test
     public void testAddMandatoryUnaryService_TooMany() {
+        // should not throw an exception although mandatory unary reference is already set
         bundleContext.registerService(ServiceInterface1.class.getName(), dependency1b, null);
     }
     
-    @Test(expected = ReferenceViolationException.class)
+    @Test
     public void testRemoveMandatoryUnaryService_TooMany() {
+        // this should check if the mandatory references is no longer set - but this is currently not implemented
         reg1a.unregister();
     }
     

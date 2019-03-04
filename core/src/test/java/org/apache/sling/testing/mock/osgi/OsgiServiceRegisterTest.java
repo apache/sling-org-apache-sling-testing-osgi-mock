@@ -19,13 +19,18 @@
 package org.apache.sling.testing.mock.osgi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.Service2;
+import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.Service3;
+import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface2;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface3;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Rule;
 import org.junit.Test;
+import org.osgi.framework.Constants;
 
 public class OsgiServiceRegisterTest {
 
@@ -73,5 +78,22 @@ public class OsgiServiceRegisterTest {
         assertEquals(1, context.getServices(ServiceInterface2.class, null).length);
         assertEquals(1, context.getServices(ServiceInterface3.class, null).length);
     }
+    
+    @Test
+    @SuppressWarnings("null")
+    public void testInjectMandatoryUnaryReferenceOutOfMultipleServices() {
+        context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
         
+        ServiceInterface1 service1_ranking100 = mock(ServiceInterface1.class);
+        context.registerService(ServiceInterface1.class, service1_ranking100, Constants.SERVICE_RANKING, 100);
+        ServiceInterface1 service1_ranking200 = mock(ServiceInterface1.class);
+        context.registerService(ServiceInterface1.class, service1_ranking200, Constants.SERVICE_RANKING, 200);
+        ServiceInterface1 service1_ranking10 = mock(ServiceInterface1.class);
+        context.registerService(ServiceInterface1.class, service1_ranking10, Constants.SERVICE_RANKING, 10);
+        
+        // register service with unary mandatory reference to ServiceInterface1
+        Service3 service3 = context.registerInjectActivateService(new Service3());
+        assertSame(service1_ranking200, service3.getReference1());
+    }
+
 }

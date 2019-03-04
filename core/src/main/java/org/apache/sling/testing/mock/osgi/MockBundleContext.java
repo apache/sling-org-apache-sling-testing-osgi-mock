@@ -152,8 +152,8 @@ class MockBundleContext implements BundleContext {
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
                 case MANDATORY_UNARY:
-                    throw new ReferenceViolationException("Mandatory unary reference of type " + reference.getInterfaceType() + " already fulfilled "
-                            + "for service " + reference.getServiceClass().getName() + ", registration of new service with this interface failed.");
+                    // nothing to do - reference is already set
+                    break;
                 case MANDATORY_MULTIPLE:
                 case OPTIONAL_MULTIPLE:
                 case OPTIONAL_UNARY:
@@ -172,8 +172,8 @@ class MockBundleContext implements BundleContext {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
             case MANDATORY_UNARY:
-                throw new ReferenceViolationException("Mandatory unary reference of type " + reference.getInterfaceType() + " already fulfilled "
-                        + "for service " + reference.getServiceClass().getName() + ", registration of new service with this interface failed.");
+                // nothing to do - reference is already set
+                break;
             case MANDATORY_MULTIPLE:
             case OPTIONAL_MULTIPLE:
             case OPTIONAL_UNARY:
@@ -231,13 +231,10 @@ class MockBundleContext implements BundleContext {
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
                 case MANDATORY_UNARY:
-                    throw new ReferenceViolationException("Reference of type " + reference.getInterfaceType() + " "
-                            + "for service " + reference.getServiceClass().getName() + " is mandatory unary, "
-                            + "unregistration of service with this interface failed.");
                 case MANDATORY_MULTIPLE:
                 case OPTIONAL_MULTIPLE:
                 case OPTIONAL_UNARY:
-                    // it is currently not checked if for a MANDATORY_MULTIPLE reference the last reference is removed
+                    // it is currently not checked if for a MANDATORY_UNARY or MANDATORY_MULTIPLE reference the last reference is removed
                     OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(),
                             new ServiceInfo(registration));
                     break;
@@ -253,9 +250,6 @@ class MockBundleContext implements BundleContext {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
             case MANDATORY_UNARY:
-                throw new ReferenceViolationException("Reference of type " + reference.getInterfaceType() + " "
-                        + "for service " + reference.getServiceClass().getName() + " is mandatory unary, "
-                        + "unregistration of service with this interface failed.");
             case MANDATORY_MULTIPLE:
             case OPTIONAL_MULTIPLE:
             case OPTIONAL_UNARY:

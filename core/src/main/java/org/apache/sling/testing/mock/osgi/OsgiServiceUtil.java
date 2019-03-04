@@ -421,9 +421,9 @@ final class OsgiServiceUtil {
             }
         }
 
-        // multiple references found? check if reference is not multiple
+        // multiple references found? inject only first one with highest ranking
         if (matchingServices.size() > 1 && !reference.isCardinalityMultiple()) {
-            throw new ReferenceViolationException("Multiple matches found for unary reference '" + reference.getName() + "' for class "+ targetClass.getName());
+            matchingServices = matchingServices.subList(0, 1);
         }
 
         // try to invoke bind method
