@@ -52,7 +52,6 @@ public class OsgiContextImpl {
     /**
      * Teardown actions after test method execution
      */
-    @SuppressWarnings("null")
     protected void tearDown() {
         if (componentContext != null) {
             // deactivate all services
@@ -72,7 +71,6 @@ public class OsgiContextImpl {
     /**
      * @return OSGi component context
      */
-    @SuppressWarnings("null")
     public final @NotNull ComponentContext componentContext() {
         if (this.componentContext == null) {
             this.componentContext = MockOsgi.newComponentContext();
@@ -83,7 +81,6 @@ public class OsgiContextImpl {
     /**
      * @return OSGi Bundle context
      */
-    @SuppressWarnings("null")
     public final @NotNull BundleContext bundleContext() {
         return componentContext().getBundleContext();
     }
@@ -197,7 +194,7 @@ public class OsgiContextImpl {
      * @return The services instances or an empty array.
      * @throws RuntimeException If the <code>filter</code> string is not a valid OSGi service filter string.
      */
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings("unchecked")
     public final @NotNull <ServiceType> ServiceType @NotNull [] getServices(@NotNull final Class<ServiceType> serviceType, @Nullable final String filter) {
         try {
             ServiceReference[] serviceReferences = bundleContext().getServiceReferences(serviceType.getName(), filter);

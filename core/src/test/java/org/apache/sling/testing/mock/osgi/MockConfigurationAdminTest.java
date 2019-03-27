@@ -32,7 +32,6 @@ import org.osgi.framework.ServiceReference;
 
 import com.google.common.collect.ImmutableMap;
 
-@SuppressWarnings("null")
 public class MockConfigurationAdminTest {
     
     private static final String[] TEST_ADAPTABLES = new String[] {

@@ -36,7 +36,6 @@ import org.osgi.service.component.annotations.Deactivate;
 /**
  * Test different variants of activate/deactivate methods with varying signatures.
  */
-@SuppressWarnings("null")
 public class OsgiServiceUtilActivateDeactivateTest {
 
     private Map<String,Object> map = ImmutableMap.<String, Object>of("prop1", "value1",
