@@ -33,7 +33,7 @@ class OsgiContextMemberTest {
 
     @Test
     void testSimpleService() {
-        context.registerInjectActivateService(new Integer(5));
+        context.registerService(Integer.class, new Integer(5));
         
         Integer service = context.getService(Integer.class);
         assertEquals((Integer)5, service);
