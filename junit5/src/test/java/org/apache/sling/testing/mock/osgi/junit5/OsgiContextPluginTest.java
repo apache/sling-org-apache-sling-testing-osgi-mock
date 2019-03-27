@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * Test with {@link OsgiContext} with context plugins.
  */
 @ExtendWith(OsgiContextExtension.class)
+@SuppressWarnings("null")
 class OsgiContextPluginTest {
 
     private final @NotNull OsgiContextCallback contextBeforeSetup = mock(OsgiContextCallback.class);

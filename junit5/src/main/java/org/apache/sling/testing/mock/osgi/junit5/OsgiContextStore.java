@@ -40,6 +40,7 @@ final class OsgiContextStore {
      * @param testInstance Test instance
      * @return OsgiContext or null
      */
+    @SuppressWarnings("null")
     public static OsgiContext getOsgiContext(ExtensionContext extensionContext, Object testInstance) {
         return getStore(extensionContext).get(testInstance, OsgiContext.class);
     }
