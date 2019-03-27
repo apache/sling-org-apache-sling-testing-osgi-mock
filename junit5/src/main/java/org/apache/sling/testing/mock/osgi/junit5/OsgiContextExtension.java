@@ -114,10 +114,19 @@ public final class OsgiContextExtension implements ParameterResolver, TestInstan
     }
 
     private Field getFieldFromTestInstance(Object testInstance, Class<?> type) {
-        Field contextField = Arrays.stream(testInstance.getClass().getDeclaredFields())
+        return getFieldFromTestInstance(testInstance.getClass(), type);
+    }
+
+    private Field getFieldFromTestInstance(Class<?> instanceClass, Class<?> type) {
+        if (instanceClass == null) {
+            return null;
+        }
+        Field contextField = Arrays.stream(instanceClass.getDeclaredFields())
                 .filter(field -> type.isAssignableFrom(field.getType())).findFirst().orElse(null);
         if (contextField != null) {
             contextField.setAccessible(true);
+        } else {
+            return getFieldFromTestInstance(instanceClass.getSuperclass(), type);
         }
         return contextField;
     }
