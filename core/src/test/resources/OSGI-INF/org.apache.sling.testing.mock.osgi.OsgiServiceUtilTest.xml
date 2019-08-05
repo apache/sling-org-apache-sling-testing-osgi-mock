@@ -54,8 +54,8 @@
     <reference name="reference3DynamicFiltered" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface3" cardinality="0..1" policy="dynamic" field="reference3DynamicFiltered" field-collection-type="service"/>
   </scr:component>
   <scr:component name="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service3StaticGreedy" activate="activate" deactivate="deactivate" modified="modified">
-    <implementation class="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service3StaticGreedy"/>
-    <property name="service.pid" value="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service3StaticGreedy"/>
+    <implementation class="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service3StaticGreedyImpl"/>
+    <property name="service.pid" value="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service3StaticGreedyImpl"/>
     <reference name="reference1" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface1" cardinality="1..1" policy="static" policy-option="greedy" bind="bindReference1" unbind="unbindReference1"/>
     <reference name="reference1Optional" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface1Optional" cardinality="0..1" policy="dynamic" policy-option="greedy" bind="bindReference1Optional" unbind="unbindReference1Optional"/>
     <reference name="reference2" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface2" cardinality="1..n" policy="static" policy-option="greedy" bind="bindReference2" unbind="unbindReference2"/>

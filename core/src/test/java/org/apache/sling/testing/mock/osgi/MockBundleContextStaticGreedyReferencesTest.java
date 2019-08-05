@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.Service3StaticGreedy;
+import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.Service3StaticGreedyImpl;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface1Optional;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface2;
@@ -71,7 +72,7 @@ public class MockBundleContextStaticGreedyReferencesTest {
         reg1a = bundleContext.registerService(ServiceInterface1.class.getName(), dependency1a, null);
         reg2a = bundleContext.registerService(ServiceInterface2.class.getName(), dependency2a, null);
         
-        Service3StaticGreedy service = new Service3StaticGreedy();
+        Service3StaticGreedy service = new Service3StaticGreedyImpl();
         MockOsgi.injectServices(service, bundleContext);
         MockOsgi.activate(service, bundleContext);
         bundleContext.registerService(Service3StaticGreedy.class.getName(), service, null);
@@ -148,7 +149,7 @@ public class MockBundleContextStaticGreedyReferencesTest {
     }
     
     private void assertDependency1(ServiceInterface1 instance) {
-        Service3StaticGreedy service =getService();
+        Service3StaticGreedy service = getService();
         if (instance == null) {
             assertNull(service.getReference1());
         }
@@ -158,7 +159,7 @@ public class MockBundleContextStaticGreedyReferencesTest {
     }
     
     private void assertDependency1Optional(ServiceInterface1Optional instance) {
-        Service3StaticGreedy service =getService();
+        Service3StaticGreedy service = getService();
         if (instance == null) {
             assertNull(service.getReference1Optional());
         }
@@ -168,7 +169,7 @@ public class MockBundleContextStaticGreedyReferencesTest {
     }
     
     private void assertDependencies2(ServiceInterface2... instances) {
-        Service3StaticGreedy service =getService();
+        Service3StaticGreedy service = getService();
         assertEquals(ImmutableSet.<ServiceInterface2>copyOf(instances), 
                 ImmutableSet.<ServiceInterface2>copyOf(service.getReferences2()));
     }

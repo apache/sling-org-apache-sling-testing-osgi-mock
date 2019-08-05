@@ -214,7 +214,9 @@ class MockBundleContext implements BundleContext {
         }
         MockOsgi.injectServices(newService, this);
         MockOsgi.activate(newService, this, properties);
-        registerService(serviceClass.getName(), newService, MapUtil.toDictionary(properties));
+        
+        String[] serviceInterfaces = (String[])registration.getClasses().toArray(new String[registration.getClasses().size()]);
+        registerService(serviceInterfaces, newService, MapUtil.toDictionary(properties));
     }
 
     /**

@@ -402,9 +402,18 @@ public class OsgiServiceUtilTest {
 
     }
 
-    @Component(reference = { @Reference(name = "reference2", service = ServiceInterface2.class, cardinality = ReferenceCardinality.AT_LEAST_ONE,
+    public interface Service3StaticGreedy {
+        ServiceInterface1 getReference1();
+        ServiceInterface1Optional getReference1Optional();
+        List<ServiceInterface2> getReferences2();
+        List<ServiceSuperInterface3> getReferences3();
+        List<Map<String, Object>> getReference3Configs();
+    }
+
+    @Component(service= Service3StaticGreedy.class,
+            reference = { @Reference(name = "reference2", service = ServiceInterface2.class, cardinality = ReferenceCardinality.AT_LEAST_ONE,
             bind="bindReference2", unbind="unbindReference2") })
-    public static class Service3StaticGreedy {
+    public static class Service3StaticGreedyImpl implements Service3StaticGreedy {
 
         @Reference(bind="bindReference1", unbind="unbindReference1")
         private ServiceInterface1 reference1;
@@ -437,14 +446,17 @@ public class OsgiServiceUtilTest {
             this.config = newConfig;
         }
 
+        @Override
         public ServiceInterface1 getReference1() {
             return this.reference1;
         }
 
+        @Override
         public ServiceInterface1Optional getReference1Optional() {
             return this.reference1Optional;
         }
 
+        @Override
         public List<ServiceInterface2> getReferences2() {
             List<ServiceInterface2> services = new ArrayList<ServiceInterface2>();
             for (ServiceReference<?> serviceReference : references2) {
@@ -453,10 +465,12 @@ public class OsgiServiceUtilTest {
             return services;
         }
 
+        @Override
         public List<ServiceSuperInterface3> getReferences3() {
             return this.references3;
         }
 
+        @Override
         public List<Map<String, Object>> getReference3Configs() {
             return this.reference3Configs;
         }
