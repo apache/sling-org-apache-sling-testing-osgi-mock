@@ -592,7 +592,7 @@ final class OsgiServiceUtil {
     @SuppressWarnings({ "unchecked", "null" })
     private static @NotNull Collection<Object> newCollectionInstance(Class<?> collectionType)
             throws InstantiationException, IllegalAccessException {
-        if (collectionType == List.class) {
+        if (collectionType == List.class || collectionType == Collection.class) {
             return new ArrayList<>();
         }
         if (collectionType == Set.class) {

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -132,6 +133,10 @@ public class OsgiServiceUtilTest {
         Set<ServiceSuperInterface3> references3Set = service3.getReferences3Set();
         assertEquals(1, references3Set.size());
         assertSame(service2, references3Set.iterator().next());
+
+        Collection<ServiceSuperInterface3> references3Collection = service3.getReferences3Collection();
+        assertEquals(1, references3Collection.size());
+        assertSame(service2, references3Collection.iterator().next());
 
         assertTrue(MockOsgi.deactivate(service3, bundleContext));
         assertNull(service3.getComponentContext());
@@ -396,6 +401,7 @@ public class OsgiServiceUtilTest {
         private List<ServiceSuperInterface3> references3Filtered;
         private ServiceSuperInterface3 reference3DynamicFiltered;
         private Set<ServiceSuperInterface3> references3Set;
+        private Collection<ServiceSuperInterface3> references3Collection;
 
         private ComponentContext componentContext;
         private Map<String, Object> config;
@@ -447,6 +453,10 @@ public class OsgiServiceUtilTest {
 
         public Set<ServiceSuperInterface3> getReferences3Set() {
             return this.references3Set;
+        }
+
+        public Collection<ServiceSuperInterface3> getReferences3Collection() {
+            return this.references3Collection;
         }
 
         public ComponentContext getComponentContext() {
