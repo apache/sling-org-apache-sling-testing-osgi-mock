@@ -25,9 +25,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.impl.inject.Annotations;
@@ -37,6 +40,7 @@ import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferencePolicy;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferencePolicyOption;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -351,7 +355,22 @@ final class OsgiServiceUtil {
         }
         return null;
     }
-    
+
+    private static Field getCollectionField(Class clazz, String fieldName) {
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            if (StringUtils.equals(field.getName(), fieldName) && Collection.class.isAssignableFrom(field.getType())) {
+                return field;
+            }
+        }
+        // not found? check super classes
+        Class<?> superClass = clazz.getSuperclass();
+        if (superClass != null && superClass != Object.class) {
+            return getCollectionField(superClass, fieldName);
+        }
+        return null;
+    }
+
     private static void setField(Object target, Field field, Object value) {
         try {
             field.setAccessible(true);
@@ -494,20 +513,7 @@ final class OsgiServiceUtil {
                                 item = serviceInfo.getServiceReference();
                             }
                         }
-                        // 1. collection
-                        Field field = getFieldWithAssignableType(targetClass, fieldName, Collection.class);
-                        if (field != null) {
-                            if (bind) {
-                                addToCollection(target, field, item);
-                            }
-                            else {
-                                removeFromCollection(target, field, item);
-                            }
-                            return;
-                        }
-                        
-                        // 2. list
-                        field = getField(targetClass, fieldName, List.class);
+                        Field field = getCollectionField(targetClass, fieldName);
                         if (field != null) {
                             if (bind) {
                                 addToCollection(target, field, item);
@@ -551,17 +557,14 @@ final class OsgiServiceUtil {
             field.setAccessible(true);
             Collection<Object> collection = (Collection<Object>)field.get(target);
             if (collection == null) {
-                collection = new ArrayList<Object>();
+                collection = newCollectionInstance(field.getType());
             }
             if (item != null) {
                 collection.add(item);
             }
             field.set(target, collection);
             
-        } catch (IllegalAccessException ex) {
-            throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
-                    + target.getClass().getName(), ex);
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
             throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
                     + target.getClass().getName(), ex);
         }
@@ -573,20 +576,32 @@ final class OsgiServiceUtil {
             field.setAccessible(true);
             Collection<Object> collection = (Collection<Object>)field.get(target);
             if (collection == null) {
-                collection = new ArrayList<Object>();
+                collection = newCollectionInstance(field.getType());
             }
             if (item != null) {
                 collection.remove(item);
             }
             field.set(target, collection);
             
-        } catch (IllegalAccessException ex) {
-            throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
-                    + target.getClass().getName(), ex);
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
             throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
                     + target.getClass().getName(), ex);
         }
+    }
+
+    @SuppressWarnings({ "unchecked", "null" })
+    private static @NotNull Collection<Object> newCollectionInstance(Class<?> collectionType)
+            throws InstantiationException, IllegalAccessException {
+        if (collectionType == List.class) {
+            return new ArrayList<>();
+        }
+        if (collectionType == Set.class) {
+            return new HashSet<>();
+        }
+        if (collectionType == SortedSet.class) {
+            return new TreeSet();
+        }
+        return (Collection)collectionType.newInstance();
     }
 
     /**

@@ -27,9 +27,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,6 +98,40 @@ public class OsgiServiceUtilTest {
         List<Map<String, Object>> reference3Configs = service3.getReference3Configs();
         assertEquals(1, reference3Configs.size());
         assertEquals(200, reference3Configs.get(0).get(Constants.SERVICE_RANKING));
+
+        Set<ServiceSuperInterface3> references3Set = service3.getReferences3Set();
+        assertEquals(1, references3Set.size());
+        assertSame(service2, references3Set.iterator().next());
+
+        assertTrue(MockOsgi.deactivate(service3, bundleContext));
+        assertNull(service3.getComponentContext());
+    }
+
+    @Test
+    public void testService3OsgiR6() {
+        Service3OsgiR6 service3 = new Service3OsgiR6();
+        assertTrue(MockOsgi.injectServices(service3, bundleContext));
+
+        Dictionary<String, Object> service3Config = new Hashtable<String, Object>();
+        service3Config.put("prop1", "value1");
+        assertTrue(MockOsgi.activate(service3, bundleContext, service3Config));
+
+        assertNotNull(service3.getComponentContext());
+        assertEquals(service3Config.get("prop1"), service3.getComponentContext().getProperties().get("prop1"));
+
+        assertSame(service1, service3.getReference1());
+
+        List<ServiceInterface2> references2 = service3.getReferences2();
+        assertEquals(1, references2.size());
+        assertSame(service2, references2.get(0));
+
+        List<ServiceSuperInterface3> references3 = service3.getReferences3();
+        assertEquals(1, references3.size());
+        assertSame(service2, references3.get(0));
+
+        Set<ServiceSuperInterface3> references3Set = service3.getReferences3Set();
+        assertEquals(1, references3Set.size());
+        assertSame(service2, references3Set.iterator().next());
 
         assertTrue(MockOsgi.deactivate(service3, bundleContext));
         assertNull(service3.getComponentContext());
@@ -241,12 +277,16 @@ public class OsgiServiceUtilTest {
         @Reference(cardinality = ReferenceCardinality.OPTIONAL, bind="bindReference1Optional", unbind="unbindReference1Optional")
         private ServiceInterface1Optional reference1Optional;
 
-        private List<ServiceReference> references2 = new ArrayList<ServiceReference>();
+        private List<ServiceReference> references2 = new ArrayList<>();
 
         @Reference(name = "reference3", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
                 bind="bindReference3", unbind="unbindReference3")
-        private List<ServiceSuperInterface3> references3 = new ArrayList<ServiceSuperInterface3>();
-        private List<Map<String, Object>> reference3Configs = new ArrayList<Map<String, Object>>();
+        private List<ServiceSuperInterface3> references3 = new ArrayList<>();
+        private List<Map<String, Object>> reference3Configs = new ArrayList<>();
+
+        @Reference(name = "references3Set", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+                bind="bindReferenceSet3", unbind="unbindReferenceSet3")
+        private Set<ServiceSuperInterface3> references3Set = new HashSet<>();
 
         private ComponentContext componentContext;
         private Map<String, Object> config;
@@ -276,7 +316,7 @@ public class OsgiServiceUtilTest {
         }
 
         public List<ServiceInterface2> getReferences2() {
-            List<ServiceInterface2> services = new ArrayList<ServiceInterface2>();
+            List<ServiceInterface2> services = new ArrayList<>();
             for (ServiceReference<?> serviceReference : references2) {
                 services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
             }
@@ -289,6 +329,10 @@ public class OsgiServiceUtilTest {
 
         public List<Map<String, Object>> getReference3Configs() {
             return this.reference3Configs;
+        }
+
+        public Set<ServiceSuperInterface3> getReferences3Set() {
+            return this.references3Set;
         }
 
         public ComponentContext getComponentContext() {
@@ -333,6 +377,14 @@ public class OsgiServiceUtilTest {
             reference3Configs.remove(serviceConfig);
         }
 
+        protected void bindReference3Set(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
+            references3Set.add(service);
+        }
+
+        protected void unbindReference3Set(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
+            references3Set.remove(service);
+        }
+
     }
 
     public static class Service3OsgiR6 {
@@ -343,6 +395,7 @@ public class OsgiServiceUtilTest {
         private List<ServiceSuperInterface3> references3;
         private List<ServiceSuperInterface3> references3Filtered;
         private ServiceSuperInterface3 reference3DynamicFiltered;
+        private Set<ServiceSuperInterface3> references3Set;
 
         private ComponentContext componentContext;
         private Map<String, Object> config;
@@ -390,6 +443,10 @@ public class OsgiServiceUtilTest {
 
         public ServiceSuperInterface3 getReference3DynamicFiltered() {
             return this.reference3DynamicFiltered;
+        }
+
+        public Set<ServiceSuperInterface3> getReferences3Set() {
+            return this.references3Set;
         }
 
         public ComponentContext getComponentContext() {
