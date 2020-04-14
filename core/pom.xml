@@ -63,8 +63,7 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <!-- Do not use version 0.9.10, it created threading issues when running junit tests in parallel (see SLING-5002) -->
-            <version>0.9.9</version>
+            <version>0.9.12</version>
             <scope>compile</scope>
             <!-- exclude all optional dependencies -->
             <exclusions>
@@ -87,10 +86,6 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-simple</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.code.findbugs</groupId>
-                    <artifactId>annotations</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
