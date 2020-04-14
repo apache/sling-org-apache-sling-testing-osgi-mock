@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -32,8 +33,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Mock {@link ServiceRegistration} implementation.
@@ -53,7 +52,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     public MockServiceRegistration(final Bundle bundle, final String[] clazzes, final T service,
             final Dictionary<String, Object> properties, MockBundleContext bundleContext) {
         this.serviceId = ++serviceCounter;
-        this.clazzes = new HashSet<String>(ImmutableList.copyOf(clazzes));
+        this.clazzes = new HashSet<String>(Arrays.asList(clazzes));
         
         if (service instanceof ServiceFactory) {
             this.service = ((ServiceFactory<T>)service).getService(bundleContext.getBundle(), this);

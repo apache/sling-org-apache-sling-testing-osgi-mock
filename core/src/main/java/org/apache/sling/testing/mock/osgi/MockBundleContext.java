@@ -21,7 +21,11 @@ package org.apache.sling.testing.mock.osgi;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.List;
@@ -57,9 +61,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.io.Files;
 
 /**
  * Mock {@link BundleContext} implementation.
@@ -311,10 +312,10 @@ class MockBundleContext implements BundleContext {
     public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) throws InvalidSyntaxException {
         ServiceReference<S>[] result = getServiceReferences(clazz.getName(), filter);
         if (result == null) {
-            return ImmutableList.<ServiceReference<S>>of();
+            return Collections.emptyList();
         }
         else {
-            return ImmutableList.<ServiceReference<S>>copyOf(result);
+            return Arrays.asList(result);
         }
     }
 
@@ -421,7 +422,11 @@ class MockBundleContext implements BundleContext {
         }
         synchronized (this) {
             if (dataFileBaseDir == null) {
-                dataFileBaseDir = Files.createTempDir();
+                try {
+                    dataFileBaseDir = Files.createTempDirectory("osgi-mock").toFile();
+                } catch (IOException ex) {
+                    throw new RuntimeException("Error creating temp. directory.", ex);
+                }
             }
         }
         if (path.isEmpty()) { 
@@ -437,7 +442,9 @@ class MockBundleContext implements BundleContext {
      */
     @SuppressWarnings("null")
     public void shutdown() {
-        for (MockServiceRegistration<?> serviceRegistration : ImmutableList.copyOf(registeredServices).reverse()) {
+        List<MockServiceRegistration> reversedRegisteredServices = new ArrayList<>(registeredServices);
+        Collections.reverse(reversedRegisteredServices);
+        for (MockServiceRegistration<?> serviceRegistration : reversedRegisteredServices) {
             try {
                 MockOsgi.deactivate(serviceRegistration.getService(), this, serviceRegistration.getProperties());
             }

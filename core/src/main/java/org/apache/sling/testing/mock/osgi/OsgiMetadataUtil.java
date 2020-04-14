@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.NamespaceContext;
@@ -42,6 +43,8 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.TreeBidiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.framework.FilterImpl;
 import org.osgi.framework.Constants;
@@ -56,12 +59,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 /**
  * Helper methods to parse OSGi metadata.
@@ -84,7 +81,7 @@ final class OsgiMetadataUtil {
 
     private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
 
-    private static final BiMap<String, String> NAMESPACES = HashBiMap.create();
+    private static final BidiMap<String, String> NAMESPACES = new TreeBidiMap<>();
     static {
         NAMESPACES.put("scr", "http://www.osgi.org/xmlns/scr/v1.1.0");
     }
@@ -99,7 +96,7 @@ final class OsgiMetadataUtil {
 
         @Override
         public String getPrefix(String namespaceURI) {
-            return NAMESPACES.inverse().get(namespaceURI);
+            return NAMESPACES.getKey(namespaceURI);
         }
 
         @Override
@@ -113,16 +110,7 @@ final class OsgiMetadataUtil {
      * So we can cache the parsing step if we need them multiple times.
      */
     private static final Map<String,Document> METADATA_DOCUMENT_CACHE = initMetadataDocumentCache();
-    private static final LoadingCache<Class, OsgiMetadata> METADATA_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<Class, OsgiMetadata>() {
-        @Override
-        public OsgiMetadata load(Class clazz) throws Exception {
-            Document metadataDocument = METADATA_DOCUMENT_CACHE.get(cleanupClassName(clazz.getName()));
-            if (metadataDocument != null) {
-                return new OsgiMetadata(clazz, metadataDocument);
-            }
-            return NULL_METADATA;
-        }
-    });
+    private static final ConcurrentMap<Class, OsgiMetadata> METADATA_CACHE = new ConcurrentHashMap<>();
 
     private OsgiMetadataUtil() {
         // static methods only
@@ -135,17 +123,18 @@ final class OsgiMetadataUtil {
      * @return Metadata object or null if no metadata present in classpath
      */
     public static OsgiMetadata getMetadata(Class clazz) {
-        try {
-            OsgiMetadata metadata = METADATA_CACHE.get(clazz);
-            if (metadata == NULL_METADATA) {
-                return null;
+        OsgiMetadata metadata = METADATA_CACHE.computeIfAbsent(clazz, key -> {
+            Document metadataDocument = METADATA_DOCUMENT_CACHE.get(cleanupClassName(key.getName()));
+            if (metadataDocument != null) {
+                return new OsgiMetadata(key, metadataDocument);
             }
-            else {
-                return metadata;
-            }
+            return NULL_METADATA;
+        });
+        if (metadata == NULL_METADATA) {
+            return null;
         }
-        catch (ExecutionException ex) {
-            throw new RuntimeException("Error loading OSGi metadata from loader cache.", ex);
+        else {
+            return metadata;
         }
     }
     

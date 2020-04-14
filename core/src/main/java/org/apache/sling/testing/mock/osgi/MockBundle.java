@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
@@ -35,8 +36,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
-import com.google.common.collect.ImmutableMap;
-
 /**
  * Mock {@link Bundle} implementation.
  */
@@ -46,7 +45,7 @@ public final class MockBundle implements Bundle {
 
     private final long bundleId;
     private final BundleContext bundleContext;
-    private Map<String, String> headers = ImmutableMap.<String, String>of();
+    private Map<String, String> headers = Collections.emptyMap();
     private String symbolicName;
     private long lastModified;
 
