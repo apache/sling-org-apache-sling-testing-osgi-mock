@@ -30,9 +30,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -126,6 +128,64 @@ public class MockBundleContextTest {
         bundleContext.ungetService(refInteger);
     }
     
+    @Test
+    public void testModifyServiceRegistration() throws InvalidSyntaxException {
+        // register test services
+        String service1 = "service";
+        Dictionary<String, Object> properties1 = new Hashtable<>();
+        properties1.put("a", "1");
+        properties1.put("b", "2");
+
+        final List<ServiceEvent> events = new ArrayList<>();
+        final ServiceListener listener = new ServiceListener(){
+
+			@Override
+			public void serviceChanged(ServiceEvent event) {
+				events.add(event);				
+			}            
+        };
+        bundleContext.addServiceListener(listener);
+        ServiceRegistration<String> reg1 = bundleContext.registerService(String.class, service1, properties1);
+
+        // check properties for registration
+        assertEquals(4, reg1.getReference().getPropertyKeys().length);
+        assertNotNull(reg1.getReference().getProperty(Constants.SERVICE_ID));
+        assertNotNull(reg1.getReference().getProperty(Constants.OBJECTCLASS));
+        assertEquals("1", reg1.getReference().getProperty("a"));
+        assertEquals("2", reg1.getReference().getProperty("b"));
+
+        // check for registered event
+        assertEquals(1, events.size());
+        assertEquals(ServiceEvent.REGISTERED, events.get(0).getType());
+        assertSame(reg1.getReference(), events.get(0).getServiceReference());
+        
+        // update properties
+        Dictionary<String, Object> properties2 = new Hashtable<>();
+        properties2.put("a", "1");
+        properties2.put("c", "3");
+        reg1.setProperties(properties2);
+
+        // check properties 
+        assertEquals(4, reg1.getReference().getPropertyKeys().length);
+        assertNotNull(reg1.getReference().getProperty(Constants.SERVICE_ID));
+        assertNotNull(reg1.getReference().getProperty(Constants.OBJECTCLASS));
+        assertEquals("1", reg1.getReference().getProperty("a"));
+        assertEquals("3", reg1.getReference().getProperty("c"));
+
+        // check for modified event
+        assertEquals(2, events.size());
+        assertEquals(ServiceEvent.MODIFIED, events.get(1).getType());
+        assertSame(reg1.getReference(), events.get(1).getServiceReference());
+    
+        // unregister
+        reg1.unregister();
+
+        // check for unregister event
+        assertEquals(3, events.size());
+        assertEquals(ServiceEvent.UNREGISTERING, events.get(2).getType());
+        assertSame(reg1.getReference(), events.get(2).getServiceReference());
+    }
+
     @Test
     public void testServiceFactoryRegistration() throws InvalidSyntaxException {
         // prepare test services

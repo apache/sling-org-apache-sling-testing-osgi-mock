@@ -357,7 +357,7 @@ class MockBundleContext implements BundleContext {
         serviceListeners.remove(serviceListener);
     }
 
-    private void notifyServiceListeners(int eventType, ServiceReference serviceReference) {
+    void notifyServiceListeners(int eventType, ServiceReference serviceReference) {
         final ServiceEvent event = new ServiceEvent(eventType, serviceReference);
         for ( Map.Entry<ServiceListener, Filter> entry : serviceListeners.entrySet()) {
             if ( entry.getValue() == null || entry.getValue().match(serviceReference)) {

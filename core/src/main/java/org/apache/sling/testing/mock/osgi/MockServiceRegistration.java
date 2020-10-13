@@ -20,6 +20,7 @@ package org.apache.sling.testing.mock.osgi;
 
 import java.util.Arrays;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
@@ -30,6 +31,7 @@ import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -44,7 +46,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     private final Long serviceId;
     private final Set<String> clazzes;
     private final T service;
-    private Dictionary<String, Object> properties;
+    private Hashtable<String, Object> properties;
     private final ServiceReference<T> serviceReference;
     private final MockBundleContext bundleContext;
 
@@ -63,11 +65,23 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
 
         readOsgiMetadata();
 
-        this.properties = properties != null ? properties : new Hashtable<String,Object>();
-        this.properties.put(Constants.SERVICE_ID, this.serviceId);
-        this.properties.put(Constants.OBJECTCLASS, this.clazzes.toArray(new String[this.clazzes.size()]));
+        this.properties = new Hashtable<String,Object>();
+        this.updateProperties(properties);
         this.serviceReference = new MockServiceReference<T>(bundle, this);
         this.bundleContext = bundleContext;
+    }
+
+    private void updateProperties(final Dictionary<String, ?> newProps) {
+        this.properties.clear();
+        if ( newProps != null ) {
+            final Enumeration<String> names = newProps.keys();
+            while ( names.hasMoreElements() ) {
+                final String key = names.nextElement();
+                this.properties.put(key, newProps.get(key));
+            }
+        }
+        this.properties.put(Constants.SERVICE_ID, this.serviceId);
+        this.properties.put(Constants.OBJECTCLASS, this.clazzes.toArray(new String[this.clazzes.size()]));
     }
 
     @Override
@@ -75,10 +89,10 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         return this.serviceReference;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void setProperties(final Dictionary properties) {
-        this.properties = properties;
+    public void setProperties(final Dictionary<String, ?> newProps) {
+        this.updateProperties(newProps);
+        this.bundleContext.notifyServiceListeners(ServiceEvent.MODIFIED, this.serviceReference);
     }
 
     @Override
