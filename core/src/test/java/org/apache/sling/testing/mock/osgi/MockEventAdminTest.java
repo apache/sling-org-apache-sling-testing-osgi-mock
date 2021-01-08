@@ -101,7 +101,7 @@ public class MockEventAdminTest {
         assertEquals(ImmutableList.of(EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
     }
 
-    @Test(timeout = 2000)
+    @Test(timeout = 3000)
     public void testPostEvents() {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.postEvent(EVENT_SAMPLE_2);
