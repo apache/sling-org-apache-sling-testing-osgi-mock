@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -56,6 +57,16 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
 
     @Override
     public Configuration[] listConfigurations(String filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Configuration getFactoryConfiguration(String factoryPid, String name, String location) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Configuration getFactoryConfiguration(String factoryPid, String name) throws IOException {
         throw new UnsupportedOperationException();
     }
 

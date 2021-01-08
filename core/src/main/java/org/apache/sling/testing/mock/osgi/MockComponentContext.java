@@ -74,7 +74,7 @@ class MockComponentContext implements ComponentContext {
 
     // --- unsupported operations ---
     @Override
-    public ComponentInstance getComponentInstance() {
+    public <S> ComponentInstance<S> getComponentInstance() {
         throw new UnsupportedOperationException();
     }
 
@@ -84,7 +84,7 @@ class MockComponentContext implements ComponentContext {
     }
 
     @Override
-    public Object locateService(final String name) {
+    public <S> S locateService(final String name) {
         throw new UnsupportedOperationException();
     }
 

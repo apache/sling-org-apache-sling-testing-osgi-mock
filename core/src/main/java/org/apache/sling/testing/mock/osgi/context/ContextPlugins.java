@@ -68,7 +68,7 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param plugin Plugin
      */
-    @SuppressWarnings({ "null", "unused" })
+    @SuppressWarnings("unused")
     @SafeVarargs
     public final <T extends OsgiContextImpl> void addPlugin(@NotNull ContextPlugin<T> @NotNull ... plugin) {
         for (final ContextPlugin<T> item : plugin) {
@@ -84,7 +84,7 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param beforeSetUpCallback Allows the application to register an own callback function that is called before the built-in setup rules are executed.
      */
-    @SuppressWarnings({ "null", "unused" })
+    @SuppressWarnings("unused")
     @SafeVarargs
     public final <T extends OsgiContextImpl> void addBeforeSetUpCallback(@NotNull final ContextCallback<T> @NotNull ... beforeSetUpCallback) {
         for (final ContextCallback<T> item : beforeSetUpCallback) {
@@ -109,7 +109,7 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      */
-    @SuppressWarnings({ "null", "unused" })
+    @SuppressWarnings("unused")
     @SafeVarargs
     public final <T extends OsgiContextImpl> void addAfterSetUpCallback(@NotNull final ContextCallback<T> @NotNull ... afterSetUpCallback) {
         for (final ContextCallback<T> item : afterSetUpCallback) {
@@ -134,7 +134,7 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
-    @SuppressWarnings({ "null", "unused" })
+    @SuppressWarnings("unused")
     @SafeVarargs
     public final <T extends OsgiContextImpl> void addBeforeTearDownCallback(@NotNull final ContextCallback<T> @NotNull ... beforeTearDownCallback) {
         for (final ContextCallback<T> item : beforeTearDownCallback) {
@@ -159,7 +159,7 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterTearDownCallback Allows the application to register an own callback function that is after before the built-in teardown rules are executed.
      */
-    @SuppressWarnings({ "null", "unused" })
+    @SuppressWarnings("unused")
     @SafeVarargs
     public final <T extends OsgiContextImpl> void addAfterTearDownCallback(@NotNull final ContextCallback<T> @NotNull ... afterTearDownCallback) {
         for (final ContextCallback<T> item : afterTearDownCallback) {

@@ -18,10 +18,13 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 
 /**
@@ -102,6 +105,31 @@ class MockConfiguration implements Configuration {
 
     @Override
     public long getChangeCount() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Dictionary<String, Object> getProcessedProperties(ServiceReference<?> reference) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean updateIfDifferent(Dictionary<String, ?> properties) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addAttributes(ConfigurationAttribute... attrs) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Set<ConfigurationAttribute> getAttributes() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeAttributes(ConfigurationAttribute... attrs) throws IOException {
         throw new UnsupportedOperationException();
     }
 

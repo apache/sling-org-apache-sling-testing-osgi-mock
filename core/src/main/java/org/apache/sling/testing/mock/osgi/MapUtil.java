@@ -92,7 +92,7 @@ public final class MapUtil {
      * @param args Key/value pairs
      * @return Map
      */
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings("unchecked")
     public static @NotNull Map<String, Object> toMap(@NotNull Object @NotNull ... args) {
         if (args == null || args.length == 0) {
             return Collections.emptyMap();
