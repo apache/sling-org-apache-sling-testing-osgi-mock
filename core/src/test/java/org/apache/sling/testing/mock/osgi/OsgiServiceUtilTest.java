@@ -624,5 +624,64 @@ public class OsgiServiceUtilTest {
     public static class ServiceFactory1 {
         
     }
-        
+
+    public interface RankedService {
+        int getRanking();
+    }
+
+    @Component(
+            properties = {
+                    "service.ranking:Integer=5"
+            }
+    )
+    public static class RankedServiceFive implements RankedService {
+
+        private int ranking;
+
+        @Activate
+        public void activate(Map<String, Object> properties) {
+            this.ranking = (Integer) properties.get("service.ranking");
+        }
+
+        @Override
+        public int getRanking() {
+            return ranking;
+        }
+    }
+
+    @Component(
+            properties = {
+                    "service.ranking:Integer=10"
+            }
+    )
+    public static class RankedServiceTen implements RankedService {
+
+        private int ranking;
+
+        @Activate
+        public void activate(Map<String, Object> properties) {
+            this.ranking = (Integer) properties.get("service.ranking");
+        }
+
+        @Override
+        public int getRanking() {
+            return ranking;
+        }
+    }
+
+    @Component(service = Service6VolatileMultipleReferences.class)
+    public static class Service6VolatileMultipleReferences {
+
+        @Reference
+        private volatile List<RankedService> rankedServices;
+
+        public String getRanks() {
+            StringBuilder builder = new StringBuilder();
+            for(RankedService rankedService : rankedServices) {
+                builder.append(rankedService.getClass().getSimpleName()).append("=").append(rankedService.getRanking());
+            }
+            return builder.toString();
+        }
+    }
+
 }
