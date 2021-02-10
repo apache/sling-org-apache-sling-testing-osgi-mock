@@ -22,15 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.impl.inject.Annotations;
@@ -443,7 +435,11 @@ final class OsgiServiceUtil {
         // multiple references found? inject only first one with highest ranking
         if (matchingServices.size() > 1 && !reference.isCardinalityMultiple()) {
             matchingServices = matchingServices.subList(0, 1);
+        } else {
+            // sorting based on lowest ranking first
+            matchingServices.sort(Comparator.comparing(ServiceInfo::getServiceReference));
         }
+
 
         // try to invoke bind method
         for (ServiceInfo matchingService : matchingServices) {
