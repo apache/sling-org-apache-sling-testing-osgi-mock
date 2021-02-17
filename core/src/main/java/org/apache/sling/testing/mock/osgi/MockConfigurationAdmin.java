@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import org.apache.felix.framework.FilterImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
