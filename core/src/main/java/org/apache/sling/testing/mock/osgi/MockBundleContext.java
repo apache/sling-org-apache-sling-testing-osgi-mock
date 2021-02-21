@@ -71,7 +71,7 @@ class MockBundleContext implements BundleContext {
     private final SortedSet<MockServiceRegistration> registeredServices = new ConcurrentSkipListSet<MockServiceRegistration>();
     private final Map<ServiceListener, Filter> serviceListeners = new ConcurrentHashMap<ServiceListener, Filter>();
     private final Queue<BundleListener> bundleListeners = new ConcurrentLinkedQueue<BundleListener>();
-    private final ConfigurationAdmin configAdmin = new MockConfigurationAdmin();
+    private final ConfigurationAdmin configAdmin = new MockConfigurationAdmin(this);
     private File dataFileBaseDir;
     
     private final Bundle systemBundle;

@@ -20,6 +20,8 @@ package org.apache.sling.testing.mock.osgi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -28,9 +30,12 @@ import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import com.google.common.collect.ImmutableMap;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 public class MockConfigurationAdminTest {
     
@@ -99,6 +104,23 @@ public class MockConfigurationAdminTest {
 
         assertEquals(2, reference.getProperty("prop1"));
         assertEquals(2, reference.getProperty("prop2"));
+    }
+
+    @Test
+    public void testFilteringConfigurations() throws IOException, InvalidSyntaxException {
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration1", "prop1", 1, "prop2", "B");
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration2", "prop1", 2, "prop2", "A");
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration3", "prop1", 3, "prop2", "A");
+
+        final ConfigurationAdmin configurationAdmin = context.bundleContext().getService(context.bundleContext().getServiceReference(ConfigurationAdmin.class));
+        final Configuration[] allConfigurations = configurationAdmin.listConfigurations("(prop1=*)");
+        assertEquals(3, allConfigurations.length);
+        final Configuration[] prop2AConfigurations = configurationAdmin.listConfigurations("(prop2=A)");
+        assertEquals(2, prop2AConfigurations.length);
+        final Configuration[] searchForAllConfigurations = configurationAdmin.listConfigurations(null);
+        assertTrue(searchForAllConfigurations.length >= 3); // Other configurations could be registered outside this method as well
+        final Configuration[] noConfigurations = configurationAdmin.listConfigurations("(nonexistingprop=nonexistingvalue)");
+        assertNull(noConfigurations);
     }
 
     static class ServiceWithConfigurationPID {}
