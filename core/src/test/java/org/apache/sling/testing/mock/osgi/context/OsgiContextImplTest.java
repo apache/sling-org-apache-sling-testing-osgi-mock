@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
-import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest;
-import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface1;
-import org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest.ServiceInterface2;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface2;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,14 +119,14 @@ public class OsgiContextImplTest {
     public void testRegisterInjectActivate() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        context.registerInjectActivateService(new OsgiServiceUtilTest.Service3());
+        context.registerInjectActivateService(new Service3());
     }
 
     @Test
     public void testRegisterInjectActivateWithProperties() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        OsgiServiceUtilTest.Service3 service = context.registerInjectActivateService(new OsgiServiceUtilTest.Service3(), "prop1", "value3");
+        Service3 service = context.registerInjectActivateService(new Service3(), "prop1", "value3");
         assertEquals("value3", service.getConfig().get("prop1"));
     }
 
@@ -134,7 +134,7 @@ public class OsgiContextImplTest {
     public void testRegisterInjectActivateWithPropertiesWithNulls() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        OsgiServiceUtilTest.Service3 service = context.registerInjectActivateService(new OsgiServiceUtilTest.Service3(),
+        Service3 service = context.registerInjectActivateService(new Service3(),
                 "prop1", "value3",
                 "prop2", null,
                 null, "value4",
@@ -151,13 +151,13 @@ public class OsgiContextImplTest {
         props.put("prop2", null);
         props.put(null, "value4");
         props.put(null, null);
-        OsgiServiceUtilTest.Service3 service = context.registerInjectActivateService(new OsgiServiceUtilTest.Service3(), props);
+        Service3 service = context.registerInjectActivateService(new Service3(), props);
         assertEquals("value3", service.getConfig().get("prop1"));
     }
 
     @Test(expected=RuntimeException.class)
     public void testRegisterInjectActivate_RefrenceMissing() {
-        context.registerInjectActivateService(new OsgiServiceUtilTest.Service3());
+        context.registerInjectActivateService(new Service3());
     }
 
     @Test(expected=NoScrMetadataException.class)

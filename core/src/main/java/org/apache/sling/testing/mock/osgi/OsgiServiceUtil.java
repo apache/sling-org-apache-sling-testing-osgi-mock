@@ -671,7 +671,7 @@ final class OsgiServiceUtil {
                 for (Reference reference : metadata.getReferences()) {
                     if (reference.getPolicy() == ReferencePolicy.DYNAMIC) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (StringUtils.equals(serviceInterface, reference.getInterfaceType())) {
+                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceType())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
@@ -698,7 +698,7 @@ final class OsgiServiceUtil {
                 for (Reference reference : metadata.getReferences()) {
                     if (reference.getPolicy() == ReferencePolicy.STATIC && reference.getPolicyOption() == ReferencePolicyOption.GREEDY) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (StringUtils.equals(serviceInterface, reference.getInterfaceType())) {
+                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceType())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
@@ -707,6 +707,24 @@ final class OsgiServiceUtil {
             }
         }
         return references;
+    }
+
+    private static boolean classEqualsOrSuper(String givenClassName, String expectedClassName) {
+        Class<?> givenClass;
+        try {
+            givenClass = Class.forName(givenClassName);
+        }
+        catch (ClassNotFoundException ex) {
+            throw new RuntimeException("Untable to get class for " + givenClassName + ": " + ex.getMessage(), ex);
+        }
+        Class<?> expectedClass;
+        try {
+            expectedClass = Class.forName(expectedClassName);
+        }
+        catch (ClassNotFoundException ex) {
+            throw new RuntimeException("Untable to get class for " + expectedClassName + ": " + ex.getMessage(), ex);
+        }
+        return expectedClass.isAssignableFrom(givenClass);
     }
 
     static class ServiceInfo {

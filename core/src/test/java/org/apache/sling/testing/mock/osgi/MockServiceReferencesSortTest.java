@@ -25,6 +25,10 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.Hashtable;
 
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.RankedService;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.RankedServiceFive;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.RankedServiceTen;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service6VolatileMultipleReferences;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,19 +94,19 @@ public class MockServiceReferencesSortTest {
 
     @Test
     public void testVolatileCollectionReference() {
-        OsgiServiceUtilTest.RankedService rankedServiceTen = new OsgiServiceUtilTest.RankedServiceTen();
-        bundleContext.registerService(OsgiServiceUtilTest.RankedService.class.getName(), rankedServiceTen , null);
+        RankedService rankedServiceTen = new RankedServiceTen();
+        bundleContext.registerService(RankedService.class.getName(), rankedServiceTen , null);
         MockOsgi.activate(rankedServiceTen, bundleContext);
 
-        OsgiServiceUtilTest.RankedService rankedServiceFive = new OsgiServiceUtilTest.RankedServiceFive();
-        bundleContext.registerService(OsgiServiceUtilTest.RankedService.class.getName(), rankedServiceFive, null);
+        RankedService rankedServiceFive = new RankedServiceFive();
+        bundleContext.registerService(RankedService.class.getName(), rankedServiceFive, null);
         MockOsgi.activate(rankedServiceFive, bundleContext);
 
-        OsgiServiceUtilTest.Service6VolatileMultipleReferences service6VolatileMultipleReferences = new OsgiServiceUtilTest.Service6VolatileMultipleReferences();
-        bundleContext.registerService(OsgiServiceUtilTest.Service6VolatileMultipleReferences.class.getName(), service6VolatileMultipleReferences, null);
+        Service6VolatileMultipleReferences service6VolatileMultipleReferences = new Service6VolatileMultipleReferences();
+        bundleContext.registerService(Service6VolatileMultipleReferences.class.getName(), service6VolatileMultipleReferences, null);
         MockOsgi.injectServices(service6VolatileMultipleReferences, bundleContext);
 
-        assertEquals("Should get highest when getting one service", rankedServiceTen, bundleContext.getService(bundleContext.getServiceReference(OsgiServiceUtilTest.RankedService.class)));
+        assertEquals("Should get highest when getting one service", rankedServiceTen, bundleContext.getService(bundleContext.getServiceReference(RankedService.class)));
         assertEquals("Should have order from lowest to highest on sorted ranked services", "RankedServiceFive=5RankedServiceTen=10", getSortedRankedServices());
         assertEquals("Should have order from lowest to highest on volatile reference list", "RankedServiceFive=5RankedServiceTen=10", service6VolatileMultipleReferences.getRanks());
     }
@@ -110,7 +114,7 @@ public class MockServiceReferencesSortTest {
     private String getSortedRankedServices() {
         ServiceReference<?>[] refs = null;
         try {
-            refs = bundleContext.getServiceReferences(OsgiServiceUtilTest.RankedService.class.getName(), null);
+            refs = bundleContext.getServiceReferences(RankedService.class.getName(), null);
         }
         catch (InvalidSyntaxException ise) {
             fail("Unexpected InvalidSyntaxException");
@@ -120,7 +124,7 @@ public class MockServiceReferencesSortTest {
 
         final StringBuilder sb = new StringBuilder();
         for(ServiceReference<?> ref : refs) {
-            OsgiServiceUtilTest.RankedService rankedService = (OsgiServiceUtilTest.RankedService)bundleContext.getService(ref);
+            RankedService rankedService = (RankedService)bundleContext.getService(ref);
             sb.append(rankedService.getClass().getSimpleName()).append("=").append(rankedService.getRanking());
             bundleContext.ungetService(ref);
         }

@@ -22,8 +22,6 @@
   <scr:component name="org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata">
     <implementation class="org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata"/>
     <service>
-      <provide interface="org.apache.sling.models.spi.Injector"/>
-      <provide interface="org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory"/>
       <provide interface="java.lang.Comparable"/>
     </service>
     <property name="service.ranking" type="Integer" value="5000"/>

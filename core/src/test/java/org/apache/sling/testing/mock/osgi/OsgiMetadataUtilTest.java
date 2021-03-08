@@ -30,6 +30,8 @@ import java.util.Set;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferenceCardinality;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3;
+import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface2;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 
@@ -42,10 +44,7 @@ public class OsgiMetadataUtilTest {
         assertEquals("org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata", metadata.getPID());
 
         Set<String> serviceInterfaces = metadata.getServiceInterfaces();
-        assertEquals(3, serviceInterfaces.size());
-        assertTrue(serviceInterfaces.contains("org.apache.sling.models.spi.Injector"));
-        assertTrue(serviceInterfaces
-                .contains("org.apache.sling.models.spi.injectorspecific.InjectAnnotationProcessorFactory"));
+        assertEquals(1, serviceInterfaces.size());
         assertTrue(serviceInterfaces.contains("java.lang.Comparable"));
 
         Map<String, Object> props = metadata.getProperties();
@@ -64,13 +63,13 @@ public class OsgiMetadataUtilTest {
 
     @Test
     public void testReferences() {
-        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(OsgiServiceUtilTest.Service3.class);
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(Service3.class);
         List<Reference> references = metadata.getReferences();
         assertEquals(5, references.size());
 
         Reference ref1 = references.get(2);
         assertEquals("reference2", ref1.getName());
-        assertEquals("org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceInterface2", ref1.getInterfaceType());
+        assertEquals(ServiceInterface2.class.getName(), ref1.getInterfaceType());
         assertEquals(ReferenceCardinality.MANDATORY_MULTIPLE, ref1.getCardinality());
         assertEquals("bindReference2", ref1.getBind());
         assertEquals("unbindReference2", ref1.getUnbind());
@@ -78,7 +77,7 @@ public class OsgiMetadataUtilTest {
 
     @Test
     public void testActivateMethodName() {
-        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(OsgiServiceUtilTest.Service3.class);
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(Service3.class);
         assertEquals("activate", metadata.getActivateMethodName());
     }
 
