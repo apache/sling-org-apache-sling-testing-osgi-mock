@@ -39,6 +39,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.felix.scr.impl.helper.ComponentServiceObjectsHelper;
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.FieldCollectionType;
@@ -52,6 +53,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentServiceObjects;
 
 /**
  * Helper methods to inject dependencies and activate services.
@@ -293,8 +295,21 @@ final class OsgiServiceUtil {
                 for (Class<?> parameterType : method.getParameterTypes()) {
                     boolean foundAnyMatch = false;
                     for (int i=0; i<types.length; i++) {
-                        if ((parameterType==types[i])
-                                || (types[i]==Annotation.class && parameterType.isAnnotation())) {
+                        if (types[i] == Annotation.class) {
+                            if (parameterType.isAnnotation()) {
+                                foundAnyMatch = true;
+                                break;
+                            }
+                        }
+                        else if (types[i] == ComponentContext.class || types[i] == BundleContext.class
+                                || types[i] == ServiceReference.class || types[i] == ComponentServiceObjects.class
+                                || types[i] == Map.class || types[i] == int.class || types[i] == Integer.class) {
+                            if (parameterType == types[i]) {
+                                foundAnyMatch = true;
+                                break;
+                            }
+                        }
+                        else if (parameterType.isAssignableFrom(types[i])) {
                             foundAnyMatch = true;
                             break;
                         }
@@ -610,7 +625,7 @@ final class OsgiServiceUtil {
             }
             if (reference.isCardinalityMultiple()) {
                 // make sure at least empty array is set
-                invokeBindUnbindMethod(reference, target, null, true);
+                invokeBindUnbindMethod(reference, target, null, bundleContext, true);
             }
         }
 
@@ -629,11 +644,11 @@ final class OsgiServiceUtil {
 
         // try to invoke bind method
         for (ServiceInfo matchingService : matchingServices) {
-            invokeBindUnbindMethod(reference, target, matchingService, true);
+            invokeBindUnbindMethod(reference, target, matchingService, bundleContext, true);
         }
     }
 
-    private static void invokeBindUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo, boolean bind) {
+    private static void invokeBindUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo, BundleContext bundleContext, boolean bind) {
         Class<?> targetClass = target.getClass();
 
         // try to invoke bind method
@@ -646,6 +661,7 @@ final class OsgiServiceUtil {
         }
 
         if (StringUtils.isNotEmpty(methodName) && serviceInfo != null) {
+            ComponentServiceObjectsHelper helper = new ComponentServiceObjectsHelper(bundleContext);
 
             // 1. ServiceReference
             Method method = getMethod(targetClass, methodName, new Class<?>[] { ServiceReference.class });
@@ -654,7 +670,14 @@ final class OsgiServiceUtil {
                 return;
             }
 
-            // 2. assignable from service instance
+            // 2. ComponentServiceObjects
+            method = getMethod(targetClass, methodName, new Class<?>[] { ComponentServiceObjects.class });
+            if (method != null) {
+                invokeMethod(target, method, new Object[] { helper.getServiceObjects(serviceInfo.getServiceReference()) });
+                return;
+            }
+
+            // 3. assignable from service instance
             Class<?> interfaceType = reference.getInterfaceTypeAsClass();
             method = getMethodWithAssignableTypes(targetClass, methodName, new Class<?>[] { interfaceType });
             if (method != null) {
@@ -662,17 +685,33 @@ final class OsgiServiceUtil {
                 return;
             }
 
-            // 3. assignable from service instance plus map
-            method = getMethodWithAssignableTypes(targetClass, methodName, new Class<?>[] { interfaceType, Map.class });
+            // 4. Map
+            method = getMethod(targetClass, methodName, new Class<?>[] { Map.class });
             if (method != null) {
-                invokeMethod(target, method, new Object[] { serviceInfo.getServiceInstance(), serviceInfo.getServiceConfig() });
+                invokeMethod(target, method, new Object[] { serviceInfo.getServiceConfig() });
                 return;
             }
 
-            // 4. assignable from service reference plus interface
-            method = getMethodWithAssignableTypes(targetClass, methodName, new Class<?>[] {ServiceReference.class, interfaceType});
+            // 5. mixed arguments
+            Class<?>[] mixedArgsAllowed = new Class<?>[] { ServiceReference.class, ComponentServiceObjects.class, interfaceType, Map.class };
+            method = getMethodWithAnyCombinationArgs(targetClass, methodName, mixedArgsAllowed);
             if (method != null) {
-                invokeMethod(target, method, new Object[] { serviceInfo.getServiceReference(), serviceInfo.getServiceInstance() });
+                Object[] args = new Object[method.getParameterTypes().length];
+                for (int i=0; i<args.length; i++) {
+                    if (method.getParameterTypes()[i] == ServiceReference.class) {
+                        args[i] = serviceInfo.getServiceReference();
+                    }
+                    else if (method.getParameterTypes()[i] == ComponentServiceObjects.class) {
+                        args[i] = helper.getServiceObjects(serviceInfo.getServiceReference());
+                    }
+                    else if (method.getParameterTypes()[i].isAssignableFrom(interfaceType)) {
+                        args[i] = serviceInfo.getServiceInstance();
+                    }
+                    else if (method.getParameterTypes()[i] == Map.class) {
+                        args[i] = serviceInfo.getServiceConfig();
+                    }
+                }
+                invokeMethod(target, method, args);
                 return;
             }
 
@@ -680,7 +719,7 @@ final class OsgiServiceUtil {
                     + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
         }
 
-        // in OSGi declarative services 1.3 there are no bind/unbind methods - modify the field directly
+        // OSGi declarative services 1.3 supports modifying the field directly
         else if (StringUtils.isNotEmpty(fieldName)) {
 
             // check for field with list/collection reference
@@ -791,9 +830,10 @@ final class OsgiServiceUtil {
      * @param reference Reference metadata
      * @param target Target object for reference
      * @param serviceInfo Service on which to invoke the method
+     * @param bundleContext Bundle context
      */
-    public static void invokeBindMethod(Reference reference, Object target, ServiceInfo serviceInfo) {
-        invokeBindUnbindMethod(reference,  target, serviceInfo, true);
+    public static void invokeBindMethod(Reference reference, Object target, ServiceInfo serviceInfo, BundleContext bundleContext) {
+        invokeBindUnbindMethod(reference,  target, serviceInfo, bundleContext, true);
     }
 
     /**
@@ -801,9 +841,10 @@ final class OsgiServiceUtil {
      * @param reference Reference metadata
      * @param target Target object for reference
      * @param serviceInfo Service on which to invoke the method
+     * @param bundleContext Bundle context
      */
-    public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo) {
-        invokeBindUnbindMethod(reference,  target, serviceInfo, false);
+    public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo, BundleContext bundleContext) {
+        invokeBindUnbindMethod(reference,  target, serviceInfo, bundleContext, false);
     }
 
     private static List<ServiceInfo> getMatchingServices(Class<?> type, BundleContext bundleContext, String filter) {

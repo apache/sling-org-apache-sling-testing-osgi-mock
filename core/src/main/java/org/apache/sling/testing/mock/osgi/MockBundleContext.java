@@ -124,7 +124,7 @@ class MockBundleContext implements BundleContext {
         Dictionary<String, Object> mergedPropertes = MapMergeUtil.propertiesMergeWithOsgiMetadata(service.getClass(), configAdmin, properties);
         MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, mergedPropertes, this);
         this.registeredServices.add(registration);
-        handleRefsUpdateOnRegister(registration);
+        handleRefsUpdateOnRegister(registration, this);
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
         return registration;
     }
@@ -138,9 +138,10 @@ class MockBundleContext implements BundleContext {
     /**
      * Check for already registered services that may be affected by the service registration - either
      * adding by additional optional references, or creating a conflict in the dependencies.
-     * @param registration
+     * @param registration Service registration
+     * @param bundleContext Bundle context
      */
-    private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration) {
+    private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
@@ -160,7 +161,7 @@ class MockBundleContext implements BundleContext {
                 case OPTIONAL_MULTIPLE:
                 case OPTIONAL_UNARY:
                     OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration));
+                            new ServiceInfo(registration), bundleContext);
                     break;
                 default:
                     throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
@@ -189,7 +190,7 @@ class MockBundleContext implements BundleContext {
 
     void unregisterService(MockServiceRegistration<?> registration) {
         this.registeredServices.remove(registration);
-        handleRefsUpdateOnUnregister(registration);
+        handleRefsUpdateOnUnregister(registration, this);
         notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
     }
 
@@ -213,9 +214,10 @@ class MockBundleContext implements BundleContext {
     /**
      * Check for already registered services that may be affected by the service unregistration - either
      * adding by removing optional references, or creating a conflict in the dependencies.
-     * @param registration
+     * @param registration Service registration
+     * @param bundleContext Bundle context
      */
-    private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration) {
+    private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
@@ -229,7 +231,7 @@ class MockBundleContext implements BundleContext {
                 case OPTIONAL_UNARY:
                     // it is currently not checked if for a MANDATORY_UNARY or MANDATORY_MULTIPLE reference the last reference is removed
                     OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration));
+                            new ServiceInfo(registration), bundleContext);
                     break;
                 default:
                     throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
@@ -474,6 +476,25 @@ class MockBundleContext implements BundleContext {
         return null;
     }
 
+    @Override
+    public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
+        return new ServiceObjects<S>() {
+            @Override
+            public S getService() {
+                return MockBundleContext.this.getService(reference);
+            }
+            @Override
+            public void ungetService(S service) {
+                MockBundleContext.this.ungetService(reference);
+            }
+            @Override
+            public ServiceReference<S> getServiceReference() {
+                return reference;
+            }
+        };
+    }
+
+
     // --- unsupported operations ---
     @Override
     public Bundle installBundle(final String s) {
@@ -482,11 +503,6 @@ class MockBundleContext implements BundleContext {
 
     @Override
     public Bundle installBundle(final String s, final InputStream inputStream) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
         throw new UnsupportedOperationException();
     }
 
