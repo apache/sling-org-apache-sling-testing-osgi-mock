@@ -49,7 +49,7 @@ public class OsgiMetadataUtilTest {
 
         Map<String, Object> props = metadata.getProperties();
         assertEquals(3, props.size());
-        assertEquals(5000, props.get("service.ranking"));
+        assertEquals(5000, props.get(Constants.SERVICE_RANKING));
         assertEquals("The Apache Software Foundation", props.get(Constants.SERVICE_VENDOR));
         assertArrayEquals(new String[] { "org.apache.sling.api.resource.Resource", "org.apache.sling.api.resource.ResourceResolver" },
                 (String[])props.get("adaptables"));

@@ -20,6 +20,7 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
 import java.util.Map;
 
+import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.propertytypes.ServiceRanking;
@@ -32,7 +33,7 @@ public class RankedServiceTen implements RankedService {
 
     @Activate
     public void activate(Map<String, Object> properties) {
-        this.ranking = (Integer) properties.get("service.ranking");
+        this.ranking = (Integer)properties.get(Constants.SERVICE_RANKING);
     }
 
     @Override

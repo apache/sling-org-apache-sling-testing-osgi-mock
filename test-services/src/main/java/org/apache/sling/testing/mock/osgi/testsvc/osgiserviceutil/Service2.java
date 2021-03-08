@@ -18,11 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
-import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 
-@Component(service = { ServiceInterface2.class, ServiceInterface3.class },
-        property = Constants.SERVICE_RANKING + ":Integer=200")
+@Component(service = { ServiceInterface2.class, ServiceInterface3.class })
+@ServiceRanking(200)
 public class Service2 implements ServiceInterface2, ServiceInterface3 {
 
     // dummy interface
