@@ -80,7 +80,7 @@ public final class MockBundle implements Bundle {
 
     @Override
     public URL getEntry(final String name) {
-        
+
         String nameToQuery = name.startsWith("/") ? name : "/" + name;
 
         return getClass().getResource(nameToQuery);
@@ -101,7 +101,7 @@ public final class MockBundle implements Bundle {
         // localziation not supported, always return default headers
         return getHeaders();
     }
-    
+
     /**
      * Set headers for mock bundle
      * @param value Header map
@@ -127,27 +127,27 @@ public final class MockBundle implements Bundle {
     public long getLastModified() {
         return lastModified;
     }
-    
+
     /**
-     * Set the last modified value for the mock bundle 
+     * Set the last modified value for the mock bundle
      * @param lastModified last modified
      */
     public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
     }
-    
+
     @Override
     public Enumeration<String> getEntryPaths(final String path) {
-        
+
         String queryPath = path.startsWith("/") ? path : "/" + path;
-        
+
         URL res = getClass().getResource(queryPath);
         if ( res == null ) {
             return null;
         }
-        
+
         Vector<String> matching = new Vector<String>();
-        
+
         try {
             File file = new File(res.toURI());
             if ( file.isDirectory()) {
@@ -161,29 +161,29 @@ public final class MockBundle implements Bundle {
         } catch ( RuntimeException e) {
             throw new RuntimeException("Failed opening file from " + res , e);
         }
-        
+
         if ( matching.isEmpty() ) {
             return null;
         }
-        
+
         return matching.elements();
     }
 
     private String relativeWithTrailingSlash(String queryPath) {
-        
+
         // make relative
         if ( queryPath.startsWith("/")) {
             queryPath = queryPath.substring(1, queryPath.length());
         }
-        
+
         // remove trailing slash
         if ( !queryPath.isEmpty() && !queryPath.endsWith("/") ) {
             queryPath = queryPath +"/";
         }
-        
+
         return queryPath;
     }
-    
+
     @Override
     public String getLocation() {
         if (bundleId == Constants.SYSTEM_BUNDLE_ID) {

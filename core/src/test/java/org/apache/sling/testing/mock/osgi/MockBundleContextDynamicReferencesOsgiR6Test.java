@@ -46,7 +46,7 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
     private Service3OsgiR6 service;
     private ServiceRegistration reg1a;
     private ServiceRegistration reg2a;
-    
+
     @Mock
     private ServiceInterface1 dependency1a;
     @Mock
@@ -69,16 +69,16 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
     @Before
     public void setUp() {
         bundleContext = MockOsgi.newBundleContext();
-        
+
         // setup service instance with only minimum mandatory references
         reg1a = bundleContext.registerService(ServiceInterface1.class.getName(), dependency1a, null);
         reg2a = bundleContext.registerService(ServiceInterface2.class.getName(), dependency2a, null);
-        
+
         service = new Service3OsgiR6();
         MockOsgi.injectServices(service, bundleContext);
         MockOsgi.activate(service, bundleContext);
         bundleContext.registerService(Service3OsgiR6.class.getName(), service, MapUtil.toDictionary(ImmutableMap.<String,Object>of("reference3DynamicFiltered.target","(prop1=def)")));
-        
+
         assertDependency1(dependency1a);
         assertDependency1Optional(null);
         assertDependencies2(dependency2a);
@@ -89,32 +89,32 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
     public void testAddRemoveOptionalUnaryService() {
         ServiceRegistration reg1aOptional = bundleContext.registerService(ServiceInterface1Optional.class.getName(), dependency1aOptional, null);
         assertDependency1Optional(dependency1aOptional);
-        
+
         reg1aOptional.unregister();
         assertDependency1Optional(null);
     }
-    
+
     public void testAddOptionalUnaryService_TooMany() {
         bundleContext.registerService(ServiceInterface1Optional.class.getName(), dependency1aOptional, null);
         assertDependency1Optional(dependency1aOptional);
-        
+
         // in real OSGi this should fail - but this is not covered by the current implementation. so test the real implementation here.
         bundleContext.registerService(ServiceInterface1Optional.class.getName(), dependency1bOptional, null);
         assertDependency1Optional(dependency1bOptional);
     }
-    
+
     @Test
     public void testAddMandatoryUnaryService_TooMany() {
         // should not throw an exception although mandatory unary reference is already set
         bundleContext.registerService(ServiceInterface1.class.getName(), dependency1b, null);
     }
-    
+
     @Test
     public void testRemoveMandatoryUnaryService_TooMany() {
         // this should check if the mandatory references is no longer set - but this is currently not implemented
         reg1a.unregister();
     }
-    
+
     @Test
     public void testAddRemoveOptionalMultipleService() {
         ServiceRegistration reg3a = bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a, null);
@@ -125,11 +125,11 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
 
         reg3a.unregister();
         assertDependencies3(dependency3b);
-        
+
         reg3b.unregister();
         assertDependencies3();
     }
-    
+
     @Test
     public void testAddRemoveMandatoryMultipleService() {
         ServiceRegistration reg2b = bundleContext.registerService(ServiceInterface2.class.getName(), dependency2b, null);
@@ -137,38 +137,38 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
 
         reg2b.unregister();
         assertDependencies2(dependency2a);
-        
+
         // in real OSGi this should fail - but this is not covered by the current implementation. so test the real implementation here.
         reg2a.unregister();
         assertDependencies2();
     }
-    
+
     @Test
     public void testReferenceWithTargetFilter() {
         assertDependencies3Filtered();
-        
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a, 
+
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "abc")));
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b, 
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "def")));
-        
+
         assertDependencies3Filtered(dependency3a);
     }
-    
+
     @Test
     public void testReferenceWithDynamicTargetFilter() {
         assertDependencies3DynamicFiltered(null);
-        
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a, 
+
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "abc")));
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b, 
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "def")));
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3c, 
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3c,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "hij")));
-        
+
         assertDependencies3DynamicFiltered(dependency3b);
     }
 
@@ -180,7 +180,7 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
             assertSame(instance, service.getReference1());
         }
     }
-    
+
     private void assertDependency1Optional(ServiceInterface1Optional instance) {
         if (instance == null) {
             assertNull(service.getReference1Optional());
@@ -189,19 +189,19 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
             assertSame(instance, service.getReference1Optional());
         }
     }
-    
+
     private void assertDependencies2(ServiceInterface2... instances) {
-        assertEquals(ImmutableSet.<ServiceInterface2>copyOf(instances), 
+        assertEquals(ImmutableSet.<ServiceInterface2>copyOf(instances),
                 ImmutableSet.<ServiceInterface2>copyOf(service.getReferences2()));
     }
-    
+
     private void assertDependencies3(ServiceSuperInterface3... instances) {
-        assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances), 
+        assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances),
                 ImmutableSet.<ServiceSuperInterface3>copyOf(service.getReferences3()));
     }
-    
+
     private void assertDependencies3Filtered(ServiceSuperInterface3... instances) {
-        assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances), 
+        assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances),
                 ImmutableSet.<ServiceSuperInterface3>copyOf(service.getReferences3Filtered()));
     }
 

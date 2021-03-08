@@ -73,13 +73,13 @@ class MockBundleContext implements BundleContext {
     private final Queue<BundleListener> bundleListeners = new ConcurrentLinkedQueue<BundleListener>();
     private final ConfigurationAdmin configAdmin = new MockConfigurationAdmin(this);
     private File dataFileBaseDir;
-    
+
     private final Bundle systemBundle;
 
     public MockBundleContext() {
         this.systemBundle = new MockBundle(this, Constants.SYSTEM_BUNDLE_ID);
         this.bundle = new MockBundle(this);
-        
+
         // register configuration admin by default
         registerService(ConfigurationAdmin.class.getName(), configAdmin, null);
     }
@@ -127,20 +127,20 @@ class MockBundleContext implements BundleContext {
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
         return registration;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public <S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory, Dictionary<String, ?> properties) {
         return registerService(clazz.getName(), factory, properties);
     }
-    
+
     /**
      * Check for already registered services that may be affected by the service registration - either
      * adding by additional optional references, or creating a conflict in the dependencies.
      * @param registration
      */
     private void handleRefsUpdateOnRegister(MockServiceRegistration registration) {
-        
+
         // handle DYNAMIC references to this registration
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
         for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
@@ -185,23 +185,23 @@ class MockBundleContext implements BundleContext {
             }
         }
     }
-    
+
     void unregisterService(MockServiceRegistration registration) {
         this.registeredServices.remove(registration);
         handleRefsUpdateOnUnregister(registration);
         notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
     }
-    
+
     @SuppressWarnings({ "unchecked", "null" })
     void restartService(MockServiceRegistration registration) {
         // get current service properties
         Class<?> serviceClass = registration.getService().getClass();
         Map<String,Object> properties = MapUtil.toMap(registration.getProperties());
-        
+
         // deactivate & unregister service
         MockOsgi.deactivate(registration.getService(), this);
         unregisterService(registration);
-        
+
         // newly create and register service
         Object newService;
         try {
@@ -215,7 +215,7 @@ class MockBundleContext implements BundleContext {
         }
         MockOsgi.injectServices(newService, this);
         MockOsgi.activate(newService, this, properties);
-        
+
         String[] serviceInterfaces = (String[])registration.getClasses().toArray(new String[registration.getClasses().size()]);
         registerService(serviceInterfaces, newService, MapUtil.toDictionary(properties));
     }
@@ -263,7 +263,7 @@ class MockBundleContext implements BundleContext {
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public ServiceReference getServiceReference(final String clazz) {
@@ -414,7 +414,7 @@ class MockBundleContext implements BundleContext {
         // no mock implementation, simulate that no property is found and return null
         return null;
     }
-    
+
     @Override
     public File getDataFile(final String path) {
         if (path == null) {
@@ -429,7 +429,7 @@ class MockBundleContext implements BundleContext {
                 }
             }
         }
-        if (path.isEmpty()) { 
+        if (path.isEmpty()) {
             return dataFileBaseDir;
         }
         else {

@@ -32,7 +32,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings({"unchecked","null"})
 public class ContextPluginsTest {
-    
+
     private OsgiContext context = new OsgiContext();
 
     @Mock
@@ -43,24 +43,24 @@ public class ContextPluginsTest {
     private ContextCallback callback1;
     @Mock
     private ContextCallback callback2;
-    
+
     @Test
     public void testConstructorSetUp() throws Exception {
         ContextPlugins underTest = new ContextPlugins(callback1);
-        
+
         assertEquals(1, underTest.getPlugins().size());
-        
+
         underTest.executeAfterSetUpCallback(context);
-        
+
         verify(callback1, times(1)).execute(context);
     }
 
     @Test
     public void testConstructorSetUpTearDown() throws Exception {
         ContextPlugins underTest = new ContextPlugins(callback1, callback2);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeAfterSetUpCallback(context);
         underTest.executeBeforeTearDownCallback(context);
 
@@ -72,9 +72,9 @@ public class ContextPluginsTest {
     public void testExecuteBeforeSetUpCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addPlugin(plugin1, plugin2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeBeforeSetUpCallback(context);
         verify(plugin1, times(1)).beforeSetUp(context);
         verify(plugin2, times(1)).beforeSetUp(context);
@@ -86,9 +86,9 @@ public class ContextPluginsTest {
     public void testExecuteAfterSetUpCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addPlugin(plugin1, plugin2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeAfterSetUpCallback(context);
         verify(plugin1, times(1)).afterSetUp(context);
         verify(plugin2, times(1)).afterSetUp(context);
@@ -100,9 +100,9 @@ public class ContextPluginsTest {
     public void testExecuteBeforeTearDownCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addPlugin(plugin1, plugin2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeBeforeTearDownCallback(context);
         verify(plugin1, times(1)).beforeTearDown(context);
         verify(plugin2, times(1)).beforeTearDown(context);
@@ -114,9 +114,9 @@ public class ContextPluginsTest {
     public void testExecuteAfterTearDownCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addPlugin(plugin1, plugin2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeAfterTearDownCallback(context);
         verify(plugin1, times(1)).afterTearDown(context);
         verify(plugin2, times(1)).afterTearDown(context);
@@ -128,9 +128,9 @@ public class ContextPluginsTest {
     public void testAddBeforeSetUpCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addBeforeSetUpCallback(callback1, callback2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeBeforeSetUpCallback(context);
         verify(callback1, times(1)).execute(context);
         verify(callback2, times(1)).execute(context);
@@ -140,9 +140,9 @@ public class ContextPluginsTest {
     public void testAddAfterSetUpCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addAfterSetUpCallback(callback1, callback2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeAfterSetUpCallback(context);
         verify(callback1, times(1)).execute(context);
         verify(callback2, times(1)).execute(context);
@@ -152,9 +152,9 @@ public class ContextPluginsTest {
     public void testAddBeforeTearDownCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addBeforeTearDownCallback(callback1, callback2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeBeforeTearDownCallback(context);
         verify(callback1, times(1)).execute(context);
         verify(callback2, times(1)).execute(context);
@@ -164,9 +164,9 @@ public class ContextPluginsTest {
     public void testAddAfterTearDownCallback() throws Exception {
         ContextPlugins underTest = new ContextPlugins();
         underTest.addAfterTearDownCallback(callback1, callback2, null);
-        
+
         assertEquals(2, underTest.getPlugins().size());
-        
+
         underTest.executeAfterTearDownCallback(context);
         verify(callback1, times(1)).execute(context);
         verify(callback2, times(1)).execute(context);

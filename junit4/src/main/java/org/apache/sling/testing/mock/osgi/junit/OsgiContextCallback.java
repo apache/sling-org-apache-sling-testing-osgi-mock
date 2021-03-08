@@ -29,5 +29,5 @@ import org.osgi.annotation.versioning.ConsumerType;
 public interface OsgiContextCallback extends ContextCallback<OsgiContext> {
 
     // specialized version of ContextCallback
-    
+
 }

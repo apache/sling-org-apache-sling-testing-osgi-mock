@@ -66,7 +66,7 @@ import org.xml.sax.SAXException;
 final class OsgiMetadataUtil {
 
     private static final Logger log = LoggerFactory.getLogger(OsgiMetadataUtil.class);
-    
+
     private static final String METADATA_PATH = "OSGI-INF";
     private static final String METADATA_METATYPE_PATH = "OSGI-INF/metatype/";
 
@@ -87,7 +87,7 @@ final class OsgiMetadataUtil {
     }
 
     private static final OsgiMetadata NULL_METADATA = new OsgiMetadata();
-    
+
     private static final NamespaceContext NAMESPACE_CONTEXT = new NamespaceContext() {
         @Override
         public String getNamespaceURI(String prefix) {
@@ -115,7 +115,7 @@ final class OsgiMetadataUtil {
     private OsgiMetadataUtil() {
         // static methods only
     }
-    
+
     /**
      * Try to read OSGI-metadata from /OSGI-INF and read all implemented interfaces and service properties.
      * The metadata is cached after initial read, so it's no problem to call this method multiple time for the same class.
@@ -137,14 +137,14 @@ final class OsgiMetadataUtil {
             return metadata;
         }
     }
-    
+
     /**
      * Reads all SCR metadata XML documents located at OSGI-INF/ and caches them with quick access by implementation class.
      * @return Cache map
      */
     private static Map<String,Document> initMetadataDocumentCache() {
         Map<String,Document> cacheMap = new HashMap<>();
-        
+
         XPath xpath = XPATH_FACTORY.newXPath();
         xpath.setNamespaceContext(NAMESPACE_CONTEXT);
         XPathExpression xpathExpression;
@@ -159,16 +159,16 @@ final class OsgiMetadataUtil {
         Reflections reflections = new Reflections(METADATA_PATH, new ResourcesScanner());
         Pattern xmlFilesPattern = Pattern.compile("^.*\\.xml$");
         Set<String> paths = reflections.getResources(xmlFilesPattern);
-        
+
         // filter out OSGi metatype files and parse all found XML documents
         Pattern metatypeFilesPattern = Pattern.compile("^" + Pattern.quote(METADATA_METATYPE_PATH )+ ".*$");
         paths.stream()
             .filter(path -> !metatypeFilesPattern.matcher(path).matches())
             .forEach(path -> parseMetadataDocuments(cacheMap, path, xpathExpression));
-        
+
         return cacheMap;
     }
-    
+
     private static void parseMetadataDocuments(Map<String,Document> cacheMap, String resourcePath, XPathExpression xpathExpression) {
         try {
             Enumeration<URL> resourceUrls = OsgiMetadataUtil.class.getClassLoader().getResources(resourcePath);
@@ -183,7 +183,7 @@ final class OsgiMetadataUtil {
             log.warn("Error reading SCR metadata XML document from " + resourcePath, ex);
         }
     }
-    
+
     private static void parseMetadataDocument(Map<String,Document> cacheMap, String resourcePath,
             InputStream fileStream, XPathExpression xpathExpression) throws XPathExpressionException {
         Document metadata = toXmlDocument(fileStream, resourcePath);
@@ -196,7 +196,7 @@ final class OsgiMetadataUtil {
                     cacheMap.put(implementationClass, metadata);
                 }
             }
-        }                            
+        }
     }
 
     private static String getImplementationClassName(Node componentNode) {
@@ -233,7 +233,7 @@ final class OsgiMetadataUtil {
             }
         }
     }
-    
+
     /**
      * @param clazz OSGi component
      * @return XPath query fragment to find matching XML node in SCR metadata
@@ -242,7 +242,7 @@ final class OsgiMetadataUtil {
         String className = cleanupClassName(clazz.getName());
         return "//*[implementation/@class='" + className + "' or @name='" + className + "']";
     }
-    
+
     /**
      * Remove extensions from class names added e.g. by mockito.
      * @param className Class name
@@ -251,7 +251,7 @@ final class OsgiMetadataUtil {
     public static final String cleanupClassName(String className) {
         return StringUtils.substringBefore(StringUtils.substringBefore(className, "$MockitoMock$"), "$$Enhancer");
     }
-    
+
     private static String getComponentName(Class clazz, Document metadata) {
         String query = getComponentXPathQuery(clazz);
         NodeList nodes = queryNodes(metadata, query);
@@ -420,11 +420,11 @@ final class OsgiMetadataUtil {
         public Class<?> getServiceClass() {
             return clazz;
         }
-        
+
         public String getName() {
             return name;
         }
-        
+
         public String getPID() {
             String pid = null;
             if (properties != null) {
@@ -540,7 +540,7 @@ final class OsgiMetadataUtil {
         public ReferenceCardinality getCardinality() {
             return this.cardinality;
         }
-        
+
         public boolean isCardinalityMultiple() {
             return this.cardinality == ReferenceCardinality.OPTIONAL_MULTIPLE
                     || this.cardinality == ReferenceCardinality.MANDATORY_MULTIPLE;
@@ -570,18 +570,18 @@ final class OsgiMetadataUtil {
         public String getField() {
             return this.field;
         }
-        
+
         public String getTarget() {
             return this.target;
         }
-        
+
         public boolean matchesTargetFilter(ServiceReference<?> serviceReference) {
             if (targetFilter == null) {
                 return true;
             }
             return targetFilter.match(serviceReference);
         }
-        
+
         public FieldCollectionType getFieldCollectionType() {
             return this.fieldCollectionType;
         }
@@ -758,8 +758,8 @@ final class OsgiMetadataUtil {
         PROPERTIES,
 
         /**
-         * An unmodifiable Map.Entry whose key is an unmodifiable Map containing the 
-         * service properties of the bound service, as above, and whose value is the 
+         * An unmodifiable Map.Entry whose key is an unmodifiable Map containing the
+         * service properties of the bound service, as above, and whose value is the
          * bound service object. This Map.Entry must implement Comparable.
          */
         TUPLE;

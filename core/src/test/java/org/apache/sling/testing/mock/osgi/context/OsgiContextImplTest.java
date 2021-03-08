@@ -55,7 +55,7 @@ public class OsgiContextImplTest {
     public void tearDown() throws Exception {
         this.context.tearDown();
     }
-    
+
     @Test
     public void testContextObjects() {
         assertNotNull(context.componentContext());
@@ -105,7 +105,7 @@ public class OsgiContextImplTest {
         context.registerService(Set.class, myService1);
         Set<String> myService2 = new HashSet<String>();
         context.registerService(Set.class, myService2);
-        
+
         assertSame(myService1, context.getService(Set.class));
 
         // expected: ascending order because ordering ascending by service ID

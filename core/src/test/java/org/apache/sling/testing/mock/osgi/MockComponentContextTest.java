@@ -89,7 +89,7 @@ public class MockComponentContextTest {
     public void testGetUsingBundle() {
         // test context without using bundle
         assertNull(underTest.getUsingBundle());
-        
+
         // test context with using bundle
         Bundle usingBundle = mock(Bundle.class);
         ComponentContext contextWithUsingBundle = MockOsgi.componentContext().usingBundle(usingBundle).build();

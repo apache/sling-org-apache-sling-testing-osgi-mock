@@ -127,7 +127,7 @@ public class MockBundleContextTest {
         bundleContext.ungetService(refsString[1]);
         bundleContext.ungetService(refInteger);
     }
-    
+
     @Test
     public void testModifyServiceRegistration() throws InvalidSyntaxException {
         // register test services
@@ -139,10 +139,10 @@ public class MockBundleContextTest {
         final List<ServiceEvent> events = new ArrayList<>();
         final ServiceListener listener = new ServiceListener(){
 
-			@Override
-			public void serviceChanged(ServiceEvent event) {
-				events.add(event);				
-			}            
+      @Override
+      public void serviceChanged(ServiceEvent event) {
+        events.add(event);
+      }
         };
         bundleContext.addServiceListener(listener);
         ServiceRegistration<String> reg1 = bundleContext.registerService(String.class, service1, properties1);
@@ -158,14 +158,14 @@ public class MockBundleContextTest {
         assertEquals(1, events.size());
         assertEquals(ServiceEvent.REGISTERED, events.get(0).getType());
         assertSame(reg1.getReference(), events.get(0).getServiceReference());
-        
+
         // update properties
         Dictionary<String, Object> properties2 = new Hashtable<>();
         properties2.put("a", "1");
         properties2.put("c", "3");
         reg1.setProperties(properties2);
 
-        // check properties 
+        // check properties
         assertEquals(4, reg1.getReference().getPropertyKeys().length);
         assertNotNull(reg1.getReference().getProperty(Constants.SERVICE_ID));
         assertNotNull(reg1.getReference().getProperty(Constants.OBJECTCLASS));
@@ -176,7 +176,7 @@ public class MockBundleContextTest {
         assertEquals(2, events.size());
         assertEquals(ServiceEvent.MODIFIED, events.get(1).getType());
         assertSame(reg1.getReference(), events.get(1).getServiceReference());
-    
+
         // unregister
         reg1.unregister();
 
@@ -209,7 +209,7 @@ public class MockBundleContextTest {
         assertSame(service, bundleContext.getService(ref));
         bundleContext.ungetService(ref);
     }
-    
+
     @Test
     public void testNoServiceReferences() throws InvalidSyntaxException {
         ServiceReference<?>[] refs = bundleContext.getServiceReferences(String.class.getName(), null);
@@ -219,7 +219,7 @@ public class MockBundleContextTest {
         assertNotNull(refCol);
         assertTrue(refCol.isEmpty());
     }
-    
+
     @Test
     public void testServiceUnregistration() {
         // prepare test services
@@ -227,14 +227,14 @@ public class MockBundleContextTest {
         Object service1 = new Object();
         Dictionary<String, Object> properties1 = ranking(null);
         ServiceRegistration reg1 = bundleContext.registerService(clazz1, service1, properties1);
-        
+
         assertNotNull(bundleContext.getServiceReference(clazz1));
 
         reg1.unregister();
 
         assertNull(bundleContext.getServiceReference(clazz1));
     }
-    
+
 
     @Test
     public void testGetBundles() throws Exception {
@@ -281,24 +281,24 @@ public class MockBundleContextTest {
     public void testGetProperty() {
         assertNull(bundleContext.getProperty("anyProperty"));
     }
-    
+
     @Test
     public void testObjectClassFilterMatches() throws InvalidSyntaxException {
-        
+
         Filter filter = bundleContext.createFilter("(" + Constants.OBJECTCLASS + "=" + Integer.class.getName() + ")");
-        
+
         ServiceRegistration serviceRegistration = bundleContext.registerService(Integer.class.getName(), Integer.valueOf(1), null);
-        
+
         assertTrue(filter.match(serviceRegistration.getReference()));
     }
 
     @Test
     public void testObjectClassFilterDoesNotMatch() throws InvalidSyntaxException {
-        
+
         Filter filter = bundleContext.createFilter("(" + Constants.OBJECTCLASS + "=" + Integer.class.getName() + ")");
-        
+
         ServiceRegistration serviceRegistration = bundleContext.registerService(Long.class.getName(), Long.valueOf(1), null);
-        
+
         assertFalse(filter.match(serviceRegistration.getReference()));
     }
 
@@ -306,10 +306,10 @@ public class MockBundleContextTest {
     public void testGetDataFile() {
         File rootFile = bundleContext.getDataFile("");
         assertNotNull(rootFile);
-        
+
         File childFile = bundleContext.getDataFile("child");
         assertNotNull(childFile);
-        
+
         assertEquals(childFile.getParentFile(), rootFile);
     }
 
@@ -336,12 +336,12 @@ public class MockBundleContextTest {
         bundleContext.registerService(String.class, "service1", ranking(10));
         bundleContext.registerService(String.class, "service2", ranking(20));
         bundleContext.registerService(String.class, "service3", ranking(5));
-        
+
         // should return service with highest ranking
         ServiceReference<String> ref = bundleContext.getServiceReference(String.class);
         String service = bundleContext.getService(ref);
         assertEquals("service2", service);
-        
+
         bundleContext.ungetService(ref);
     }
 
@@ -350,21 +350,21 @@ public class MockBundleContextTest {
         bundleContext.registerService(String.class, "service1", ranking(null));
         bundleContext.registerService(String.class, "service2", ranking(null));
         bundleContext.registerService(String.class, "service3", ranking(null));
-        
+
         // should return service with lowest service id = which was registered first
         ServiceReference<String> ref = bundleContext.getServiceReference(String.class);
         String service = bundleContext.getService(ref);
         assertEquals("service1", service);
-        
+
         bundleContext.ungetService(ref);
     }
-    
+
     @Test
     public void testGetServicesWithNoClassOnlyFilter() throws InvalidSyntaxException {
         bundleContext.registerService(String.class, "service1", testProperty());
         bundleContext.registerService(Long.class, new Long(2), testProperty());
         bundleContext.registerService(Integer.class, new Integer(9), testProperty());
-        
+
         // should return service with lowest service id = which was registered first
         ServiceReference[] refs = bundleContext.getServiceReferences((String)null, "(prop1=value1)");
         assertNotNull(refs);
@@ -378,7 +378,7 @@ public class MockBundleContextTest {
         }
         return props;
     }
-    
+
     private static Dictionary<String, Object> testProperty() {
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         props.put("prop1", "value1");

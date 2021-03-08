@@ -129,7 +129,7 @@ public final class MockOsgi {
     public static @NotNull ComponentContextBuilder componentContext() {
         return new ComponentContextBuilder();
     }
-    
+
     /**
      * @param loggerContext Context class for logging
      * @return Mocked {@link LogService} instance
@@ -276,7 +276,7 @@ public final class MockOsgi {
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
         return OsgiServiceUtil.modified(target, componentContext, mergedProperties);
     }
-    
+
     /**
      * Simulate configuration modification of service instance. Invokes the @Modified annotated method.
      * @param target Service instance.
@@ -287,7 +287,7 @@ public final class MockOsgi {
     public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return modified(target, bundleContext, toDictionary(properties));
     }
-    
+
     /**
      * Set configuration via ConfigurationAdmin service in bundle context for component with given pid.
      * @param bundleContext Bundle context
@@ -297,7 +297,7 @@ public final class MockOsgi {
     public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @Nullable Map<String,Object> properties) {
         setConfigForPid(bundleContext, pid, toDictionary(properties));
     }
-    
+
     /**
      * Set configuration via ConfigurationAdmin service in bundle context for component with given pid.
      * @param bundleContext Bundle context
@@ -307,7 +307,7 @@ public final class MockOsgi {
     public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @NotNull Object @NotNull ... properties) {
         setConfigForPid(bundleContext, pid, toDictionary(properties));
     }
-    
+
     private static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @Nullable Dictionary<String, Object> properties) {
         ConfigurationAdmin configAdmin = getConfigAdmin(bundleContext);
         if (configAdmin == null) {
@@ -321,7 +321,7 @@ public final class MockOsgi {
             throw new RuntimeException("Unable to update configuration for pid '" + pid + "'.", ex);
         }
     }
-    
+
     /**
      * Deactivates all bundles registered in the mocked bundle context.
      * @param bundleContext Bundle context
@@ -329,7 +329,7 @@ public final class MockOsgi {
     public static void shutdown(@NotNull BundleContext bundleContext) {
         ((MockBundleContext)bundleContext).shutdown();
     }
-    
+
     /**
      * Get configuration admin.
      * @param bundleContext Bundle context
@@ -342,5 +342,5 @@ public final class MockOsgi {
         }
         return null;
     }
-    
+
 }

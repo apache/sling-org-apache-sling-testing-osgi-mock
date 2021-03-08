@@ -42,15 +42,15 @@ public class OsgiServiceUtilActivateDeactivateTest {
             "prop2.with.periods", "value2",
             "prop3-with-hyphens", "value3");
     private BundleContext bundleContext = MockOsgi.newBundleContext();
-    
+
     @Test
     public void testService1() {
         Service1 service = new Service1();
-        
+
         assertTrue(MockOsgi.activate(service, bundleContext, map));
         assertTrue(service.isActivated());
         assertSame(bundleContext, service.getComponentContext().getBundleContext());
-        
+
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
@@ -58,11 +58,11 @@ public class OsgiServiceUtilActivateDeactivateTest {
     @Test
     public void testService2() {
         Service2 service = new Service2();
-        
+
         assertTrue(MockOsgi.activate(service, bundleContext, "prop1", "value1"));
         assertTrue(service.isActivated());
         assertSame(bundleContext, service.getBundleContext());
-        
+
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
@@ -70,11 +70,11 @@ public class OsgiServiceUtilActivateDeactivateTest {
     @Test
     public void testService3() {
         Service3 service = new Service3();
-        
+
         assertTrue(MockOsgi.activate(service, bundleContext, map));
         assertTrue(service.isActivated());
         assertEquals("value1", service.getMap().get("prop1"));
-        
+
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
@@ -82,7 +82,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
     @Test
     public void testService4() {
         Service4 service = new Service4();
-        
+
         assertTrue(MockOsgi.activate(service, bundleContext, map));
         assertTrue(service.isActivated());
         assertEquals(map, ImmutableMap.copyOf(service.getMap()));
@@ -94,10 +94,10 @@ public class OsgiServiceUtilActivateDeactivateTest {
     @Test
     public void testService5() {
         Service5 service = new Service5();
-        
+
         assertTrue(MockOsgi.activate(service, bundleContext, map));
         assertTrue(service.isActivated());
-        
+
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
@@ -105,21 +105,21 @@ public class OsgiServiceUtilActivateDeactivateTest {
     @Test
     public void testService6() {
         Service6 service = new Service6();
-        
+
         assertTrue(MockOsgi.activate(service, bundleContext, map));
         assertTrue(service.isActivated());
         assertSame(bundleContext, service.getComponentContext().getBundleContext());
         assertSame(bundleContext, service.getBundleContext());
         assertEquals("value1", service.getMap().get("prop1"));
-        
+
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
-    
+
     @Test
     public void testService7() {
         Service7 service = new Service7();
-        
+
         assertTrue(MockOsgi.activate(service, bundleContext, map));
         assertTrue(service.isActivated());
         assertSame(bundleContext, service.getComponentContext().getBundleContext());
@@ -129,8 +129,8 @@ public class OsgiServiceUtilActivateDeactivateTest {
         assertTrue(MockOsgi.deactivate(service, bundleContext, map));
         assertFalse(service.isActivated());
     }
-    
-    
+
+
     public @interface ServiceConfig {
         String prop1();
         String prop2_with_periods();
@@ -145,7 +145,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
 
     @Component
     public static class Service1 {
-        
+
         private boolean activated;
         private ComponentContext componentContext;
 
@@ -160,7 +160,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
             this.activated = false;
             this.componentContext = null;
         }
-        
+
         public boolean isActivated() {
             return activated;
         }
@@ -173,7 +173,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
 
     @Component
     public static class Service2 {
-        
+
         private boolean activated;
         private BundleContext bundleContext;
 
@@ -188,7 +188,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
             this.activated = false;
             this.bundleContext = null;
         }
-        
+
         public boolean isActivated() {
             return activated;
         }
@@ -201,7 +201,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
 
     @Component
     public static class Service3 {
-        
+
         private boolean activated;
         private Map<String, Object> map;
 
@@ -216,7 +216,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
             this.activated = false;
             this.map = null;
         }
-        
+
         public boolean isActivated() {
             return activated;
         }
@@ -229,7 +229,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
 
     @Component
     public static class Service4 {
-        
+
         private boolean activated;
         private Map<String, Object> map;
 
@@ -243,7 +243,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
         private void deactivate(int value) {
             this.activated = false;
         }
-        
+
         public boolean isActivated() {
             return activated;
         }
@@ -251,12 +251,12 @@ public class OsgiServiceUtilActivateDeactivateTest {
         public Map<String, Object> getMap() {
             return map;
         }
-        
+
     }
 
     @Component
     public static class Service5 {
-        
+
         private boolean activated;
 
         @Activate
@@ -268,7 +268,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
         private void deactivate(Integer value) {
             this.activated = false;
         }
-        
+
         public boolean isActivated() {
             return activated;
         }
@@ -277,7 +277,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
 
     @Component
     public static class Service6 {
-        
+
         private boolean activated;
         private ComponentContext componentContext;
         private BundleContext bundleContext;
@@ -298,7 +298,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
             this.bundleContext = null;
             this.map = null;
         }
-        
+
         public boolean isActivated() {
             return activated;
         }
@@ -319,7 +319,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
 
     @Component
     public static class Service7 {
-        
+
         private boolean activated;
         private ComponentContext componentContext;
         private BundleContext bundleContext;
@@ -340,7 +340,7 @@ public class OsgiServiceUtilActivateDeactivateTest {
             this.bundleContext = null;
             this.map = null;
         }
-        
+
         public boolean isActivated() {
             return activated;
         }

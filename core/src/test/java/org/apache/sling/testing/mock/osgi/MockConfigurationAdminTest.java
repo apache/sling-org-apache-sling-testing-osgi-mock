@@ -38,7 +38,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 public class MockConfigurationAdminTest {
-    
+
     private static final String[] TEST_ADAPTABLES = new String[] {
         "adaptable1",
         "adaptable2"
@@ -53,12 +53,12 @@ public class MockConfigurationAdminTest {
                 Constants.SERVICE_RANKING, 3000,
                 "adaptables", TEST_ADAPTABLES,
                 "prop2", 2);
-        
+
         context.registerInjectActivateService(new ServiceWithMetadata(), ImmutableMap.<String, Object>builder()
                 .put(Constants.SERVICE_RANKING, 4000)
                 .put("prop1", 1)
                 .build());
-        
+
         ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
 
         // values passed over when registering service has highest precedence

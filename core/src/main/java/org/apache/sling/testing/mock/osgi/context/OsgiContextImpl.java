@@ -48,7 +48,7 @@ public class OsgiContextImpl {
     protected void setUp() {
         registerDefaultServices();
     }
-    
+
     /**
      * Teardown actions after test method execution
      */
@@ -67,7 +67,7 @@ public class OsgiContextImpl {
     private void registerDefaultServices() {
         registerInjectActivateService(new MockEventAdmin());
     }
-    
+
     /**
      * @return OSGi component context
      */
@@ -131,7 +131,7 @@ public class OsgiContextImpl {
     public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @NotNull final Object @NotNull ... properties) {
         return registerService(serviceClass, service, MapUtil.toMap(properties));
     }
-    
+
     /**
      * Injects dependencies, activates and registers a service in the mocked
      * OSGi environment.

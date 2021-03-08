@@ -44,20 +44,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Mock implementation of {@link EventAdmin}.
- * From {@link EventConstants} currently only {@link EventConstants#EVENT_TOPIC} is supported. 
+ * From {@link EventConstants} currently only {@link EventConstants#EVENT_TOPIC} is supported.
  */
 @Component(immediate = true, service = EventAdmin.class)
 public final class MockEventAdmin implements EventAdmin {
-    
+
     @Reference(name="eventHandler", service=EventHandler.class,
             cardinality=ReferenceCardinality.MULTIPLE, policy=ReferencePolicy.DYNAMIC,
             bind="bindEventHandler", unbind="unbindEventHandler")
     private final Map<Object, EventHandlerItem> eventHandlers = new TreeMap<Object, EventHandlerItem>();
 
     private ExecutorService asyncHandler;
-    
+
     private static final Logger log = LoggerFactory.getLogger(MockEventAdmin.class);
-    
+
     @Activate
     protected void activate(ComponentContext componentContext) {
         asyncHandler = Executors.newCachedThreadPool();
@@ -88,7 +88,7 @@ public final class MockEventAdmin implements EventAdmin {
     public void sendEvent(final Event event) {
         distributeEvent(event);
     }
-    
+
     private void distributeEvent(Event event) {
         synchronized (eventHandlers) {
             for (EventHandlerItem item : eventHandlers.values()) {
@@ -103,7 +103,7 @@ public final class MockEventAdmin implements EventAdmin {
             }
         }
     }
-    
+
     protected void bindEventHandler(EventHandler eventHandler, Map<String, Object> props) {
         synchronized (eventHandlers) {
             eventHandlers.put(ServiceUtil.getComparableForServiceRanking(props, Order.DESCENDING), new EventHandlerItem(eventHandler, props));
@@ -115,19 +115,19 @@ public final class MockEventAdmin implements EventAdmin {
             eventHandlers.remove(ServiceUtil.getComparableForServiceRanking(props, Order.DESCENDING));
         }
     }
-    
+
     private static class EventHandlerItem {
-        
+
         private final EventHandler eventHandler;
         private final Pattern[] topicPatterns;
 
         private static final Pattern WILDCARD_PATTERN = Pattern.compile("[^*]+|(\\*)");
-        
+
         public EventHandlerItem(EventHandler eventHandler, Map<String, Object> props) {
             this.eventHandler = eventHandler;
             topicPatterns = generateTopicPatterns(props.get(EventConstants.EVENT_TOPIC));
         }
-        
+
         public boolean matches(Event event) {
             if (topicPatterns.length == 0) {
                 return true;
@@ -142,7 +142,7 @@ public final class MockEventAdmin implements EventAdmin {
             }
             return false;
         }
-        
+
         public EventHandler getEventHandler() {
             return eventHandler;
         }
@@ -167,7 +167,7 @@ public final class MockEventAdmin implements EventAdmin {
             }
             return patterns;
         }
-        
+
         /**
          * Converts a wildcard string with * to a regex pattern (from http://stackoverflow.com/questions/24337657/wildcard-matching-in-java)
          * @param wildcard
@@ -183,7 +183,7 @@ public final class MockEventAdmin implements EventAdmin {
             matcher.appendTail(result);
             return Pattern.compile(result.toString());
         }
-        
+
     }
 
 }

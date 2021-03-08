@@ -55,7 +55,7 @@
         </dependency>
 
     </dependencies>
-    
+
     <dependencyManagement>
       <dependencies>
 
@@ -124,7 +124,7 @@
 
       </dependencies>
     </dependencyManagement>
-    
+
     <build>
         <pluginManagement>
             <plugins>
