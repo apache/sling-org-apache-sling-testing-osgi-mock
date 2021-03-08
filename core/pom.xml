@@ -199,6 +199,7 @@
                 <artifactId>apache-rat-plugin</artifactId>
                 <configuration>
                     <excludes>
+                        <exclude>src/test/resources/OSGI-INF/*</exclude>
                         <exclude>src/test/resources/META-INF/test.txt</exclude>
                         <exclude>src/test/resources/bundleData/nested/first.txt</exclude>
                         <exclude>src/test/resources/bundleData/nested/second.txt</exclude>

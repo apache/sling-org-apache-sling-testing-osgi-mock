@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
+import org.apache.sling.testing.mock.osgi.sample.osgicontextimpl.MyComponent;
+import org.apache.sling.testing.mock.osgi.sample.osgicontextimpl.MyService;
 import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface2;
@@ -37,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.util.tracker.ServiceTracker;
 
 @SuppressWarnings("null")
@@ -177,22 +178,5 @@ public class OsgiContextImplTest {
         assertEquals(1, tracker.getServiceReferences().length);
 
         tracker.close();
-    }
-
-    @Component(
-            service = MyService.class
-    )
-    public static class MyComponent implements MyService {
-
-        @Override
-        public String foo() {
-            return "bar";
-        }
-    }
-
-    public interface MyService {
-
-        String foo();
-
     }
 }
