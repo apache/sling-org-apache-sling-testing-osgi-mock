@@ -71,7 +71,7 @@ public final class ComponentContextBuilder {
             bundleContext = MockOsgi.newBundleContext();
         }
         if (properties == null) {
-            properties = new Hashtable<String, Object>();
+            properties = new Hashtable<>();
         }
         return new MockComponentContext((MockBundleContext)bundleContext, properties, usingBundle);
     }

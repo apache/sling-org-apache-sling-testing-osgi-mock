@@ -44,7 +44,7 @@ class MockServiceReference<T> implements ServiceReference<T> {
     }
 
     private Comparable<Object> buildComparable() {
-        Map<String,Object> props = MapUtil.toMap(serviceRegistration.getProperties());
+        Map<String,Object> props = serviceRegistration.getPropertiesAsMap();
          // use ascending order as defined in ServiceReference#compareTo()
         return ServiceUtil.getComparableForServiceRanking(props, Order.ASCENDING);
     }

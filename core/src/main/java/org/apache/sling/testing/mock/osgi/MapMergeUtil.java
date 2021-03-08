@@ -44,15 +44,15 @@ final class MapMergeUtil {
      * 1. Properties defined in calling unit test code
      * 2. Properties from ConfigurationAdmin
      * 3. Properties from OSGi SCR metadata
-     * @param target Target service
+     * @param targetClass Target service class
      * @param configAdmin Configuration admin or null if none is registered
      * @param properties Properties from unit test code or null if none where passed
      * @return Merged properties
      */
-    static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Object target,
+    static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Class<?> targetClass,
             ConfigurationAdmin configAdmin,
             Dictionary<String, Object> properties) {
-        return toDictionary(propertiesMergeWithOsgiMetadata(target, configAdmin, toMap(properties)));
+        return toDictionary(propertiesMergeWithOsgiMetadata(targetClass, configAdmin, toMap(properties)));
     }
 
     /**
@@ -60,17 +60,17 @@ final class MapMergeUtil {
      * 1. Properties defined in calling unit test code
      * 2. Properties from ConfigurationAdmin
      * 3. Properties from OSGi SCR metadata
-     * @param target Target service
+     * @param targetClass Target service class
      * @param configAdmin Configuration admin or null if none is registered
      * @param properties Properties from unit test code or null if none where passed
      * @return Merged properties
      */
-    static Map<String, Object> propertiesMergeWithOsgiMetadata(Object target,
+    static Map<String, Object> propertiesMergeWithOsgiMetadata(Class<?> targetClass,
             ConfigurationAdmin configAdmin,
             Map<String, Object> properties) {
-        Map<String, Object> mergedProperties = new HashMap<String, Object>();
+        Map<String, Object> mergedProperties = new HashMap<>();
 
-        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(target.getClass());
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(targetClass);
         if (metadata != null) {
             Map<String,Object> metadataProperties = metadata.getProperties();
             if (metadataProperties != null) {

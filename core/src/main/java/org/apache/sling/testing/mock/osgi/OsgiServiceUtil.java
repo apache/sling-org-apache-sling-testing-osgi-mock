@@ -19,19 +19,24 @@
 package org.apache.sling.testing.mock.osgi;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.impl.inject.Annotations;
@@ -42,6 +47,7 @@ import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferencePolicy;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferencePolicyOption;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -62,7 +68,7 @@ final class OsgiServiceUtil {
      * @param componentContext Component context
      * @return true if activation/deactivation method was called. False if it failed.
      */
-    public static boolean activateDeactivate(Object target, ComponentContext componentContext, boolean activate) {
+    public static boolean activateDeactivate(Object target, MockComponentContext componentContext, boolean activate) {
         Class<?> targetClass = target.getClass();
 
         // get method name for activation/deactivation from osgi metadata
@@ -88,7 +94,7 @@ final class OsgiServiceUtil {
 
         // try to find matching activate/deactivate method and execute it
         if (invokeLifecycleMethod(target, targetClass, methodName, !activate,
-                componentContext, MapUtil.toMap(componentContext.getProperties()))) {
+                componentContext, componentContext.getPropertiesAsMap())) {
             return true;
         }
 
@@ -106,7 +112,7 @@ final class OsgiServiceUtil {
      * @param properties Updated configuration
      * @return true if modified method was called. False if it failed.
      */
-    public static boolean modified(Object target, ComponentContext componentContext, Map<String,Object> properties) {
+    public static boolean modified(Object target, MockComponentContext componentContext, Map<String,Object> properties) {
         Class<?> targetClass = target.getClass();
 
         // get method name for activation/deactivation from osgi metadata
@@ -140,7 +146,7 @@ final class OsgiServiceUtil {
      */
     private static boolean invokeLifecycleMethod(Object target, Class<?> targetClass,
             String methodName, boolean allowIntegerArgument,
-            ComponentContext componentContext, Map<String,Object> properties) {
+            MockComponentContext componentContext, Map<String,Object> properties) {
 
         // 1. componentContext
         Method method = getMethod(targetClass, methodName, new Class<?>[] { ComponentContext.class });
@@ -159,7 +165,7 @@ final class OsgiServiceUtil {
         // 3. map
         method = getMethod(targetClass, methodName, new Class<?>[] { Map.class });
         if (method != null) {
-            invokeMethod(target, method, new Object[] { MapUtil.toMap(componentContext.getProperties()) });
+            invokeMethod(target, method, new Object[] { componentContext.getPropertiesAsMap() });
             return true;
         }
 
@@ -167,7 +173,7 @@ final class OsgiServiceUtil {
         method = getMethod(targetClass, methodName, new Class<?>[] { Annotation.class });
         if (method != null) {
             invokeMethod(target, method, new Object[] { Annotations.toObject(method.getParameterTypes()[0],
-                    MapUtil.toMap(componentContext.getProperties()),
+                    componentContext.getPropertiesAsMap(),
                     componentContext.getBundleContext().getBundle(), false) });
             return true;
         }
@@ -205,11 +211,11 @@ final class OsgiServiceUtil {
                     args[i] = componentContext.getBundleContext();
                 }
                 else if (method.getParameterTypes()[i] == Map.class) {
-                    args[i] = MapUtil.toMap(componentContext.getProperties());
+                    args[i] = componentContext.getPropertiesAsMap();
                 }
                 else if (method.getParameterTypes()[i].isAnnotation()) {
                     args[i] = Annotations.toObject(method.getParameterTypes()[i],
-                            MapUtil.toMap(componentContext.getProperties()),
+                            componentContext.getPropertiesAsMap(),
                             componentContext.getBundleContext().getBundle(), false);
                 }
                 else if (method.getParameterTypes()[i] == int.class || method.getParameterTypes()[i] == Integer.class) {
@@ -401,13 +407,13 @@ final class OsgiServiceUtil {
         if (metadata == null) {
             throw new NoScrMetadataException(targetClass);
         }
-        List<Reference> references = metadata.getReferences();
-        if (references.isEmpty()) {
-            return false;
-        }
 
         // try to inject services
-        for (Reference reference : references) {
+        boolean foundAny = false;
+        for (Reference reference : metadata.getReferences()) {
+            if (reference.isConstructorParameter()) {
+                continue;
+            }
             if (properties != null) {
                 // Look for a target override
                 Object o = properties.get(reference.getName() + ".target");
@@ -416,48 +422,175 @@ final class OsgiServiceUtil {
                 }
             }
             injectServiceReference(reference, target, bundleContext);
+            foundAny = true;
         }
-        return true;
+        return foundAny;
     }
 
     /**
      * Simulate OSGi service dependency injection. Injects direct references and multiple references.
      * @param targetClass Service class
-     * @param bundleContext Bundle context from which services are fetched to inject.
-     * @param properties Services properties (used to resolve dynamic reference properties)
+     * @param componentContext Component context
      * @return true if all dependencies could be injected, false if the service has no dependencies.
      */
     @SuppressWarnings("null")
-    public static @NotNull <T> T injectServices(Class<T> targetClass, BundleContext bundleContext, Map<String, Object> properties) {
+    public static @NotNull <T> T activateInjectServices(Class<T> targetClass, MockComponentContext componentContext) {
+        T target;
         try {
-            // TODO: implement constructor injection
-            T target = targetClass.newInstance();
-
-            OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(targetClass);
-            if (metadata == null) {
-                throw new NoScrMetadataException(targetClass);
+            // try to find constructor with parameter matching the OSGi metadata
+            target = instantiateServiceWithActivateInject(targetClass, componentContext);
+            // fallback to default constructor
+            if (target == null) {
+                target = targetClass.newInstance();
             }
-            List<Reference> references = metadata.getReferences();
-            if (references.isEmpty()) {
-                return target;
-            }
-
-            // try to inject services
-            for (Reference reference : references) {
-                if (properties != null) {
-                    // Look for a target override
-                    Object o = properties.get(reference.getName() + ".target");
-                    if (o instanceof String) {
-                        reference = new DynamicReference(reference,(String)o);
-                    }
-                }
-                injectServiceReference(reference, target, bundleContext);
-            }
-            return target;
         }
-        catch (IllegalAccessException | InstantiationException ex) {
+        catch (IllegalAccessException | InstantiationException | InvocationTargetException ex) {
             throw new RuntimeException("Error creating instance of " + targetClass.getName() + ": " + ex.getMessage(), ex);
         }
+
+        // check if there are additional references outside constructor, inject them as well
+        injectServices(target, componentContext.getBundleContext(), componentContext.getPropertiesAsMap());
+
+        // check for dedicated activate method
+        activateDeactivate(target, componentContext, true);
+
+        return target;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static @Nullable <T> T instantiateServiceWithActivateInject(Class<T> targetClass, MockComponentContext componentContext)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(targetClass);
+        if (metadata == null) {
+            return null;
+        }
+
+        // get list of constructor injection references, ordered by parameter number
+        List<Reference> constructorInjectionReferences = metadata.getReferences().stream()
+                .filter(Reference::isConstructorParameter)
+                .sorted((ref1, ref2) -> ref1.getParameter().compareTo(ref2.getParameter()))
+                .collect(Collectors.toList());
+
+        // go through all constructors and try to find a matching one
+        Constructor<T> matchingConstructor = null;
+        List<Object> constructorParamValues = null;
+        for (Constructor<T> constructor : (Constructor<T>[])targetClass.getConstructors()) {
+            Optional<List<Object>> values = buildConstructorInjectionValues(targetClass, constructor,
+                    componentContext, constructorInjectionReferences);
+            if (values.isPresent()) {
+                matchingConstructor = constructor;
+                constructorParamValues = values.get();
+                break;
+            }
+        }
+        if (matchingConstructor != null && constructorParamValues != null) {
+            return matchingConstructor.newInstance(constructorParamValues.toArray(new Object[0]));
+        }
+        else {
+            return null;
+        }
+    }
+
+    private static <T> Optional<List<Object>> buildConstructorInjectionValues(Class<T> targetClass, Constructor<T> constructor,
+            MockComponentContext componentContext, List<Reference> constructorInjectionReferences)
+            throws InstantiationException, IllegalAccessException {
+        Iterator<Reference> referenceIterator = constructorInjectionReferences.iterator();
+        List<Object> values = new ArrayList<>();
+        for (Parameter parameter : constructor.getParameters()) {
+            // check for well-known parameter types first
+            if (parameter.getType() == ComponentContext.class) {
+                values.add(componentContext);
+            }
+            else if (parameter.getType() == BundleContext.class) {
+                values.add(componentContext.getBundleContext());
+            }
+            else if (parameter.getType() == Map.class) {
+                values.add(componentContext.getPropertiesAsMap());
+            }
+            else if (parameter.getType().isAnnotation()) {
+                values.add(Annotations.toObject(parameter.getType(),
+                        componentContext.getPropertiesAsMap(),
+                        componentContext.getBundleContext().getBundle(), false));
+            }
+            // check for reference injection
+            else if (referenceIterator.hasNext()) {
+                Reference reference = referenceIterator.next();
+                Optional<?> referenceValue = buildConstructorInjectionValue(targetClass, parameter.getType(), reference, componentContext);
+                if (referenceValue != null) {
+                    values.add(referenceValue.isPresent() ? referenceValue.get() : null);
+                }
+                else {
+                    // reference not found, constructor is invalid
+                    return Optional.empty();
+                }
+            }
+            else {
+                // parameter does not match, constructor is invalid
+                return Optional.empty();
+            }
+        }
+        return Optional.of(values);
+    }
+
+    /**
+     * Build value to be injected in constructor parameter.
+     * @param <T> Parameter type
+     * @param targetClass Target class
+     * @param parameterType Parameter type
+     * @param reference Reference
+     * @param componentContext Component context
+     * @return null if parameter could not be injected, empty Optional if null value should be injected, or value wrapped in Optional otherwise
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    private static <T> @Nullable Optional<?> buildConstructorInjectionValue(Class<?> targetClass, Class<T> parameterType, Reference reference,
+            MockComponentContext componentContext) throws InstantiationException, IllegalAccessException {
+        // get matching service references
+        List<ServiceInfo> matchingServices = getMatchingServices(reference.getInterfaceTypeAsClass(),
+                componentContext.getBundleContext(), reference.getTarget());
+
+        if (matchingServices.isEmpty() && !reference.isCardinalityOptional()) {
+            throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' for class " + targetClass.getName() + " : no matching services were found.");
+        }
+
+        // check for field with list/collection reference
+        if (reference.isCardinalityMultiple()) {
+            Collection<Object> collection = newCollectionInstance(parameterType);
+            switch (reference.getFieldCollectionType()) {
+                case SERVICE:
+                    matchingServices.stream()
+                        .map(ServiceInfo::getServiceInstance)
+                        .forEach(collection::add);
+                    break;
+                case REFERENCE:
+                    matchingServices.stream()
+                        .map(ServiceInfo::getServiceReference)
+                        .forEach(collection::add);
+                    break;
+                default:
+                    throw new RuntimeException("Field collection type '" + reference.getFieldCollectionType() + "' not supported "
+                            + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
+            }
+            return Optional.of(collection);
+        }
+
+        // check for single field reference
+        else {
+            Optional<ServiceInfo> firstServiceInfo = matchingServices.stream().findFirst();
+
+            // 1. assignable from service instance
+            if (classEqualsOrSuper(parameterType, reference.getInterfaceTypeAsClass())) {
+                return firstServiceInfo.map(ServiceInfo::getServiceInstance);
+            }
+
+            // 2. ServiceReference
+            if (parameterType == ServiceReference.class) {
+                return firstServiceInfo.map(ServiceInfo::getServiceReference);
+            }
+        }
+
+        // no match
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -648,7 +781,7 @@ final class OsgiServiceUtil {
             return new HashSet<>();
         }
         if (collectionType == SortedSet.class) {
-            return new TreeSet();
+            return new TreeSet<>();
         }
         return (Collection)collectionType.newInstance();
     }
@@ -708,9 +841,12 @@ final class OsgiServiceUtil {
             OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(existingRegistration.getService().getClass());
             if (metadata != null) {
                 for (Reference reference : metadata.getReferences()) {
+                    if (reference.isConstructorParameter()) {
+                        continue;
+                    }
                     if (reference.getPolicy() == ReferencePolicy.DYNAMIC) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceType())) {
+                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceTypeAsClass())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
@@ -737,7 +873,7 @@ final class OsgiServiceUtil {
                 for (Reference reference : metadata.getReferences()) {
                     if (reference.getPolicy() == ReferencePolicy.STATIC && reference.getPolicyOption() == ReferencePolicyOption.GREEDY) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceType())) {
+                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceTypeAsClass())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
@@ -748,7 +884,13 @@ final class OsgiServiceUtil {
         return references;
     }
 
-    private static boolean classEqualsOrSuper(String givenClassName, String expectedClassName) {
+    /**
+     * Checks if the given class is the same as the expected class, or the expected class is a supertype of it.
+     * @param givenClassName Given class
+     * @param expectedClassName Expected class
+     * @return true if classes match
+     */
+    private static boolean classEqualsOrSuper(String givenClassName, Class<?> expectedClass) {
         Class<?> givenClass;
         try {
             givenClass = Class.forName(givenClassName);
@@ -756,15 +898,19 @@ final class OsgiServiceUtil {
         catch (ClassNotFoundException ex) {
             throw new RuntimeException("Untable to get class for " + givenClassName + ": " + ex.getMessage(), ex);
         }
-        Class<?> expectedClass;
-        try {
-            expectedClass = Class.forName(expectedClassName);
-        }
-        catch (ClassNotFoundException ex) {
-            throw new RuntimeException("Untable to get class for " + expectedClassName + ": " + ex.getMessage(), ex);
-        }
+        return classEqualsOrSuper(givenClass, expectedClass);
+    }
+
+    /**
+     * Checks if the given class is the same as the expected class, or the expected class is a supertype of it.
+     * @param givenClassName Given class
+     * @param expectedClassName Expected class
+     * @return true if classes match
+     */
+    private static boolean classEqualsOrSuper(Class<?> givenClass, Class<?> expectedClass) {
         return expectedClass.isAssignableFrom(givenClass);
     }
+
 
     static class ServiceInfo {
 
@@ -781,7 +927,7 @@ final class OsgiServiceUtil {
         @SuppressWarnings("unchecked")
         public ServiceInfo(MockServiceRegistration registration) {
             this.serviceInstance = registration.getService();
-            this.serviceConfig = MapUtil.toMap(registration.getProperties());
+            this.serviceConfig = registration.getPropertiesAsMap();
             this.serviceReference = registration.getReference();
         }
 

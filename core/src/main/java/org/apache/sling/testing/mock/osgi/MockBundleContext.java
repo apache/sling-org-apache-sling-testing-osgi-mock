@@ -45,6 +45,7 @@ import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtil.ReferenceInfo;
 import org.apache.sling.testing.mock.osgi.OsgiServiceUtil.ServiceInfo;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -120,8 +121,8 @@ class MockBundleContext implements BundleContext {
     @SuppressWarnings("unchecked")
     @Override
     public ServiceRegistration registerService(final String[] clazzes, final Object service, final Dictionary properties) {
-        Dictionary<String, Object> mergedPropertes = MapMergeUtil.propertiesMergeWithOsgiMetadata(service, configAdmin, properties);
-        MockServiceRegistration registration = new MockServiceRegistration(this.bundle, clazzes, service, mergedPropertes, this);
+        Dictionary<String, Object> mergedPropertes = MapMergeUtil.propertiesMergeWithOsgiMetadata(service.getClass(), configAdmin, properties);
+        MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, mergedPropertes, this);
         this.registeredServices.add(registration);
         handleRefsUpdateOnRegister(registration);
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
@@ -139,7 +140,7 @@ class MockBundleContext implements BundleContext {
      * adding by additional optional references, or creating a conflict in the dependencies.
      * @param registration
      */
-    private void handleRefsUpdateOnRegister(MockServiceRegistration registration) {
+    private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
@@ -147,7 +148,7 @@ class MockBundleContext implements BundleContext {
             Reference reference = referenceInfo.getReference();
             // Look for a target override
             Object o = referenceInfo.getServiceRegistration().getProperties().get(reference.getName() + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-            if (o != null && o instanceof String) {
+            if (o instanceof String) {
                 reference = new DynamicReference(reference,(String)o);
             }
             if (reference.matchesTargetFilter(registration.getReference())) {
@@ -186,37 +187,26 @@ class MockBundleContext implements BundleContext {
         }
     }
 
-    void unregisterService(MockServiceRegistration registration) {
+    void unregisterService(MockServiceRegistration<?> registration) {
         this.registeredServices.remove(registration);
         handleRefsUpdateOnUnregister(registration);
         notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
-    void restartService(MockServiceRegistration registration) {
+    @SuppressWarnings("null")
+    void restartService(@NotNull MockServiceRegistration<?> registration) {
         // get current service properties
         Class<?> serviceClass = registration.getService().getClass();
-        Map<String,Object> properties = MapUtil.toMap(registration.getProperties());
+        Map<String,Object> properties = registration.getPropertiesAsMap();
 
         // deactivate & unregister service
         MockOsgi.deactivate(registration.getService(), this);
         unregisterService(registration);
 
         // newly create and register service
-        Object newService;
-        try {
-            newService = serviceClass.newInstance();
-        }
-        catch (InstantiationException e) {
-            throw new RuntimeException("Unable to instantiate service: " + serviceClass);
-        }
-        catch (IllegalAccessException e) {
-            throw new RuntimeException("Unable to access service class: " + serviceClass);
-        }
-        MockOsgi.injectServices(newService, this);
-        MockOsgi.activate(newService, this, properties);
+        Object newService = MockOsgi.activateInjectServices(serviceClass, this, properties);
 
-        String[] serviceInterfaces = (String[])registration.getClasses().toArray(new String[registration.getClasses().size()]);
+        String[] serviceInterfaces = registration.getClasses().toArray(new String[registration.getClasses().size()]);
         registerService(serviceInterfaces, newService, MapUtil.toDictionary(properties));
     }
 
@@ -225,7 +215,7 @@ class MockBundleContext implements BundleContext {
      * adding by removing optional references, or creating a conflict in the dependencies.
      * @param registration
      */
-    private void handleRefsUpdateOnUnregister(MockServiceRegistration registration) {
+    private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);

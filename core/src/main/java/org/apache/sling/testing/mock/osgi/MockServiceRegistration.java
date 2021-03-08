@@ -23,6 +23,7 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +47,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     private final Long serviceId;
     private final Set<String> clazzes;
     private final T service;
-    private Hashtable<String, Object> properties;
+    private final Hashtable<String, Object> properties;
     private final ServiceReference<T> serviceReference;
     private final MockBundleContext bundleContext;
 
@@ -65,7 +66,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
 
         readOsgiMetadata();
 
-        this.properties = new Hashtable<String,Object>();
+        this.properties = new Hashtable<>();
         this.updateProperties(properties);
         this.serviceReference = new MockServiceReference<T>(bundle, this);
         this.bundleContext = bundleContext;
@@ -102,6 +103,10 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
 
     Dictionary<String, Object> getProperties() {
         return this.properties;
+    }
+
+    Map<String, Object> getPropertiesAsMap() {
+        return MapUtil.toMap(this.properties);
     }
 
     boolean matches(final String clazz, final String filter) throws InvalidSyntaxException {

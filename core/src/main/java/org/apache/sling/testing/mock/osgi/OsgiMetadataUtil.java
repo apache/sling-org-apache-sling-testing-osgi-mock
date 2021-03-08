@@ -477,6 +477,7 @@ final class OsgiMetadataUtil {
         protected final FieldCollectionType fieldCollectionType;
         protected String target;
         protected Filter targetFilter;
+        protected Integer parameter;
 
         protected Reference(Class<?> clazz, Node node) {
             this.clazz = clazz;
@@ -499,6 +500,10 @@ final class OsgiMetadataUtil {
             }
             else {
                 this.targetFilter = null;
+            }
+            String parameterString = getAttributeValue(node, "parameter");
+            if (parameterString != null) {
+                this.parameter = Integer.valueOf(parameterString);
             }
         }
 
@@ -573,6 +578,14 @@ final class OsgiMetadataUtil {
 
         public String getTarget() {
             return this.target;
+        }
+
+        public Integer getParameter() {
+            return this.parameter;
+        }
+
+        public boolean isConstructorParameter() {
+            return this.parameter != null;
         }
 
         public boolean matchesTargetFilter(ServiceReference<?> serviceReference) {

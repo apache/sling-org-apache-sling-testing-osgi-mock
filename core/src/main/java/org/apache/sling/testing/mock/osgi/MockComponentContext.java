@@ -19,6 +19,7 @@
 package org.apache.sling.testing.mock.osgi;
 
 import java.util.Dictionary;
+import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -33,18 +34,32 @@ class MockComponentContext implements ComponentContext {
 
     private final MockBundleContext bundleContext;
     private final Dictionary<String, Object> properties;
+    private final Map<String, Object> propertiesAsMap;
     private final Bundle usingBundle;
 
     public MockComponentContext(final MockBundleContext mockBundleContext,
             final Dictionary<String, Object> properties, final Bundle usingBundle) {
         this.bundleContext = mockBundleContext;
         this.properties = properties;
+        this.propertiesAsMap = MapUtil.toMap(properties);
+        this.usingBundle = usingBundle;
+    }
+
+    public MockComponentContext(final MockBundleContext mockBundleContext,
+            final Map<String, Object> propertiesAsMap, final Bundle usingBundle) {
+        this.bundleContext = mockBundleContext;
+        this.properties = MapUtil.toDictionary(propertiesAsMap);
+        this.propertiesAsMap = propertiesAsMap;
         this.usingBundle = usingBundle;
     }
 
     @Override
     public Dictionary<String, Object> getProperties() {
         return this.properties;
+    }
+
+    public Map<String, Object> getPropertiesAsMap() {
+        return this.propertiesAsMap;
     }
 
     @Override

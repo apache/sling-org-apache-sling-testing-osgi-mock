@@ -188,8 +188,7 @@ public class OsgiContextImpl {
      * @return Registered service instance
      */
     public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> serviceClass, @Nullable final Map<String, Object> properties) {
-        T service = MockOsgi.injectServices(serviceClass, bundleContext(), properties);
-        MockOsgi.activate(service, bundleContext(), properties);
+        T service = MockOsgi.activateInjectServices(serviceClass, bundleContext(), properties);
         registerService(null, service, properties);
         return service;
     }
