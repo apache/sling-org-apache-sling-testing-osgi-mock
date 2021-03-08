@@ -133,8 +133,7 @@ public class OsgiContextImpl {
     }
 
     /**
-     * Injects dependencies, activates and registers a service in the mocked
-     * OSGi environment.
+     * Injects dependencies, activates and registers a service in the mocked OSGi environment.
      * @param <T> Service type
      * @param service Service instance
      * @return Registered service instance
@@ -144,8 +143,7 @@ public class OsgiContextImpl {
     }
 
     /**
-     * Injects dependencies, activates and registers a service in the mocked
-     * OSGi environment.
+     * Injects dependencies, activates and registers a service in the mocked OSGi environment.
      * @param <T> Service type
      * @param service Service instance
      * @param properties Service properties (optional)
@@ -159,15 +157,52 @@ public class OsgiContextImpl {
     }
 
     /**
-     * Injects dependencies, activates and registers a service in the mocked
-     * OSGi environment.
+     * Injects dependencies, activates and registers a service in the mocked OSGi environment.
+     * Construction injection for OSGi services is supported.
      * @param <T> Service type
-     * @param service Service instance
+     * @param service Service class
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
     public final @NotNull <T> T registerInjectActivateService(@NotNull final T service, @NotNull final Object @NotNull ... properties) {
         return registerInjectActivateService(service, MapUtil.toMap(properties));
+    }
+
+    /**
+     * Injects dependencies, activates and registers a service in the mocked OSGi environment.
+     * Construction injection for OSGi services is supported.
+     * @param <T> Service type
+     * @param service Service class
+     * @return Registered service instance
+     */
+    public final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> serviceClass) {
+        return registerInjectActivateService(serviceClass, (Map<String,Object>)null);
+    }
+
+    /**
+     * Injects dependencies, activates and registers a service in the mocked OSGi environment.
+     * Construction injection for OSGi services is supported.
+     * @param <T> Service type
+     * @param service Service class
+     * @param properties Service properties (optional)
+     * @return Registered service instance
+     */
+    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> serviceClass, @Nullable final Map<String, Object> properties) {
+        T service = MockOsgi.injectServices(serviceClass, bundleContext(), properties);
+        MockOsgi.activate(service, bundleContext(), properties);
+        registerService(null, service, properties);
+        return service;
+    }
+
+    /**
+     * Injects dependencies, activates and registers a service in the mocked OSGi environment.
+     * @param <T> Service type
+     * @param service Service instance
+     * @param properties Service properties (optional)
+     * @return Registered service instance
+     */
+    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> serviceClass, @NotNull final Object @NotNull ... properties) {
+        return registerInjectActivateService(serviceClass, MapUtil.toMap(properties));
     }
 
     /**

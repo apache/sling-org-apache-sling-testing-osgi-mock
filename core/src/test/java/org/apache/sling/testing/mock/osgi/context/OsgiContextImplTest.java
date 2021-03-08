@@ -117,17 +117,36 @@ public class OsgiContextImplTest {
     }
 
     @Test
-    public void testRegisterInjectActivate() {
+    public void testRegisterInjectActivate_Instance() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        context.registerInjectActivateService(new Service3());
+        Service3 service = context.registerInjectActivateService(new Service3());
+        assertNotNull(service.getReference1());
+        assertEquals(1, service.getReferences2().size());
     }
 
     @Test
-    public void testRegisterInjectActivateWithProperties() {
+    public void testRegisterInjectActivate_Class() {
+        context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
+        context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
+        Service3 service = context.registerInjectActivateService(Service3.class);
+        assertNotNull(service.getReference1());
+        assertEquals(1, service.getReferences2().size());
+    }
+
+    @Test
+    public void testRegisterInjectActivateWithProperties_Instance() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
         Service3 service = context.registerInjectActivateService(new Service3(), "prop1", "value3");
+        assertEquals("value3", service.getConfig().get("prop1"));
+    }
+
+    @Test
+    public void testRegisterInjectActivateWithProperties_Class() {
+        context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
+        context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
+        Service3 service = context.registerInjectActivateService(Service3.class, "prop1", "value3");
         assertEquals("value3", service.getConfig().get("prop1"));
     }
 
@@ -157,13 +176,23 @@ public class OsgiContextImplTest {
     }
 
     @Test(expected=RuntimeException.class)
-    public void testRegisterInjectActivate_RefrenceMissing() {
+    public void testRegisterInjectActivate_RefrenceMissing_Instance() {
         context.registerInjectActivateService(new Service3());
     }
 
+    @Test(expected=RuntimeException.class)
+    public void testRegisterInjectActivate_RefrenceMissing_Class() {
+        context.registerInjectActivateService(Service3.class);
+    }
+
     @Test(expected=NoScrMetadataException.class)
-    public void testRegisterInjectActivateInvalid() {
+    public void testRegisterInjectActivateInvalid_Instance() {
         context.registerInjectActivateService(new Object());
+    }
+
+    @Test(expected=NoScrMetadataException.class)
+    public void testRegisterInjectActivateInvalid_Class() {
+        context.registerInjectActivateService(Object.class);
     }
 
     @Test
@@ -179,4 +208,5 @@ public class OsgiContextImplTest {
 
         tracker.close();
     }
+
 }

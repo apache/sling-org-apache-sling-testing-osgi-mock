@@ -139,9 +139,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate OSGi service dependency injection. Injects direct references and
-     * multiple references. If a some references could not be injected no error
-     * is thrown.
+     * Simulate OSGi DS dependency injection. Injects direct references and multiple references.
+     * If a some references could not be injected no error is thrown.
      * @param target Service instance
      * @param bundleContext Bundle context from which services are fetched to inject.
      * @return true if all dependencies could be injected, false if the service has no dependencies.
@@ -151,9 +150,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate OSGi service dependency injection. Injects direct references and
-     * multiple references. If a some references could not be injected no error
-     * is thrown.
+     * Simulate OSGi DS dependency injection. Injects direct references and multiple references.
+     * If a some references could not be injected no error is thrown.
      * @param target Service instance
      * @param bundleContext Bundle context from which services are fetched to inject.
      * @param properties Service properties (used to resolve dynamic reference properties)
@@ -161,6 +159,31 @@ public final class MockOsgi {
      */
     public static boolean injectServices(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         return OsgiServiceUtil.injectServices(target, bundleContext, properties);
+    }
+
+    /**
+     * Simulate OSGi DS dependency injection. Injects direct references and multiple references.
+     * If a some references could not be injected no error is thrown.
+     * This method instantiates the service instance and also supports constructor injection.
+     * @param componentClass Component/service class
+     * @param bundleContext Bundle context from which services are fetched to inject.
+     * @return Component/service instances with injected services
+     */
+    public static @NotNull <T> T injectServices(@NotNull Class<T> componentClass, @NotNull BundleContext bundleContext) {
+        return MockOsgi.injectServices(componentClass, bundleContext, (Map<String, Object>)null);
+    }
+
+    /**
+     * Simulate OSGi DS dependency injection. Injects direct references and multiple references.
+     * If a some references could not be injected no error is thrown.
+     * This method instantiates the service instance and also supports constructor injection.
+     * @param componentClass Component/service class
+     * @param bundleContext Bundle context from which services are fetched to inject.
+     * @param properties Service properties (used to resolve dynamic reference properties)
+     * @return Component/service instances with injected services
+     */
+    public static @NotNull <T> T injectServices(@NotNull Class<T> componentClass, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
+        return OsgiServiceUtil.injectServices(componentClass, bundleContext, properties);
     }
 
     /**

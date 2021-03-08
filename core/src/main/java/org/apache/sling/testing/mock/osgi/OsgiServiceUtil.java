@@ -386,8 +386,7 @@ final class OsgiServiceUtil {
     }
 
     /**
-     * Simulate OSGi service dependency injection. Injects direct references and
-     * multiple references.
+     * Simulate OSGi service dependency injection. Injects direct references and multiple references.
      * @param target Service instance
      * @param bundleContext Bundle context from which services are fetched to inject.
      * @param properties Services properties (used to resolve dynamic reference properties)
@@ -412,13 +411,53 @@ final class OsgiServiceUtil {
             if (properties != null) {
                 // Look for a target override
                 Object o = properties.get(reference.getName() + ".target");
-                if (o != null && o instanceof String) {
+                if (o instanceof String) {
                     reference = new DynamicReference(reference,(String)o);
                 }
             }
             injectServiceReference(reference, target, bundleContext);
         }
         return true;
+    }
+
+    /**
+     * Simulate OSGi service dependency injection. Injects direct references and multiple references.
+     * @param targetClass Service class
+     * @param bundleContext Bundle context from which services are fetched to inject.
+     * @param properties Services properties (used to resolve dynamic reference properties)
+     * @return true if all dependencies could be injected, false if the service has no dependencies.
+     */
+    @SuppressWarnings("null")
+    public static @NotNull <T> T injectServices(Class<T> targetClass, BundleContext bundleContext, Map<String, Object> properties) {
+        try {
+            // TODO: implement constructor injection
+            T target = targetClass.newInstance();
+
+            OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(targetClass);
+            if (metadata == null) {
+                throw new NoScrMetadataException(targetClass);
+            }
+            List<Reference> references = metadata.getReferences();
+            if (references.isEmpty()) {
+                return target;
+            }
+
+            // try to inject services
+            for (Reference reference : references) {
+                if (properties != null) {
+                    // Look for a target override
+                    Object o = properties.get(reference.getName() + ".target");
+                    if (o instanceof String) {
+                        reference = new DynamicReference(reference,(String)o);
+                    }
+                }
+                injectServiceReference(reference, target, bundleContext);
+            }
+            return target;
+        }
+        catch (IllegalAccessException | InstantiationException ex) {
+            throw new RuntimeException("Error creating instance of " + targetClass.getName() + ": " + ex.getMessage(), ex);
+        }
     }
 
     @SuppressWarnings("unchecked")
