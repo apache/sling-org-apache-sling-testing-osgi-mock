@@ -288,7 +288,12 @@ class MockBundleContext implements BundleContext {
     @SuppressWarnings("unchecked")
     @Override
     public ServiceReference[] getServiceReferences(final String clazz, final String filter) throws InvalidSyntaxException {
-        Set<ServiceReference> result = new TreeSet<ServiceReference>(new Comparator<ServiceReference>() {
+        /*
+         * Please note that the OSGi spec does not declare any ordering for the getServiceReferences method
+         * https://docs.osgi.org/specification/osgi.core/7.0.0/framework.api.html#org.osgi.framework.BundleContext.getServiceReferences-String-String-
+         * for backward compatibility with previous implementation of osgi-mock we stick with highest-ranking first here
+         */
+        Set<ServiceReference> result = new TreeSet<>(new Comparator<ServiceReference>() {
             @Override
             public int compare(ServiceReference o1, ServiceReference o2) {
                 // reverse sort order to get highest ranking first

@@ -83,4 +83,25 @@
     </service>
     <property name="service.pid" value="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$ServiceFactory1"/>
   </scr:component>
+  <scr:component name="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$RankedServiceFive" activate="activate">
+    <property name="service.ranking" type="Integer" value="5"/>
+    <service>
+      <provide interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$RankedService"/>
+    </service>
+    <implementation class="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$RankedServiceFive"/>
+  </scr:component>
+  <scr:component name="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$RankedServiceTen" activate="activate">
+    <property name="service.ranking" type="Integer" value="10"/>
+    <service>
+      <provide interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$RankedService"/>
+    </service>
+    <implementation class="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$RankedServiceTen"/>
+  </scr:component>
+  <scr:component name="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service6VolatileMultipleReferences">
+    <service>
+      <provide interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service6VolatileMultipleReferences"/>
+    </service>
+    <reference name="rankedServices" cardinality="0..n" policy="dynamic" interface="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$RankedService" field="rankedServices" field-collection-type="service"/>
+    <implementation class="org.apache.sling.testing.mock.osgi.OsgiServiceUtilTest$Service6VolatileMultipleReferences"/>
+  </scr:component>
 </components>

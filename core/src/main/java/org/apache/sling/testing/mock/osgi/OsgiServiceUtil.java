@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -420,6 +421,7 @@ final class OsgiServiceUtil {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     private static void injectServiceReference(Reference reference, Object target, BundleContext bundleContext) {
         Class<?> targetClass = target.getClass();
 
@@ -443,7 +445,15 @@ final class OsgiServiceUtil {
         // multiple references found? inject only first one with highest ranking
         if (matchingServices.size() > 1 && !reference.isCardinalityMultiple()) {
             matchingServices = matchingServices.subList(0, 1);
+        } else {
+            /*
+             * Please note that the OSGi spec does not seem to define a ordering for the list of service references/services
+             * https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-field.injection
+             * But the actual Felix framework implementation seems to return the list always sorted by rank in ascending order, so we do the same here.
+             */
+            matchingServices.sort(Comparator.comparing(ServiceInfo::getServiceReference));
         }
+
 
         // try to invoke bind method
         for (ServiceInfo matchingService : matchingServices) {
