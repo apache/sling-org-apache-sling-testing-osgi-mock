@@ -42,13 +42,13 @@ class MockServiceReference<T> implements ServiceReference<T> {
         this.serviceRegistration = serviceRegistration;
         this.comparable = buildComparable();
     }
-    
+
     private Comparable<Object> buildComparable() {
         Map<String,Object> props = MapUtil.toMap(serviceRegistration.getProperties());
          // use ascending order as defined in ServiceReference#compareTo()
         return ServiceUtil.getComparableForServiceRanking(props, Order.ASCENDING);
     }
-    
+
     @Override
     public Bundle getBundle() {
         return this.bundle;

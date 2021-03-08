@@ -84,65 +84,63 @@ public class MockBundleTest {
         bundle.setLastModified(42);
         assertEquals(42, bundle.getLastModified());
     }
-    
+
     @Test
     public void getEntryPaths_noMatches() {
         assertNull(bundle.getEntryPaths("resources"));
-    }    
-    
+    }
+
     @Test
     public void getEntryPaths() {
-        
+
         Enumeration<String> entryPaths = bundle.getEntryPaths("bundleData");
-        
+
         List<String> paths = Collections.list(entryPaths);
-        
+
         assertThat(paths.size(), CoreMatchers.is(1));
         assertTrue(paths.contains("bundleData/nested/"));
     }
 
     @Test
     public void getEntryPaths_leadingSlash() {
-        
+
         Enumeration<String> entryPaths = bundle.getEntryPaths("bundleData");
-        
+
         List<String> paths = Collections.list(entryPaths);
-        
+
         assertThat(paths.size(), CoreMatchers.is(1));
         assertTrue(paths.contains("bundleData/nested/"));
     }
 
     @Test
     public void getEntryPaths_slash() {
-        
+
         Enumeration<String> entryPaths = bundle.getEntryPaths("/");
-        
+
         List<String> paths = Collections.list(entryPaths);
-        
-        // intentionally less precise as we don't want to be broken when e.g. test resources change 
-        assertTrue(paths.size() >= 3);
-        assertTrue(paths.contains("bundleData/"));
-        assertTrue(paths.contains("OSGI-INF/"));
-        assertTrue(paths.contains("META-INF/"));
+
+        // intentionally less precise as we don't want to be broken when e.g. test resources change
+        assertTrue(paths.size() >= 2);
+        assertTrue("Expect OSGI-INF/ in " + paths, paths.contains("OSGI-INF/"));
+        assertTrue("Expect META-INF/ in " + paths, paths.contains("META-INF/"));
     }
 
     @Test
     public void getEntryPaths_empty() {
-        
-        Enumeration<String> entryPaths = bundle.getEntryPaths("/");
-        
+
+        Enumeration<String> entryPaths = bundle.getEntryPaths("");
+
         List<String> paths = Collections.list(entryPaths);
-        
-        // intentionally less precise as we don't want to be broken when e.g. test resources change 
-        assertTrue(paths.size() >= 3);
-        assertTrue(paths.contains("bundleData/"));
-        assertTrue(paths.contains("OSGI-INF/"));
-        assertTrue(paths.contains("META-INF/"));
+
+        // intentionally less precise as we don't want to be broken when e.g. test resources change
+        assertTrue(paths.size() >= 2);
+        assertTrue("Expect OSGI-INF/ in " + paths, paths.contains("OSGI-INF/"));
+        assertTrue("Expect META-INF/ in " + paths, paths.contains("META-INF/"));
     }
-    
+
     @Test
     public void getEntryPaths_noMatch() {
-        
+
         assertNull(bundle.getEntryPaths("/EMPTY"));
         assertNull(bundle.getEntryPaths("EMPTY"));
     }
@@ -151,9 +149,9 @@ public class MockBundleTest {
     public void getEntryPaths_Nested() {
 
         Enumeration<String> entryPaths = bundle.getEntryPaths("bundleData/nested");
-        
+
         List<String> paths = Collections.list(entryPaths);
-        
+
         assertThat(paths.size(), CoreMatchers.is(2));
         assertTrue(paths.contains("bundleData/nested/first.txt"));
         assertTrue(paths.contains("bundleData/nested/second.txt"));

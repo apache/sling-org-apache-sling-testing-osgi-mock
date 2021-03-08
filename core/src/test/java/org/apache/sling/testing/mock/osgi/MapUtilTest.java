@@ -32,26 +32,26 @@ public class MapUtilTest {
     @Test
     public void testMapDictionary() {
         Map<String,Object> map = ImmutableMap.<String, Object>of("param1", "var1", "param2", 123, "param3", true);
-        
+
         Dictionary<String, Object> dict = MapUtil.toDictionary(map);
         Map<String,Object> convertedMap = MapUtil.toMap(dict);
-        
+
         assertEquals(map, convertedMap);
     }
-    
+
     @Test
     public void testMapObjectVarargs() {
         Map<String, Object> convertedMap = MapUtil.toMap("param1", "var1", "param2", 123, "param3", true);
-        
+
         assertEquals(ImmutableMap.<String, Object>of("param1", "var1", "param2", 123, "param3", true), convertedMap);
     }
-    
+
     @Test
     public void testDictionaryObjectVarargs() {
         Dictionary<String, Object> dict = MapUtil.toDictionary("param1", "var1", "param2", 123, "param3", true);
         Map<String,Object> convertedMap = MapUtil.toMap(dict);
-        
+
         assertEquals(ImmutableMap.<String, Object>of("param1", "var1", "param2", 123, "param3", true), convertedMap);
     }
-    
+
 }

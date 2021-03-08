@@ -55,7 +55,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
             final Dictionary<String, Object> properties, MockBundleContext bundleContext) {
         this.serviceId = ++serviceCounter;
         this.clazzes = new HashSet<String>(Arrays.asList(clazzes));
-        
+
         if (service instanceof ServiceFactory) {
             this.service = ((ServiceFactory<T>)service).getService(bundleContext.getBundle(), this);
         }
@@ -108,7 +108,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         return (clazz == null || this.clazzes.contains(clazz))
                 && (filter == null || new FilterImpl(filter).match(properties));
     }
-    
+
     Set<String> getClasses() {
         return clazzes;
     }
@@ -123,7 +123,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
             return this.service;
         }
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof MockServiceRegistration)) {

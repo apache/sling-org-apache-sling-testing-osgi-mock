@@ -68,7 +68,7 @@ public class OsgiServiceUtilTest {
         bundleContext.registerService(ServiceInterface2.class.getName(), service2, null);
         bundleContext.registerService(ServiceInterface3.class.getName(), service2, null);
     }
-    
+
     @After
     public void tearDown() {
         MockOsgi.shutdown(bundleContext);
@@ -212,7 +212,7 @@ public class OsgiServiceUtilTest {
     @Test
     public void testServiceFactoryViaScr() {
         ServiceFactory1 serviceFactory1 = new ServiceFactory1();
-        
+
         MockOsgi.injectServices(serviceFactory1, bundleContext);
         MockOsgi.activate(serviceFactory1, bundleContext, (Dictionary<String, Object>) null);
         bundleContext.registerService(ServiceFactory1.class.getName(), serviceFactory1, null);
@@ -224,7 +224,7 @@ public class OsgiServiceUtilTest {
     @Test
     public void testServiceFactoryViaManualRegistration() {
         final ServiceFactory1 serviceFactory1 = new ServiceFactory1();
-        
+
         bundleContext.registerService(ServiceFactory1.class.getName(), new ServiceFactory() {
             @Override
             public Object getService(Bundle bundle, ServiceRegistration registration) {
@@ -240,7 +240,7 @@ public class OsgiServiceUtilTest {
                 bundleContext.getServiceReference(ServiceFactory1.class.getName())));
     }
 
-    
+
     public interface ServiceInterface1 {
         // no methods
     }
@@ -622,7 +622,7 @@ public class OsgiServiceUtilTest {
 
     @Component(service = ServiceFactory1.class, servicefactory = true)
     public static class ServiceFactory1 {
-        
+
     }
 
     public interface RankedService {

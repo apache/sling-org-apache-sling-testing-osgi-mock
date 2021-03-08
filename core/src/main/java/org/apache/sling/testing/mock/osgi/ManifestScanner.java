@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
  * Scan METAINF/MANIFEST.MF files.
  */
 public final class ManifestScanner {
-    
+
     private static final Logger log = LoggerFactory.getLogger(ManifestScanner.class);
-    
+
     private ManifestScanner() {
         // static methods only
     }
@@ -88,7 +88,7 @@ public final class ManifestScanner {
         catch (IOException ex) {
             log.warn("Unable to read JAR manifests.", ex);
         }
-        return values; 
+        return values;
     }
 
 }

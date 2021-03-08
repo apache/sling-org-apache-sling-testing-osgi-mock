@@ -32,7 +32,7 @@ class OsgiContextMemberSuperClassTest extends OsgiContextMemberTest {
     @Test
     void testSimpleService() {
         context.registerService(Integer.class, new Integer(5));
-        
+
         Integer service = context.getService(Integer.class);
         assertEquals((Integer)5, service);
     }

@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public final class ContextPlugins {
-    
+
     private final @NotNull List<ContextPlugin<? extends OsgiContextImpl>> plugins = new ArrayList<>();
 
     /**
@@ -39,7 +39,7 @@ public final class ContextPlugins {
     public ContextPlugins() {
         // empty list
     }
-    
+
     /**
      * Start with some callbacks.
      * @param <T> context type
@@ -48,7 +48,7 @@ public final class ContextPlugins {
     public <T extends OsgiContextImpl> ContextPlugins(@NotNull final ContextCallback<T> afterSetUpCallback) {
         addAfterSetUpCallback(afterSetUpCallback);
     }
-    
+
     /**
      * Start with some callbacks.
      * @param <U> context type
@@ -57,12 +57,12 @@ public final class ContextPlugins {
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
     public <U extends OsgiContextImpl, V extends OsgiContextImpl> ContextPlugins(
-            @NotNull final ContextCallback<U> afterSetUpCallback, 
+            @NotNull final ContextCallback<U> afterSetUpCallback,
             @NotNull final ContextCallback<V> beforeTearDownCallback) {
         addAfterSetUpCallback(afterSetUpCallback);
         addBeforeTearDownCallback(beforeTearDownCallback);
     }
-    
+
     /**
      * Add plugin
      * @param <T> context type
@@ -78,7 +78,7 @@ public final class ContextPlugins {
             plugins.add(item);
         }
     }
-    
+
     /**
      * Add callback
      * @param <T> context type
@@ -103,7 +103,7 @@ public final class ContextPlugins {
             });
         }
     }
-    
+
     /**
      * Add callback
      * @param <T> context type
@@ -128,7 +128,7 @@ public final class ContextPlugins {
             });
         }
     }
-    
+
     /**
      * Add callback
      * @param <T> context type
@@ -153,7 +153,7 @@ public final class ContextPlugins {
             });
         }
     }
-    
+
     /**
      * Add callback
      * @param <T> context type
@@ -178,14 +178,14 @@ public final class ContextPlugins {
             });
         }
     }
-    
+
     /**
      * @return All plugins
      */
     public @NotNull Collection<ContextPlugin<? extends OsgiContextImpl>> getPlugins() {
         return plugins;
     }
-    
+
     /**
      * Execute all before setup callbacks.
      * @param <T> context type

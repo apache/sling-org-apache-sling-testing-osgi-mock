@@ -47,5 +47,5 @@ public abstract class AbstractContextPlugin<T extends OsgiContextImpl> implement
     public void afterTearDown(@NotNull T context) throws Exception {
         // can be overridden by subclasses
     }
-    
+
 }

@@ -31,10 +31,10 @@ import org.osgi.service.cm.Configuration;
  * Mock implementation of {@link Configuration}.
  */
 class MockConfiguration implements Configuration {
-    
+
     private final String pid;
     private Dictionary<String, Object> props;
-    
+
     /**
      * @param pid PID
      */
@@ -74,7 +74,7 @@ class MockConfiguration implements Configuration {
         // just clear the props map
         props = newConfig(pid);
     }
-    
+
     @Override
     public String toString() {
         return props.toString();
@@ -87,7 +87,7 @@ class MockConfiguration implements Configuration {
     }
 
     // --- unsupported operations ---
-    
+
     @Override
     public void setBundleLocation(String bundleLocation) {
         throw new UnsupportedOperationException();

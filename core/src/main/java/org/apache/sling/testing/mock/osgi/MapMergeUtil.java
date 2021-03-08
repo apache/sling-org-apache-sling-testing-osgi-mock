@@ -38,7 +38,7 @@ final class MapMergeUtil {
     private MapMergeUtil() {
         // static methods only
     }
-    
+
     /**
      * Merge service properties from three sources (with this precedence):
      * 1. Properties defined in calling unit test code
@@ -49,12 +49,12 @@ final class MapMergeUtil {
      * @param properties Properties from unit test code or null if none where passed
      * @return Merged properties
      */
-    static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Object target, 
-            ConfigurationAdmin configAdmin, 
+    static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Object target,
+            ConfigurationAdmin configAdmin,
             Dictionary<String, Object> properties) {
         return toDictionary(propertiesMergeWithOsgiMetadata(target, configAdmin, toMap(properties)));
     }
-    
+
     /**
      * Merge service properties from three sources (with this precedence):
      * 1. Properties defined in calling unit test code
@@ -69,7 +69,7 @@ final class MapMergeUtil {
             ConfigurationAdmin configAdmin,
             Map<String, Object> properties) {
         Map<String, Object> mergedProperties = new HashMap<String, Object>();
-        
+
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(target.getClass());
         if (metadata != null) {
             Map<String,Object> metadataProperties = metadata.getProperties();
@@ -92,13 +92,13 @@ final class MapMergeUtil {
                 }
             }
         }
-        
+
         // merge with properties from calling unit test code
         if (properties != null) {
             mergedProperties.putAll(properties);
         }
-        
+
         return mergedProperties;
     }
-    
+
 }

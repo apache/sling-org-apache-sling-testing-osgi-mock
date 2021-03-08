@@ -35,7 +35,7 @@ class MockComponentContext implements ComponentContext {
     private final Dictionary<String, Object> properties;
     private final Bundle usingBundle;
 
-    public MockComponentContext(final MockBundleContext mockBundleContext, 
+    public MockComponentContext(final MockBundleContext mockBundleContext,
             final Dictionary<String, Object> properties, final Bundle usingBundle) {
         this.bundleContext = mockBundleContext;
         this.properties = properties;

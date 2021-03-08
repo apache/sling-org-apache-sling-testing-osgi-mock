@@ -30,14 +30,14 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public final class OsgiContextBuilder {
-    
+
     private final @NotNull ContextPlugins plugins = new ContextPlugins();
-    
+
     /**
      * Create builder.
      */
     public OsgiContextBuilder() {}
-    
+
     /**
      * @param <T> context type
      * @param plugin Context plugin which listens to context lifecycle events.
@@ -99,5 +99,5 @@ public final class OsgiContextBuilder {
     public @NotNull OsgiContext build() {
         return new OsgiContext(plugins);
     }
-    
+
 }

@@ -82,10 +82,10 @@
         </dependency>
 
     </dependencies>
-    
+
     <dependencyManagement>
         <dependencies>
-      
+
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
@@ -93,7 +93,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-      
+
         </dependencies>
     </dependencyManagement>
 

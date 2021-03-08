@@ -33,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
  * Map util methods.
  */
 public final class MapUtil {
-    
+
     private MapUtil() {
         // static methods only
     }
@@ -86,7 +86,7 @@ public final class MapUtil {
     public static @Nullable Dictionary<String, Object> toDictionary(@NotNull Object @NotNull ... args) {
         return toDictionary(toMap(args));
     }
-    
+
     /**
      * Convert key/value pairs to map
      * @param args Key/value pairs
@@ -118,5 +118,5 @@ public final class MapUtil {
         }
         return result;
     }
-    
+
 }

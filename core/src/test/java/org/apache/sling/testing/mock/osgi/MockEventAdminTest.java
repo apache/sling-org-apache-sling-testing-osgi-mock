@@ -39,24 +39,24 @@ import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("null")
 public class MockEventAdminTest {
-    
+
     private static final String TOPIC_SAMPLE_1 = "sample/topic1";
     private static final String TOPIC_SAMPLE_2 = "sample/topic2";
     private static final String TOPIC_SAMPLE_ALL = "sample/*";
     private static final String TOPIC_OTHER_3 = "other/topic3";
-    
+
     private static final Event EVENT_SAMPLE_1 = new Event(TOPIC_SAMPLE_1, (Dictionary<String,?>)null);
     private static final Event EVENT_SAMPLE_2 = new Event(TOPIC_SAMPLE_2, (Dictionary<String,?>)null);
     private static final Event EVENT_OTHER_3 = new Event(TOPIC_OTHER_3, (Dictionary<String,?>)null);
-    
+
     @Rule
     public OsgiContext context = new OsgiContext();
-    
+
     private DummyEventHandler eventHandler1;
     private DummyEventHandler eventHandler12;
     private DummyEventHandler eventHandlerSampleAll;
     private DummyEventHandler eventHandlerAll;
-    
+
     @Before
     public void setUp() {
         eventHandler1 = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler(),
@@ -67,12 +67,12 @@ public class MockEventAdminTest {
                 ImmutableMap.<String, Object>of(EventConstants.EVENT_TOPIC, TOPIC_SAMPLE_ALL));
         eventHandlerAll = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler());
     }
-    
+
     @Test
     public void testSendEvent_Sample1() {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.sendEvent(EVENT_SAMPLE_1);
-        
+
         assertEquals(ImmutableList.of(EVENT_SAMPLE_1), eventHandler1.getReceivedEvents());
         assertEquals(ImmutableList.of(EVENT_SAMPLE_1), eventHandler12.getReceivedEvents());
         assertEquals(ImmutableList.of(EVENT_SAMPLE_1), eventHandlerSampleAll.getReceivedEvents());
@@ -83,7 +83,7 @@ public class MockEventAdminTest {
     public void testSendEvent_Sample2() {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.sendEvent(EVENT_SAMPLE_2);
-        
+
         assertEquals(ImmutableList.of(), eventHandler1.getReceivedEvents());
         assertEquals(ImmutableList.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents());
         assertEquals(ImmutableList.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents());
@@ -94,7 +94,7 @@ public class MockEventAdminTest {
     public void testSendEvent_Other3() {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.sendEvent(EVENT_OTHER_3);
-        
+
         assertEquals(ImmutableList.of(), eventHandler1.getReceivedEvents());
         assertEquals(ImmutableList.of(), eventHandler12.getReceivedEvents());
         assertEquals(ImmutableList.of(), eventHandlerSampleAll.getReceivedEvents());
@@ -106,7 +106,7 @@ public class MockEventAdminTest {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.postEvent(EVENT_SAMPLE_2);
         eventAdmin.postEvent(EVENT_OTHER_3);
-        
+
         // wait until result is as expected (with timeout)
         boolean expectedResult = false;
         while (!expectedResult) {
@@ -118,7 +118,7 @@ public class MockEventAdminTest {
     }
 
     private static class DummyEventHandler implements EventHandler {
-        
+
         private final List<Event> receivedEvents = new ArrayList<Event>();
 
         @Override
@@ -129,7 +129,7 @@ public class MockEventAdminTest {
         public List<Event> getReceivedEvents() {
             return ImmutableList.copyOf(receivedEvents);
         }
-        
+
     }
 
 }

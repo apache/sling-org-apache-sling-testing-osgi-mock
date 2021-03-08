@@ -36,36 +36,36 @@ public final class ComponentContextBuilder {
     private BundleContext bundleContext;
     private Dictionary<String, Object> properties;
     private Bundle usingBundle;
-    
+
     ComponentContextBuilder() {
         // constructor package-scope only
     }
-    
+
     public @NotNull ComponentContextBuilder bundleContext(@NotNull BundleContext bundleContext) {
         this.bundleContext = bundleContext;
         return this;
     }
-    
+
     public @NotNull ComponentContextBuilder properties(@Nullable Dictionary<String, Object> properties) {
         this.properties = properties;
         return this;
     }
-    
+
     public @NotNull ComponentContextBuilder properties(@Nullable Map<String, Object> properties) {
         this.properties = MapUtil.toDictionary(properties);
         return this;
     }
-        
+
     public @NotNull ComponentContextBuilder properties(@NotNull Object @NotNull ... properties) {
         this.properties = MapUtil.toDictionary(properties);
         return this;
     }
-        
+
     public @NotNull ComponentContextBuilder usingBundle(@NotNull Bundle usingBundle) {
         this.usingBundle = usingBundle;
         return this;
     }
-    
+
     public @NotNull ComponentContext build() {
         if (bundleContext == null) {
             bundleContext = MockOsgi.newBundleContext();
@@ -75,5 +75,5 @@ public final class ComponentContextBuilder {
         }
         return new MockComponentContext((MockBundleContext)bundleContext, properties, usingBundle);
     }
-    
+
 }
