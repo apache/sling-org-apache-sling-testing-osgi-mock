@@ -29,11 +29,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
-import org.apache.sling.testing.mock.osgi.sample.osgicontextimpl.MyComponent;
-import org.apache.sling.testing.mock.osgi.sample.osgicontextimpl.MyService;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface2;
+import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
+import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

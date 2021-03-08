@@ -25,13 +25,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.activatedeactivate.Service1;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.activatedeactivate.Service2;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.activatedeactivate.Service3;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.activatedeactivate.Service4;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.activatedeactivate.Service5;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.activatedeactivate.Service6;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.activatedeactivate.Service7;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service1;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service2;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service3;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service4;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service5;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service6;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service7;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 

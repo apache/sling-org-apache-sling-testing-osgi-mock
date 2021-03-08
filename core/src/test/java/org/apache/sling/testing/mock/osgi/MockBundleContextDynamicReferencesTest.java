@@ -22,12 +22,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1Optional;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface2;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface3;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceSuperInterface3;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1Optional;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface3;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceSuperInterface3;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

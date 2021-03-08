@@ -24,42 +24,44 @@
         <groupId>org.apache.sling</groupId>
         <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
         <version>3.0.1-SNAPSHOT</version>
-        <relativePath>parent/pom.xml</relativePath>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
-    <artifactId>org.apache.sling.testing.osgi-mock.reactor</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>org.apache.sling.testing.osgi-mock.test-services</artifactId>
+    <packaging>jar</packaging>
 
-    <name>Apache Sling Testing OSGi Mock</name>
-
-    <scm>
-        <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</connection>
-        <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</developerConnection>
-        <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-testing-osgi-mock.git</url>
-        <tag>HEAD</tag>
-    </scm>
-
-    <modules>
-        <module>parent</module>
-        <module>test-services</module>
-        <module>core</module>
-        <module>junit4</module>
-        <module>junit5</module>
-        <module>relocate</module>
-    </modules>
+    <name>Apache Sling Testing OSGi Mock Test Services</name>
+    <description>
+      This module is only used in the unit tests of osgi-mock.core.
+      The sample OSGi components and services are not part of the osgi-mock test source to allow bnd plugin to auto-generate the metadata for them.
+    </description>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.framework</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.service.component</artifactId>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
-
-            <!-- do not deploy this reactor pom into maven repository -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>biz.aQute.bnd</groupId>
+                <artifactId>bnd-baseline-maven-plugin</artifactId>
                 <configuration>
-                    <skip>true</skip>
+                  <skip>true</skip>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 

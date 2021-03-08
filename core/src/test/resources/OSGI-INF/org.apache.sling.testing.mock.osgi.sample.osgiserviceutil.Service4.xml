@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service4">
-  <reference name="customName" interface="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1" bind="customBind" unbind="customUnbind"/>
-  <implementation class="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service4"/>
-</scr:component>

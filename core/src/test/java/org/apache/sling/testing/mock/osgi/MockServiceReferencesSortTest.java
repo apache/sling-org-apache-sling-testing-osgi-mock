@@ -25,10 +25,10 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.RankedService;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.RankedServiceFive;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.RankedServiceTen;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service6VolatileMultipleReferences;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.RankedService;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.RankedServiceFive;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.RankedServiceTen;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service6VolatileMultipleReferences;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

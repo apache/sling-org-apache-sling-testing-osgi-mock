@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" name="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3" activate="activate" deactivate="deactivate" modified="modified">
-  <reference name="reference1" policy="dynamic" interface="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1" bind="bindReference1" unbind="unbindReference1" field="reference1"/>
-  <reference name="reference1Optional" cardinality="0..1" policy="dynamic" interface="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface1Optional" bind="bindReference1Optional" unbind="unbindReference1Optional" field="reference1Optional"/>
-  <reference name="reference2" cardinality="1..n" policy="dynamic" interface="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface2" bind="bindReference2" unbind="unbindReference2" policy-option="greedy"/>
-  <reference name="reference3" cardinality="0..n" policy="dynamic" interface="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface3" bind="bindReference3" unbind="unbindReference3" policy-option="greedy" field="references3" field-collection-type="service"/>
-  <reference name="references3Set" cardinality="0..n" interface="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface3" field="references3Set" field-collection-type="service"/>
-  <implementation class="org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3"/>
-</scr:component>

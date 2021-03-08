@@ -30,8 +30,8 @@ import java.util.Set;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferenceCardinality;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.Service3;
-import org.apache.sling.testing.mock.osgi.sample.osgiserviceutil.ServiceInterface2;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 
