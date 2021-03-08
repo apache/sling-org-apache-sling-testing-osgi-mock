@@ -20,7 +20,6 @@ package org.apache.sling.testing.mock.osgi.sample.osgiserviceutil;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,10 +62,8 @@ public class Service3OsgiR6 {
             name = "reference3DynamicFiltered")
     private volatile ServiceSuperInterface3 reference3DynamicFiltered;
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
-    private volatile List<ServiceSuperInterface3> references3Set;
-    //TODO: private Set<ServiceSuperInterface3> references3Set;
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE)
+    private volatile Set<ServiceSuperInterface3> references3Set;
 
     @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
@@ -120,8 +117,7 @@ public class Service3OsgiR6 {
     }
 
     public Set<ServiceSuperInterface3> getReferences3Set() {
-        return new HashSet<>(this.references3Set);
-        //TODO: return this.references3Set;
+        return this.references3Set;
     }
 
     public Collection<ServiceSuperInterface3> getReferences3Collection() {

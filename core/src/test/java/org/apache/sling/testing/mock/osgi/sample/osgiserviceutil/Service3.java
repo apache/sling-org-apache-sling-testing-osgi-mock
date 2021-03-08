@@ -56,9 +56,9 @@ public class Service3 {
     private volatile List<ServiceSuperInterface3> references3 = new ArrayList<>();
     private List<Map<String, Object>> reference3Configs = new ArrayList<>();
 
-    @Reference(name = "references3Set", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE)
-    private List<ServiceSuperInterface3> references3Set = new ArrayList<>();
-    //TODO: private Set<ServiceSuperInterface3> references3Set = new HashSet<>();
+    @Reference(name = "references3Set", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile Set<ServiceSuperInterface3> references3Set = new HashSet<>();
 
     private ComponentContext componentContext;
     private Map<String, Object> config;
@@ -104,8 +104,7 @@ public class Service3 {
     }
 
     public Set<ServiceSuperInterface3> getReferences3Set() {
-        return new HashSet<>(this.references3Set);
-        //TODO: return this.references3Set;
+        return this.references3Set;
     }
 
     public ComponentContext getComponentContext() {
