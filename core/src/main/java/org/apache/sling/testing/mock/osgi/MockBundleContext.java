@@ -141,11 +141,12 @@ class MockBundleContext implements BundleContext {
      * @param registration Service registration
      * @param bundleContext Bundle context
      */
+    @SuppressWarnings("unchecked")
     private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
 
         // handle DYNAMIC references to this registration
-        List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
-        for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
+        List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
+        for (ReferenceInfo<?> referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
             // Look for a target override
             Object o = referenceInfo.getServiceRegistration().getProperties().get(reference.getName() + ComponentConstants.REFERENCE_TARGET_SUFFIX);
@@ -170,8 +171,8 @@ class MockBundleContext implements BundleContext {
         }
 
         // handle STATIC+GREEDY references to this registration
-        List<ReferenceInfo> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
-        for (ReferenceInfo referenceInfo : affectedStaticGreedyReferences) {
+        List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
             case MANDATORY_UNARY:
@@ -217,11 +218,12 @@ class MockBundleContext implements BundleContext {
      * @param registration Service registration
      * @param bundleContext Bundle context
      */
+    @SuppressWarnings("unchecked")
     private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
 
         // handle DYNAMIC references to this registration
-        List<ReferenceInfo> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
-        for (ReferenceInfo referenceInfo : affectedDynamicReferences) {
+        List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
+        for (ReferenceInfo<?> referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
@@ -240,8 +242,8 @@ class MockBundleContext implements BundleContext {
         }
 
         // handle STATIC+GREEDY references to this registration
-        List<ReferenceInfo> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
-        for (ReferenceInfo referenceInfo : affectedStaticGreedyReferences) {
+        List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
             case MANDATORY_UNARY:

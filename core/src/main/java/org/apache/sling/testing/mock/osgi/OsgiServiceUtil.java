@@ -39,7 +39,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.impl.helper.ComponentServiceObjectsHelper;
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.FieldCollectionType;
@@ -51,6 +50,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentServiceObjects;
@@ -561,7 +561,7 @@ final class OsgiServiceUtil {
     private static <T> @Nullable Optional<?> buildConstructorInjectionValue(Class<?> targetClass, Class<T> parameterType, Reference reference,
             MockComponentContext componentContext) throws InstantiationException, IllegalAccessException {
         // get matching service references
-        List<ServiceInfo> matchingServices = getMatchingServices(reference.getInterfaceTypeAsClass(),
+        List<ServiceInfo<?>> matchingServices = getMatchingServices(reference.getInterfaceTypeAsClass(),
                 componentContext.getBundleContext(), reference.getTarget());
 
         if (matchingServices.isEmpty() && !reference.isCardinalityOptional()) {
@@ -591,7 +591,7 @@ final class OsgiServiceUtil {
 
         // check for single field reference
         else {
-            Optional<ServiceInfo> firstServiceInfo = matchingServices.stream().findFirst();
+            Optional<ServiceInfo<?>> firstServiceInfo = matchingServices.stream().findFirst();
 
             // 1. assignable from service instance
             if (classEqualsOrSuper(parameterType, reference.getInterfaceTypeAsClass())) {
@@ -608,7 +608,6 @@ final class OsgiServiceUtil {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     private static void injectServiceReference(Reference reference, Object target, BundleContext bundleContext) {
         Class<?> targetClass = target.getClass();
 
@@ -616,7 +615,7 @@ final class OsgiServiceUtil {
         Class<?> type = reference.getInterfaceTypeAsClass();
 
         // get matching service references
-        List<ServiceInfo> matchingServices = getMatchingServices(type, bundleContext, reference.getTarget());
+        List<ServiceInfo<?>> matchingServices = getMatchingServices(type, bundleContext, reference.getTarget());
 
         // no references found? check if reference was optional
         if (matchingServices.isEmpty()) {
@@ -643,12 +642,12 @@ final class OsgiServiceUtil {
 
 
         // try to invoke bind method
-        for (ServiceInfo matchingService : matchingServices) {
+        for (ServiceInfo<?> matchingService : matchingServices) {
             invokeBindUnbindMethod(reference, target, matchingService, bundleContext, true);
         }
     }
 
-    private static void invokeBindUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo, BundleContext bundleContext, boolean bind) {
+    private static void invokeBindUnbindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo, BundleContext bundleContext, boolean bind) {
         Class<?> targetClass = target.getClass();
 
         // try to invoke bind method
@@ -661,7 +660,6 @@ final class OsgiServiceUtil {
         }
 
         if (StringUtils.isNotEmpty(methodName) && serviceInfo != null) {
-            ComponentServiceObjectsHelper helper = new ComponentServiceObjectsHelper(bundleContext);
 
             // 1. ServiceReference
             Method method = getMethod(targetClass, methodName, new Class<?>[] { ServiceReference.class });
@@ -673,7 +671,7 @@ final class OsgiServiceUtil {
             // 2. ComponentServiceObjects
             method = getMethod(targetClass, methodName, new Class<?>[] { ComponentServiceObjects.class });
             if (method != null) {
-                invokeMethod(target, method, new Object[] { helper.getServiceObjects(serviceInfo.getServiceReference()) });
+                invokeMethod(target, method, new Object[] { toComponentServiceObjects(bundleContext.getServiceObjects(serviceInfo.getServiceReference())) });
                 return;
             }
 
@@ -702,7 +700,7 @@ final class OsgiServiceUtil {
                         args[i] = serviceInfo.getServiceReference();
                     }
                     else if (method.getParameterTypes()[i] == ComponentServiceObjects.class) {
-                        args[i] = helper.getServiceObjects(serviceInfo.getServiceReference());
+                        args[i] = toComponentServiceObjects(bundleContext.getServiceObjects(serviceInfo.getServiceReference()));
                     }
                     else if (method.getParameterTypes()[i].isAssignableFrom(interfaceType)) {
                         args[i] = serviceInfo.getServiceInstance();
@@ -770,6 +768,23 @@ final class OsgiServiceUtil {
             }
         }
 
+    }
+
+    private static <T> ComponentServiceObjects<T> toComponentServiceObjects(ServiceObjects<T> serviceObjects) {
+        return new ComponentServiceObjects<T>() {
+            @Override
+            public T getService() {
+                return serviceObjects.getService();
+            }
+            @Override
+            public void ungetService(T service) {
+                serviceObjects.ungetService(service);
+            }
+            @Override
+            public ServiceReference<T> getServiceReference() {
+                return serviceObjects.getServiceReference();
+            }
+        };
     }
 
     @SuppressWarnings("unchecked")
@@ -847,14 +862,15 @@ final class OsgiServiceUtil {
         invokeBindUnbindMethod(reference,  target, serviceInfo, bundleContext, false);
     }
 
-    private static List<ServiceInfo> getMatchingServices(Class<?> type, BundleContext bundleContext, String filter) {
-        List<ServiceInfo> matchingServices = new ArrayList<ServiceInfo>();
+    @SuppressWarnings("unchecked")
+    private static List<ServiceInfo<?>> getMatchingServices(Class<?> type, BundleContext bundleContext, String filter) {
+        List<ServiceInfo<?>> matchingServices = new ArrayList<>();
         try {
             ServiceReference[] references = bundleContext.getServiceReferences(type.getName(), filter);
             if (references != null) {
                 for (ServiceReference<?> serviceReference : references) {
                     Object serviceInstance = bundleContext.getService(serviceReference);
-                    Map<String, Object> serviceConfig = new HashMap<String, Object>();
+                    Map<String, Object> serviceConfig = new HashMap<>();
                     String[] keys = serviceReference.getPropertyKeys();
                     for (String key : keys) {
                         serviceConfig.put(key, serviceReference.getProperty(key));
@@ -875,10 +891,12 @@ final class OsgiServiceUtil {
      * @param registration Service registration
      * @return List of references
      */
-    public static List<ReferenceInfo> getMatchingDynamicReferences(SortedSet<MockServiceRegistration> registeredServices,
+    @SuppressWarnings("unchecked")
+    public static List<ReferenceInfo<?>> getMatchingDynamicReferences(SortedSet<MockServiceRegistration> registeredServices,
             MockServiceRegistration<?> registration) {
-        List<ReferenceInfo> references = new ArrayList<ReferenceInfo>();
-        for (MockServiceRegistration existingRegistration : registeredServices) {
+        List<ReferenceInfo<?>> references = new ArrayList<>();
+        for (MockServiceRegistration<?> existingRegistration : registeredServices) {
+            @SuppressWarnings("null")
             OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(existingRegistration.getService().getClass());
             if (metadata != null) {
                 for (Reference reference : metadata.getReferences()) {
@@ -905,10 +923,11 @@ final class OsgiServiceUtil {
      * @param registration Service registration
      * @return List of references
      */
-    public static List<ReferenceInfo> getMatchingStaticGreedyReferences(SortedSet<MockServiceRegistration> registeredServices,
+    @SuppressWarnings({ "unchecked", "null" })
+    public static List<ReferenceInfo<?>> getMatchingStaticGreedyReferences(SortedSet<MockServiceRegistration> registeredServices,
             MockServiceRegistration<?> registration) {
-        List<ReferenceInfo> references = new ArrayList<ReferenceInfo>();
-        for (MockServiceRegistration existingRegistration : registeredServices) {
+        List<ReferenceInfo<?>> references = new ArrayList<>();
+        for (MockServiceRegistration<?> existingRegistration : registeredServices) {
             OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(existingRegistration.getService().getClass());
             if (metadata != null) {
                 for (Reference reference : metadata.getReferences()) {
@@ -953,26 +972,25 @@ final class OsgiServiceUtil {
     }
 
 
-    static class ServiceInfo {
+    static class ServiceInfo<T> {
 
-        private final Object serviceInstance;
+        private final T serviceInstance;
         private final Map<String, Object> serviceConfig;
-        private final ServiceReference serviceReference;
+        private final ServiceReference<T> serviceReference;
 
-        public ServiceInfo(Object serviceInstance, Map<String, Object> serviceConfig, ServiceReference serviceReference) {
+        public ServiceInfo(T serviceInstance, Map<String, Object> serviceConfig, ServiceReference<T> serviceReference) {
             this.serviceInstance = serviceInstance;
             this.serviceConfig = serviceConfig;
             this.serviceReference = serviceReference;
         }
 
-        @SuppressWarnings("unchecked")
-        public ServiceInfo(MockServiceRegistration registration) {
+        public ServiceInfo(MockServiceRegistration<T> registration) {
             this.serviceInstance = registration.getService();
             this.serviceConfig = registration.getPropertiesAsMap();
             this.serviceReference = registration.getReference();
         }
 
-        public Object getServiceInstance() {
+        public T getServiceInstance() {
             return this.serviceInstance;
         }
 
@@ -980,23 +998,23 @@ final class OsgiServiceUtil {
             return this.serviceConfig;
         }
 
-        public ServiceReference getServiceReference() {
+        public ServiceReference<T> getServiceReference() {
             return serviceReference;
         }
 
     }
 
-    static class ReferenceInfo {
+    static class ReferenceInfo<T> {
 
-        private final MockServiceRegistration serviceRegistration;
+        private final MockServiceRegistration<T> serviceRegistration;
         private final Reference reference;
 
-        public ReferenceInfo(MockServiceRegistration serviceRegistration, Reference reference) {
+        public ReferenceInfo(MockServiceRegistration<T> serviceRegistration, Reference reference) {
             this.serviceRegistration = serviceRegistration;
             this.reference = reference;
         }
 
-        public MockServiceRegistration getServiceRegistration() {
+        public MockServiceRegistration<T> getServiceRegistration() {
             return serviceRegistration;
         }
 
