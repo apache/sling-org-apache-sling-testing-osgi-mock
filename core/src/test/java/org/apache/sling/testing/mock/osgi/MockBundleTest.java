@@ -120,24 +120,22 @@ public class MockBundleTest {
         List<String> paths = Collections.list(entryPaths);
         
         // intentionally less precise as we don't want to be broken when e.g. test resources change 
-        assertTrue(paths.size() >= 3);
-        assertTrue(paths.contains("bundleData/"));
-        assertTrue(paths.contains("OSGI-INF/"));
-        assertTrue(paths.contains("META-INF/"));
+        assertTrue(paths.size() >= 2);
+        assertTrue("Expect OSGI-INF/ in " + paths, paths.contains("OSGI-INF/"));
+        assertTrue("Expect META-INF/ in " + paths, paths.contains("META-INF/"));
     }
 
     @Test
     public void getEntryPaths_empty() {
         
-        Enumeration<String> entryPaths = bundle.getEntryPaths("/");
+        Enumeration<String> entryPaths = bundle.getEntryPaths("");
         
         List<String> paths = Collections.list(entryPaths);
         
         // intentionally less precise as we don't want to be broken when e.g. test resources change 
-        assertTrue(paths.size() >= 3);
-        assertTrue(paths.contains("bundleData/"));
-        assertTrue(paths.contains("OSGI-INF/"));
-        assertTrue(paths.contains("META-INF/"));
+        assertTrue(paths.size() >= 2);
+        assertTrue("Expect OSGI-INF/ in " + paths, paths.contains("OSGI-INF/"));
+        assertTrue("Expect META-INF/ in " + paths, paths.contains("META-INF/"));
     }
     
     @Test
