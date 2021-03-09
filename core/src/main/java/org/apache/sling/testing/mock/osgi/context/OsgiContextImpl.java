@@ -172,7 +172,7 @@ public class OsgiContextImpl {
      * Injects dependencies, activates and registers a service in the mocked OSGi environment.
      * Construction injection for OSGi services is supported.
      * @param <T> Service type
-     * @param service Service class
+     * @param serviceClass Service class
      * @return Registered service instance
      */
     public final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> serviceClass) {
@@ -183,7 +183,7 @@ public class OsgiContextImpl {
      * Injects dependencies, activates and registers a service in the mocked OSGi environment.
      * Construction injection for OSGi services is supported.
      * @param <T> Service type
-     * @param service Service class
+     * @param serviceClass Service class
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
@@ -196,7 +196,7 @@ public class OsgiContextImpl {
     /**
      * Injects dependencies, activates and registers a service in the mocked OSGi environment.
      * @param <T> Service type
-     * @param service Service instance
+     * @param serviceClass Service instance
      * @param properties Service properties (optional)
      * @return Registered service instance
      */

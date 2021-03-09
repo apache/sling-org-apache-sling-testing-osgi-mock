@@ -167,6 +167,7 @@ public final class MockOsgi {
      * This method instantiates the service instance and also supports constructor injection.
      * @param targetClass Component/service class
      * @param bundleContext Bundle context from which services are fetched to inject.
+     * @param <T> Target class type
      * @return Component/service instances with injected services
      */
     public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext) {
@@ -180,6 +181,7 @@ public final class MockOsgi {
      * @param targetClass Component/service class
      * @param bundleContext Bundle context from which services are fetched to inject.
      * @param properties Service properties (used to resolve dynamic reference properties)
+     * @param <T> Target class type
      * @return Component/service instances with injected services
      */
     public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
@@ -195,6 +197,7 @@ public final class MockOsgi {
      * @param targetClass Component/service class
      * @param bundleContext Bundle context from which services are fetched to inject.
      * @param properties Service properties (used to resolve dynamic reference properties)
+     * @param <T> Target class type
      * @return Component/service instances with injected services
      */
     public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext,  @NotNull Object @NotNull ... properties) {
