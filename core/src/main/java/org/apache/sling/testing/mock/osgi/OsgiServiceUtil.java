@@ -594,7 +594,7 @@ final class OsgiServiceUtil {
             Optional<ServiceInfo<?>> firstServiceInfo = matchingServices.stream().findFirst();
 
             // 1. assignable from service instance
-            if (classEqualsOrSuper(parameterType, reference.getInterfaceTypeAsClass())) {
+            if (parameterType.isAssignableFrom(reference.getInterfaceTypeAsClass())) {
                 return firstServiceInfo.map(ServiceInfo::getServiceInstance);
             }
 
@@ -905,7 +905,7 @@ final class OsgiServiceUtil {
                     }
                     if (reference.getPolicy() == ReferencePolicy.DYNAMIC) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceTypeAsClass())) {
+                            if (StringUtils.equals(serviceInterface, reference.getInterfaceType())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
@@ -933,7 +933,7 @@ final class OsgiServiceUtil {
                 for (Reference reference : metadata.getReferences()) {
                     if (reference.getPolicy() == ReferencePolicy.STATIC && reference.getPolicyOption() == ReferencePolicyOption.GREEDY) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (classEqualsOrSuper(serviceInterface, reference.getInterfaceTypeAsClass())) {
+                            if (StringUtils.equals(serviceInterface, reference.getInterfaceType())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
@@ -943,34 +943,6 @@ final class OsgiServiceUtil {
         }
         return references;
     }
-
-    /**
-     * Checks if the given class is the same as the expected class, or the expected class is a supertype of it.
-     * @param givenClassName Given class
-     * @param expectedClassName Expected class
-     * @return true if classes match
-     */
-    private static boolean classEqualsOrSuper(String givenClassName, Class<?> expectedClass) {
-        Class<?> givenClass;
-        try {
-            givenClass = Class.forName(givenClassName);
-        }
-        catch (ClassNotFoundException ex) {
-            throw new RuntimeException("Untable to get class for " + givenClassName + ": " + ex.getMessage(), ex);
-        }
-        return classEqualsOrSuper(givenClass, expectedClass);
-    }
-
-    /**
-     * Checks if the given class is the same as the expected class, or the expected class is a supertype of it.
-     * @param givenClassName Given class
-     * @param expectedClassName Expected class
-     * @return true if classes match
-     */
-    private static boolean classEqualsOrSuper(Class<?> givenClass, Class<?> expectedClass) {
-        return expectedClass.isAssignableFrom(givenClass);
-    }
-
 
     static class ServiceInfo<T> {
 

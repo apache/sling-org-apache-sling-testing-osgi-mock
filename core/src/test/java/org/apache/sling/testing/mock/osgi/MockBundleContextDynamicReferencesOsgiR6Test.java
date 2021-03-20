@@ -160,13 +160,13 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
     public void testReferenceWithDynamicTargetFilter() {
         assertDependencies3DynamicFiltered(null);
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a,
+        bundleContext.registerService(ServiceSuperInterface3.class.getName(), dependency3a,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "abc")));
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b,
+        bundleContext.registerService(ServiceSuperInterface3.class.getName(), dependency3b,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "def")));
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3c,
+        bundleContext.registerService(ServiceSuperInterface3.class.getName(), dependency3c,
                 MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "hij")));
 
         assertDependencies3DynamicFiltered(dependency3b);
