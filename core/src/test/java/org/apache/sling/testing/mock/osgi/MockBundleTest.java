@@ -21,14 +21,12 @@ package org.apache.sling.testing.mock.osgi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
@@ -97,7 +95,7 @@ public class MockBundleTest {
 
         List<String> paths = Collections.list(entryPaths);
 
-        assertThat(paths.size(), CoreMatchers.is(1));
+        assertEquals(1, paths.size());
         assertTrue(paths.contains("bundleData/nested/"));
     }
 
@@ -108,7 +106,7 @@ public class MockBundleTest {
 
         List<String> paths = Collections.list(entryPaths);
 
-        assertThat(paths.size(), CoreMatchers.is(1));
+        assertEquals(1, paths.size());
         assertTrue(paths.contains("bundleData/nested/"));
     }
 
@@ -152,7 +150,7 @@ public class MockBundleTest {
 
         List<String> paths = Collections.list(entryPaths);
 
-        assertThat(paths.size(), CoreMatchers.is(2));
+        assertEquals(2, paths.size());
         assertTrue(paths.contains("bundleData/nested/first.txt"));
         assertTrue(paths.contains("bundleData/nested/second.txt"));
     }
