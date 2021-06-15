@@ -190,9 +190,13 @@ class MockBundleContext implements BundleContext {
     }
 
     void unregisterService(MockServiceRegistration<?> registration) {
-        this.registeredServices.remove(registration);
-        handleRefsUpdateOnUnregister(registration, this);
-        notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
+        boolean wasRemoved = this.registeredServices.remove(registration);
+        if (wasRemoved) {
+            handleRefsUpdateOnUnregister(registration, this);
+            notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
+        } else {
+            throw new IllegalStateException("Service was already unregistered");
+        }
     }
 
     @SuppressWarnings("null")

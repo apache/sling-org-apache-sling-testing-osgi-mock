@@ -37,6 +37,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -233,6 +234,13 @@ public class MockBundleContextTest {
         reg1.unregister();
 
         assertNull(bundleContext.getServiceReference(clazz1));
+        
+        try {
+            reg1.unregister();
+            Assert.fail("Unregistering a non existant service should throw IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertEquals("Service was already unregistered", e.getMessage());
+        }
     }
 
 
