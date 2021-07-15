@@ -174,17 +174,24 @@ class MockBundleContext implements BundleContext {
         List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
-            switch (reference.getCardinality()) {
-            case MANDATORY_UNARY:
-                // nothing to do - reference is already set
-                break;
-            case MANDATORY_MULTIPLE:
-            case OPTIONAL_MULTIPLE:
-            case OPTIONAL_UNARY:
-                restartService(referenceInfo.getServiceRegistration());
-                break;
-            default:
-                throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+            // Look for a target override
+            Object o = referenceInfo.getServiceRegistration().getProperties().get(reference.getName() + ComponentConstants.REFERENCE_TARGET_SUFFIX);
+            if (o instanceof String) {
+                reference = new DynamicReference(reference,(String)o);
+            }
+            if (reference.matchesTargetFilter(registration.getReference())) {
+                switch (reference.getCardinality()) {
+                    case MANDATORY_UNARY:
+                        // nothing to do - reference is already set
+                        break;
+                    case MANDATORY_MULTIPLE:
+                    case OPTIONAL_MULTIPLE:
+                    case OPTIONAL_UNARY:
+                        restartService(referenceInfo.getServiceRegistration());
+                        break;
+                    default:
+                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                }
             }
         }
     }
@@ -249,15 +256,17 @@ class MockBundleContext implements BundleContext {
         List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
-            switch (reference.getCardinality()) {
-            case MANDATORY_UNARY:
-            case MANDATORY_MULTIPLE:
-            case OPTIONAL_MULTIPLE:
-            case OPTIONAL_UNARY:
-                restartService(referenceInfo.getServiceRegistration());
-                break;
-            default:
-                throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+            if (reference.matchesTargetFilter(registration.getReference())) {
+                switch (reference.getCardinality()) {
+                    case MANDATORY_UNARY:
+                    case MANDATORY_MULTIPLE:
+                    case OPTIONAL_MULTIPLE:
+                    case OPTIONAL_UNARY:
+                        restartService(referenceInfo.getServiceRegistration());
+                        break;
+                    default:
+                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                }
             }
         }
     }
