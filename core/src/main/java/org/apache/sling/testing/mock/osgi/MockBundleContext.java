@@ -176,17 +176,19 @@ class MockBundleContext implements BundleContext {
         Set<MockServiceRegistration<?>> servicesToRestart = new HashSet<>();
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
-            switch (reference.getCardinality()) {
-            case MANDATORY_UNARY:
-                // nothing to do - reference is already set
-                break;
-            case MANDATORY_MULTIPLE:
-            case OPTIONAL_MULTIPLE:
-            case OPTIONAL_UNARY:
-                servicesToRestart.add(referenceInfo.getServiceRegistration());
-                break;
-            default:
-                throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+            if (reference.matchesTargetFilter(registration.getReference())) {
+                switch (reference.getCardinality()) {
+                case MANDATORY_UNARY:
+                    // nothing to do - reference is already set
+                    break;
+                case MANDATORY_MULTIPLE:
+                case OPTIONAL_MULTIPLE:
+                case OPTIONAL_UNARY:
+                    servicesToRestart.add(referenceInfo.getServiceRegistration());
+                    break;
+                default:
+                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                }
             }
         }
         servicesToRestart.forEach(this::restartService);
@@ -253,15 +255,17 @@ class MockBundleContext implements BundleContext {
         Set<MockServiceRegistration<?>> servicesToRestart = new HashSet<>();
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
-            switch (reference.getCardinality()) {
-            case MANDATORY_UNARY:
-            case MANDATORY_MULTIPLE:
-            case OPTIONAL_MULTIPLE:
-            case OPTIONAL_UNARY:
-                servicesToRestart.add(referenceInfo.getServiceRegistration());
-                break;
-            default:
-                throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+            if (reference.matchesTargetFilter(registration.getReference())) {
+                switch (reference.getCardinality()) {
+                case MANDATORY_UNARY:
+                case MANDATORY_MULTIPLE:
+                case OPTIONAL_MULTIPLE:
+                case OPTIONAL_UNARY:
+                    servicesToRestart.add(referenceInfo.getServiceRegistration());
+                    break;
+                default:
+                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                }
             }
         }
         servicesToRestart.forEach(this::restartService);
