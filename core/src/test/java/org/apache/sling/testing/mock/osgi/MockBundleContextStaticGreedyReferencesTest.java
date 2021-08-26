@@ -38,6 +38,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -148,6 +149,19 @@ public class MockBundleContextStaticGreedyReferencesTest {
         reg2a.unregister();
     }
 
+    @Test
+    public void testReferenceWithTargetFilter() {
+        assertDependencies3Filtered();
+
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a,
+                MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "abc")));
+
+        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b,
+                MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "def")));
+
+        assertDependencies3Filtered(dependency3a);
+    }
+
     private void assertDependency1(ServiceInterface1 instance) {
         Service3StaticGreedy service = getService();
         if (instance == null) {
@@ -175,7 +189,7 @@ public class MockBundleContextStaticGreedyReferencesTest {
     }
 
     private void assertDependencies3(ServiceSuperInterface3... instances) {
-        Service3StaticGreedy service =getService();
+        Service3StaticGreedy service = getService();
         assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances),
                 ImmutableSet.<ServiceSuperInterface3>copyOf(service.getReferences3()));
     }
@@ -183,6 +197,12 @@ public class MockBundleContextStaticGreedyReferencesTest {
     private Service3StaticGreedy getService() {
         ServiceReference<?> serviceRef = bundleContext.getServiceReference(Service3StaticGreedy.class.getName());
         return (Service3StaticGreedy)bundleContext.getService(serviceRef);
+    }
+
+    private void assertDependencies3Filtered(ServiceSuperInterface3... instances) {
+        Service3StaticGreedy service = getService();
+        assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances),
+                ImmutableSet.<ServiceSuperInterface3>copyOf(service.getReferences3Filtered()));
     }
 
 }

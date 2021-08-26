@@ -57,6 +57,10 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
     private List<ServiceSuperInterface3> references3 = new ArrayList<>();
     private List<Map<String, Object>> reference3Configs = new ArrayList<>();
 
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE, target="(prop1=abc)",
+            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
+    private List<ServiceSuperInterface3> references3Filtered;
+
     private ComponentContext componentContext;
     private Map<String, Object> config;
 
@@ -110,6 +114,11 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
     @Override
     public List<Map<String, Object>> getReference3Configs() {
         return this.reference3Configs;
+    }
+
+    @Override
+    public List<ServiceSuperInterface3> getReferences3Filtered() {
+        return this.references3Filtered;
     }
 
     public ComponentContext getComponentContext() {

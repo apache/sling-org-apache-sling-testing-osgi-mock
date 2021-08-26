@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -172,6 +173,7 @@ class MockBundleContext implements BundleContext {
 
         // handle STATIC+GREEDY references to this registration
         List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        Set<MockServiceRegistration<?>> servicesToRestart = new HashSet<>();
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
@@ -181,12 +183,13 @@ class MockBundleContext implements BundleContext {
             case MANDATORY_MULTIPLE:
             case OPTIONAL_MULTIPLE:
             case OPTIONAL_UNARY:
-                restartService(referenceInfo.getServiceRegistration());
+                servicesToRestart.add(referenceInfo.getServiceRegistration());
                 break;
             default:
                 throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
             }
         }
+        servicesToRestart.forEach(this::restartService);
     }
 
     void unregisterService(MockServiceRegistration<?> registration) {
@@ -247,6 +250,7 @@ class MockBundleContext implements BundleContext {
 
         // handle STATIC+GREEDY references to this registration
         List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        Set<MockServiceRegistration<?>> servicesToRestart = new HashSet<>();
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             switch (reference.getCardinality()) {
@@ -254,12 +258,13 @@ class MockBundleContext implements BundleContext {
             case MANDATORY_MULTIPLE:
             case OPTIONAL_MULTIPLE:
             case OPTIONAL_UNARY:
-                restartService(referenceInfo.getServiceRegistration());
+                servicesToRestart.add(referenceInfo.getServiceRegistration());
                 break;
             default:
                 throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
             }
         }
+        servicesToRestart.forEach(this::restartService);
     }
 
     @SuppressWarnings("unchecked")

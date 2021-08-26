@@ -122,6 +122,11 @@ public class Service3StaticGreedyConstructorInjectionImpl implements Service3Sta
         return null;
     }
 
+    @Override
+    public List<ServiceSuperInterface3> getReferences3Filtered() {
+        return null;
+    }
+
     public ComponentContext getComponentContext() {
         return this.componentContext;
     }
