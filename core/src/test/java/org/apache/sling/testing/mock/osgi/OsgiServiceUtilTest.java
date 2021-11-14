@@ -50,7 +50,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 
@@ -100,7 +99,6 @@ public class OsgiServiceUtilTest {
 
         List<Map<String, Object>> reference3Configs = service3.getReference3Configs();
         assertEquals(1, reference3Configs.size());
-        assertEquals(200, reference3Configs.get(0).get(Constants.SERVICE_RANKING));
 
         Set<ServiceSuperInterface3> references3Set = service3.getReferences3Set();
         assertEquals(1, references3Set.size());

@@ -26,7 +26,6 @@ import static org.junit.Assert.assertSame;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest.ServiceWithMetadata;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -69,17 +68,6 @@ public class MockServiceReferenceTest {
         // mandatory properties set by the container
         assertNotNull(this.serviceReference.getProperty(Constants.SERVICE_ID));
         assertArrayEquals((String[]) this.serviceReference.getProperty(Constants.OBJECTCLASS), new String[] { String.class.getName() });
-    }
-
-    @Test
-    public void testWithOsgiMetadata() {
-        ServiceWithMetadata serviceWithMetadata = new OsgiMetadataUtilTest.ServiceWithMetadata();
-        bundleContext.registerService((String) null, serviceWithMetadata, null);
-        ServiceReference reference = this.bundleContext.getServiceReference(Comparable.class.getName());
-
-        assertEquals(5000, reference.getProperty(Constants.SERVICE_RANKING));
-        assertEquals("The Apache Software Foundation", reference.getProperty(Constants.SERVICE_VENDOR));
-        assertEquals("org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata", reference.getProperty(Constants.SERVICE_PID));
     }
 
 }

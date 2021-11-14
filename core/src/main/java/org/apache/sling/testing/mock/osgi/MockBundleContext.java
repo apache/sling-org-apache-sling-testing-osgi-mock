@@ -122,8 +122,7 @@ class MockBundleContext implements BundleContext {
     @SuppressWarnings("unchecked")
     @Override
     public ServiceRegistration registerService(final String[] clazzes, final Object service, final Dictionary properties) {
-        Dictionary<String, Object> mergedPropertes = MapMergeUtil.propertiesMergeWithOsgiMetadata(service.getClass(), configAdmin, properties);
-        MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, mergedPropertes, this);
+        MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, properties, this);
         this.registeredServices.add(registration);
         handleRefsUpdateOnRegister(registration, this);
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
