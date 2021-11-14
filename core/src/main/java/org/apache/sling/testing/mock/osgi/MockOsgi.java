@@ -249,6 +249,32 @@ public final class MockOsgi {
         return activate(target, bundleContext, toDictionary(properties));
     }
 
+
+    /**
+     * Simulate activation of service instance. Invokes the @Activate annotated method.
+     * @param target Service instance.
+     * @param bundleContext Bundle context
+     * @param properties Properties
+     * @return the service properties to use for registering this service. This includes default values from the metatype, given properties and generated properties.
+     */
+    public static Dictionary<String, Object> activateAndReturnServiceProperties(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
+        Dictionary<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
+        ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
+        OsgiServiceUtil.activateDeactivate(target, (MockComponentContext)componentContext, true);
+        return mergedProperties;
+    }
+
+    /**
+     * Simulate activation of service instance. Invokes the @Activate annotated method.
+     * @param target Service instance.
+     * @param bundleContext Bundle context
+     * @param properties Properties
+     * @return the service properties to use for registering this service. This includes default values from the metatype, given properties and generated properties.
+     */
+    public static Dictionary<String, Object> activateAndReturnServiceProperties(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
+        return activateAndReturnServiceProperties(target, bundleContext, toDictionary(properties));
+    }
+
     /**
      * Simulate deactivation of service instance. Invokes the @Deactivate annotated method.
      * @param target Service instance.

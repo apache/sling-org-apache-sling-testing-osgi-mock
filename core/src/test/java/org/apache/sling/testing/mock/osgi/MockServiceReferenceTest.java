@@ -28,6 +28,7 @@ import java.util.Hashtable;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest.ServiceWithMetadata;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -72,6 +73,7 @@ public class MockServiceReferenceTest {
     }
 
     @Test
+    @Ignore //"BundleContext.registerService should not consider OSGi DS meta data"
     public void testWithOsgiMetadata() {
         ServiceWithMetadata serviceWithMetadata = new OsgiMetadataUtilTest.ServiceWithMetadata();
         bundleContext.registerService((String) null, serviceWithMetadata, null);

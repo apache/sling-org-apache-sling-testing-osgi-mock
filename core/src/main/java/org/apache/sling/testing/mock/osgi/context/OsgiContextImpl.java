@@ -116,7 +116,18 @@ public class OsgiContextImpl {
      */
     public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @Nullable final Map<String, Object> properties) {
         Dictionary<String, Object> serviceProperties = MapUtil.toDictionary(properties);
-        bundleContext().registerService(serviceClass != null ? serviceClass.getName() : null, service, serviceProperties);
+        return registerService(serviceClass, service, serviceProperties);
+    }
+    /**
+     * Registers a service in the mocked OSGi environment.
+     * @param <T> Service type
+     * @param serviceClass Service class
+     * @param service Service instance
+     * @param properties Service properties (optional)
+     * @return Registered service instance
+     */
+    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @Nullable final Dictionary<String, Object> properties) {
+        bundleContext().registerService(serviceClass != null ? serviceClass.getName() : null, service, properties);
         return service;
     }
 
@@ -151,8 +162,8 @@ public class OsgiContextImpl {
      */
     public final @NotNull <T> T registerInjectActivateService(@NotNull final T service, @Nullable final Map<String, Object> properties) {
         MockOsgi.injectServices(service, bundleContext(), properties);
-        MockOsgi.activate(service, bundleContext(), properties);
-        registerService(null, service, properties);
+        Dictionary<String, Object> mergedProperties = MockOsgi.activateAndReturnServiceProperties(service, bundleContext(), properties);
+        registerService(null, service, mergedProperties);
         return service;
     }
 

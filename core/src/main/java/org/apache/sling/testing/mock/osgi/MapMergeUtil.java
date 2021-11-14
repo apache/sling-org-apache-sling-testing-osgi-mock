@@ -25,15 +25,20 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentConstants;
 
 /**
  * Map util merge methods.
  */
 final class MapMergeUtil {
+
+    static AtomicLong COMPONENT_ID_COUNTER = new AtomicLong();
 
     private MapMergeUtil() {
         // static methods only
@@ -64,6 +69,7 @@ final class MapMergeUtil {
      * @param configAdmin Configuration admin or null if none is registered
      * @param properties Properties from unit test code or null if none where passed
      * @return Merged properties
+     * @see <a href="http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-component.properties">Component Properties</a>
      */
     static Map<String, Object> propertiesMergeWithOsgiMetadata(Class<?> targetClass,
             ConfigurationAdmin configAdmin,
@@ -98,6 +104,9 @@ final class MapMergeUtil {
             mergedProperties.putAll(properties);
         }
 
+        // add non overwritable properties
+        mergedProperties.put(ComponentConstants.COMPONENT_NAME, targetClass.getName());
+        mergedProperties.put(ComponentConstants.COMPONENT_ID, COMPONENT_ID_COUNTER.getAndIncrement());
         return mergedProperties;
     }
 
