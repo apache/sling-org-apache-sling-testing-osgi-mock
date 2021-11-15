@@ -183,35 +183,35 @@ public class OsgiContextImpl {
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
      * Constructor injection for DS components is supported.
-     * @param <T> Service type
-     * @param serviceClass Service class
-     * @return Registered service instance
+     * @param <T> DS Component type
+     * @param componentClass a DS component class
+     * @return the DS component instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> serviceClass) {
-        return registerInjectActivateService(serviceClass, (Map<String,Object>)null);
+    public final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> componentClass) {
+        return registerInjectActivateService(componentClass, (Map<String,Object>)null);
     }
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
      * Construction injection for OSGi services is supported.
-     * @param <T> Service type
-     * @param serviceClass Service class
-     * @param properties Service properties (optional)
-     * @return Registered service instance
+     * @param <T> DS Component type
+     * @param componentClass a DS component class
+     * @param properties component properties (optional)
+     * @return the DS component instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> serviceClass, @Nullable final Map<String, Object> properties) {
-        return MockOsgi.registerInjectActivateService(serviceClass, bundleContext(), properties);
+    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> componentClass, @Nullable final Map<String, Object> properties) {
+        return MockOsgi.registerInjectActivateService(componentClass, bundleContext(), properties);
     }
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
-     * @param <T> Service type
-     * @param serviceClass Service instance
-     * @param properties Service properties (optional)
-     * @return Registered service instance
+     * @param <T> DS Component type
+     * @param componentClass a DS component class
+     * @param properties component properties (optional)
+     * @return the DS component instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> serviceClass, @NotNull final Object @NotNull ... properties) {
-        return registerInjectActivateService(serviceClass, MapUtil.toMap(properties));
+    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> componentClass, @NotNull final Object @NotNull ... properties) {
+        return registerInjectActivateService(componentClass, MapUtil.toMap(properties));
     }
 
     /**

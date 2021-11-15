@@ -207,9 +207,9 @@ public final class MockOsgi {
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
-     * To use constructor injection and also automatically call the activate method use {@link #registerInjectActivateService(Class, BundleContext)} instead.
      * @param <T> DS Component type
      * @param component a DS component instance
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      */
     public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext) {
         registerInjectActivateService(component, bundleContext, (Map<String,Object>)null);
@@ -217,9 +217,9 @@ public final class MockOsgi {
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
-     * To use constructor injection and also automatically call the activate method use {@link #registerInjectActivateService(Class, BundleContext, Map<String, Object>)} instead.
      * @param <T> DS Component type
      * @param component a DS component instance
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      * @param properties Service properties (optional)
      */
     public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
@@ -235,9 +235,9 @@ public final class MockOsgi {
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
-     * To use constructor injection and also automatically call the activate method use {@link #registerInjectActivateService(Class, BundleContext, Object...)} instead.
      * @param <T> DS Component type
      * @param component a DS component instance
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services.
      * @param properties Service properties (optional)
      */
     public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
@@ -246,10 +246,9 @@ public final class MockOsgi {
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
-     * Construction injection for OSGi services is supported.
      * @param <T> DS component type
      * @param dsComponentClass DS component class
-     * @param bundleContext the bundle context
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      * @return Registered component instance
      */
     public static final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> serviceClass, @NotNull BundleContext bundleContext) {
@@ -258,10 +257,9 @@ public final class MockOsgi {
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
-     * Construction injection is supported. In case the DS component doesn't implement any services
      * @param <T> DS component type
      * @param dsComponentClass DS component class
-     * @param bundleContext the bundle context
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      * @param properties component properties (optional)
      * @return Registered component instance
      */
@@ -278,10 +276,9 @@ public final class MockOsgi {
 
     /**
      * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
-     * Construction injection is supported.
      * @param <T> DS component type
      * @param dsComponentClass DS component class
-     * @param bundleContext the bundle context
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      * @param properties component properties (optional)
      * @return Registered component instance
      */
