@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
 
+import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
@@ -200,8 +201,92 @@ public final class MockOsgi {
      * @param <T> Target class type
      * @return Component/service instances with injected services
      */
-    public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext,  @NotNull Object @NotNull ... properties) {
+    public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return activateInjectServices(targetClass, bundleContext, MapUtil.toMap(properties));
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * To use constructor injection and also automatically call the activate method use {@link #registerInjectActivateService(Class, BundleContext)} instead.
+     * @param <T> DS Component type
+     * @param component a DS component instance
+     */
+    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext) {
+        registerInjectActivateService(component, bundleContext, (Map<String,Object>)null);
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * To use constructor injection and also automatically call the activate method use {@link #registerInjectActivateService(Class, BundleContext, Map<String, Object>)} instead.
+     * @param <T> DS Component type
+     * @param component a DS component instance
+     * @param properties Service properties (optional)
+     */
+    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
+        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(component.getClass(), getConfigAdmin(bundleContext), properties);
+        MockOsgi.injectServices(component, bundleContext, mergedProperties);
+        ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
+        OsgiServiceUtil.activateDeactivate(component, (MockComponentContext)componentContext, true);
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(component.getClass());
+        if (!metadata.getServiceInterfaces().isEmpty()) {
+            bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, toDictionary(mergedProperties));
+        }
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * To use constructor injection and also automatically call the activate method use {@link #registerInjectActivateService(Class, BundleContext, Object...)} instead.
+     * @param <T> DS Component type
+     * @param component a DS component instance
+     * @param properties Service properties (optional)
+     */
+    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
+        registerInjectActivateService(component, bundleContext, MapUtil.toMap(properties));
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * Construction injection for OSGi services is supported.
+     * @param <T> DS component type
+     * @param dsComponentClass DS component class
+     * @param bundleContext the bundle context
+     * @return Registered component instance
+     */
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> serviceClass, @NotNull BundleContext bundleContext) {
+        return registerInjectActivateService(serviceClass, bundleContext, (Map<String,Object>)null);
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * Construction injection is supported. In case the DS component doesn't implement any services
+     * @param <T> DS component type
+     * @param dsComponentClass DS component class
+     * @param bundleContext the bundle context
+     * @param properties component properties (optional)
+     * @return Registered component instance
+     */
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> dsComponentClass, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
+        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(dsComponentClass, getConfigAdmin(bundleContext), properties);
+        ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
+        T component = OsgiServiceUtil.activateInjectServices(dsComponentClass, (MockComponentContext)componentContext);
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(dsComponentClass);
+        if (!metadata.getServiceInterfaces().isEmpty()) {
+            bundleContext.registerService( metadata.getServiceInterfaces().toArray(new String[0]), component,  toDictionary(mergedProperties));
+        }
+        return component;
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * Construction injection is supported.
+     * @param <T> DS component type
+     * @param dsComponentClass DS component class
+     * @param bundleContext the bundle context
+     * @param properties component properties (optional)
+     * @return Registered component instance
+     */
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> serviceClass, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
+        return registerInjectActivateService(serviceClass, bundleContext, MapUtil.toMap(properties));
     }
 
     /**
@@ -247,32 +332,6 @@ public final class MockOsgi {
      */
     public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return activate(target, bundleContext, toDictionary(properties));
-    }
-
-
-    /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
-     * @param bundleContext Bundle context
-     * @param properties Properties
-     * @return the service properties to use for registering this service. This includes default values from the metatype, given properties and generated properties.
-     */
-    public static Dictionary<String, Object> activateAndReturnServiceProperties(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
-        Dictionary<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
-        ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
-        OsgiServiceUtil.activateDeactivate(target, (MockComponentContext)componentContext, true);
-        return mergedProperties;
-    }
-
-    /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
-     * @param bundleContext Bundle context
-     * @param properties Properties
-     * @return the service properties to use for registering this service. This includes default values from the metatype, given properties and generated properties.
-     */
-    public static Dictionary<String, Object> activateAndReturnServiceProperties(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
-        return activateAndReturnServiceProperties(target, bundleContext, toDictionary(properties));
     }
 
     /**

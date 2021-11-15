@@ -47,22 +47,16 @@ public class MockBundleContextStaticGreedySelfReferenceTest {
 
     @Test
     public void testSelfReferenceWithTargetFilter() throws InvalidSyntaxException {
-        ServiceInterface3 defaultImpl = MockOsgi.activateInjectServices(ServiceInterface3Impl.class, bundleContext);
-        bundleContext.registerService(ServiceInterface3.class.getName(), defaultImpl, null);
-
-        ServiceInterface3 selfReferencingImpl = MockOsgi.activateInjectServices(ServiceInterface3ImplSelfReferencing.class, bundleContext);
-        bundleContext.registerService(ServiceInterface3.class.getName(), selfReferencingImpl, null);
+        MockOsgi.registerInjectActivateService(ServiceInterface3Impl.class, bundleContext);
+        MockOsgi.registerInjectActivateService(ServiceInterface3ImplSelfReferencing.class, bundleContext);
 
         assertNotNull(getDefaultImplFromReference());
     }
 
     @Test
     public void testSelfReferenceWithTargetFilterReverse() throws InvalidSyntaxException {
-        ServiceInterface3 selfReferencingImpl = MockOsgi.activateInjectServices(ServiceInterface3ImplSelfReferencing.class, bundleContext);
-        bundleContext.registerService(ServiceInterface3.class.getName(), selfReferencingImpl, null);
-
-        ServiceInterface3 defaultImpl = MockOsgi.activateInjectServices(ServiceInterface3Impl.class, bundleContext);
-        bundleContext.registerService(ServiceInterface3.class.getName(), defaultImpl, null);
+        MockOsgi.registerInjectActivateService(ServiceInterface3ImplSelfReferencing.class, bundleContext);
+        MockOsgi.registerInjectActivateService(ServiceInterface3Impl.class, bundleContext);
 
         assertNotNull(getDefaultImplFromReference());
     }
