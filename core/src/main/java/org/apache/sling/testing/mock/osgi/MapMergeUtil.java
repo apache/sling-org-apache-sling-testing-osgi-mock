@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -38,7 +37,7 @@ import org.osgi.service.component.ComponentConstants;
  */
 final class MapMergeUtil {
 
-    static AtomicLong COMPONENT_ID_COUNTER = new AtomicLong();
+    static final AtomicLong COMPONENT_ID_COUNTER = new AtomicLong();
 
     private MapMergeUtil() {
         // static methods only
