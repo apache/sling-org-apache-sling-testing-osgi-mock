@@ -287,8 +287,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Simulate activation of DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @return true if activation method was called. False if no activate method is defined.
      */
@@ -297,8 +297,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Simulate activation of DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
@@ -310,8 +310,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Simulate activation of DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
@@ -321,8 +321,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Simulate activation of DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
@@ -332,7 +332,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate deactivation of service instance. Invokes the @Deactivate annotated method.
+     * Simulate deactivation of DS component instance. Invokes the @Deactivate annotated method.
      * @param target Service instance.
      * @param bundleContext Bundle context.
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -342,8 +342,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate deactivation of service instance. Invokes the @Deactivate annotated method.
-     * @param target Service instance.
+     * Simulate deactivation of DS component instance. Invokes the @Deactivate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -355,8 +355,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Deactivate annotated method.
-     * @param target Service instance.
+     * Simulate deactivation of DS component instance. Invokes the @Deactivate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -366,8 +366,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Deactivate annotated method.
-     * @param target Service instance.
+     * Simulate deactivation of DS component instance. Invokes the @Deactivate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -377,8 +377,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate configuration modification of service instance. Invokes the @Modified annotated method.
-     * @param target Service instance.
+     * Simulate configuration modification of DS component instance. Invokes the @Modified annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
@@ -388,8 +388,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate configuration modification of service instance. Invokes the @Modified annotated method.
-     * @param target Service instance.
+     * Simulate configuration modification of DS component instance. Invokes the @Modified annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
@@ -401,8 +401,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate configuration modification of service instance. Invokes the @Modified annotated method.
-     * @param target Service instance.
+     * Simulate configuration modification of DS component instance. Invokes the @Modified annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
