@@ -251,8 +251,8 @@ public final class MockOsgi {
      * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      * @return Registered component instance
      */
-    public static final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> serviceClass, @NotNull BundleContext bundleContext) {
-        return registerInjectActivateService(serviceClass, bundleContext, (Map<String,Object>)null);
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> dsComponentClass, @NotNull BundleContext bundleContext) {
+        return registerInjectActivateService(dsComponentClass, bundleContext, (Map<String,Object>)null);
     }
 
     /**
@@ -282,8 +282,8 @@ public final class MockOsgi {
      * @param properties component properties (optional)
      * @return Registered component instance
      */
-    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> serviceClass, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
-        return registerInjectActivateService(serviceClass, bundleContext, MapUtil.toMap(properties));
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> dsComponentClass, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
+        return registerInjectActivateService(dsComponentClass, bundleContext, MapUtil.toMap(properties));
     }
 
     /**
