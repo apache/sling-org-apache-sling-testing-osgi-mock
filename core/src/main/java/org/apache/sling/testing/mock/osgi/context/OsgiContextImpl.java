@@ -116,7 +116,8 @@ public class OsgiContextImpl {
      */
     public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @Nullable final Map<String, Object> properties) {
         Dictionary<String, Object> serviceProperties = MapUtil.toDictionary(properties);
-        return registerService(serviceClass, service, serviceProperties);
+        bundleContext().registerService(serviceClass != null ? serviceClass.getName() : null, service, serviceProperties);
+        return service;
     }
 
     /**
