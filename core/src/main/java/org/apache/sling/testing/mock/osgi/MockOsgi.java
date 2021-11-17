@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
 
+import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
@@ -139,7 +140,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate OSGi DS dependency injection. Injects direct references and multiple references.
+     * Simulates OSGi DS dependency injection. Injects direct references and multiple references.
      * If a some references could not be injected no error is thrown.
      * @param target Service instance
      * @param bundleContext Bundle context from which services are fetched to inject.
@@ -150,7 +151,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate OSGi DS dependency injection. Injects direct references and multiple references.
+     * Simulates OSGi DS dependency injection. Injects direct references and multiple references.
      * If a some references could not be injected no error is thrown.
      * @param target Service instance
      * @param bundleContext Bundle context from which services are fetched to inject.
@@ -162,7 +163,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate OSGi DS dependency injection and activation. Injects direct references and multiple references.
+     * Simulates OSGi DS dependency injection and activation. Injects direct references and multiple references.
      * If a some references could not be injected no error is thrown.
      * This method instantiates the service instance and also supports constructor injection.
      * @param targetClass Component/service class
@@ -175,7 +176,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate OSGi DS dependency injection and activation. Injects direct references and multiple references.
+     * Simulates OSGi DS dependency injection and activation. Injects direct references and multiple references.
      * If a some references could not be injected no error is thrown.
      * This method instantiates the service instance and also supports constructor injection.
      * @param targetClass Component/service class
@@ -191,7 +192,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate OSGi DS dependency injection and activation. Injects direct references and multiple references.
+     * Simulates OSGi DS dependency injection and activation. Injects direct references and multiple references.
      * If a some references could not be injected no error is thrown.
      * This method instantiates the service instance and also supports constructor injection.
      * @param targetClass Component/service class
@@ -200,13 +201,94 @@ public final class MockOsgi {
      * @param <T> Target class type
      * @return Component/service instances with injected services
      */
-    public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext,  @NotNull Object @NotNull ... properties) {
+    public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return activateInjectServices(targetClass, bundleContext, MapUtil.toMap(properties));
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * @param <T> DS Component type
+     * @param component a DS component instance
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
+     */
+    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext) {
+        registerInjectActivateService(component, bundleContext, (Map<String,Object>)null);
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * @param <T> DS Component type
+     * @param component a DS component instance
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
+     * @param properties Service properties (optional)
+     */
+    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
+        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(component.getClass(), getConfigAdmin(bundleContext), properties);
+        MockOsgi.injectServices(component, bundleContext, mergedProperties);
+        ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
+        OsgiServiceUtil.activateDeactivate(component, (MockComponentContext)componentContext, true);
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(component.getClass());
+        if (!metadata.getServiceInterfaces().isEmpty()) {
+            bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, toDictionary(mergedProperties));
+        }
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * @param <T> DS Component type
+     * @param component a DS component instance
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services.
+     * @param properties Service properties (optional)
+     */
+    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
+        registerInjectActivateService(component, bundleContext, MapUtil.toMap(properties));
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * @param <T> DS component type
+     * @param dsComponentClass DS component class
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
+     * @return Registered component instance
+     */
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> dsComponentClass, @NotNull BundleContext bundleContext) {
+        return registerInjectActivateService(dsComponentClass, bundleContext, (Map<String,Object>)null);
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * @param <T> DS component type
+     * @param dsComponentClass DS component class
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
+     * @param properties component properties (optional)
+     * @return Registered component instance
+     */
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> dsComponentClass, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
+        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(dsComponentClass, getConfigAdmin(bundleContext), properties);
+        ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
+        T component = OsgiServiceUtil.activateInjectServices(dsComponentClass, (MockComponentContext)componentContext);
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(dsComponentClass);
+        if (!metadata.getServiceInterfaces().isEmpty()) {
+            bundleContext.registerService( metadata.getServiceInterfaces().toArray(new String[0]), component,  toDictionary(mergedProperties));
+        }
+        return component;
+    }
+
+    /**
+     * Injects dependencies, activates and registers a DS component in the mocked OSGi environment.
+     * @param <T> DS component type
+     * @param dsComponentClass DS component class
+     * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
+     * @param properties component properties (optional)
+     * @return Registered component instance
+     */
+    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> dsComponentClass, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
+        return registerInjectActivateService(dsComponentClass, bundleContext, MapUtil.toMap(properties));
+    }
+
+    /**
+     * Simulates activation of a DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @return true if activation method was called. False if no activate method is defined.
      */
@@ -215,8 +297,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Simulates activation of a DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
@@ -228,8 +310,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Simulates activation of a DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
@@ -239,8 +321,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Activate annotated method.
-     * @param target Service instance.
+     * Simulates activation of a DS component instance. Invokes the @Activate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
@@ -250,7 +332,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate deactivation of service instance. Invokes the @Deactivate annotated method.
+     * Simulates deactivation of a DS component instance. Invokes the @Deactivate annotated method.
      * @param target Service instance.
      * @param bundleContext Bundle context.
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -260,8 +342,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate deactivation of service instance. Invokes the @Deactivate annotated method.
-     * @param target Service instance.
+     * Simulates deactivation of a DS component instance. Invokes the @Deactivate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -273,8 +355,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Deactivate annotated method.
-     * @param target Service instance.
+     * Simulates deactivation of a DS component instance. Invokes the @Deactivate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -284,8 +366,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate activation of service instance. Invokes the @Deactivate annotated method.
-     * @param target Service instance.
+     * Simulates deactivation of a DS component instance. Invokes the @Deactivate annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
@@ -295,8 +377,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate configuration modification of service instance. Invokes the @Modified annotated method.
-     * @param target Service instance.
+     * Simulates configuration modification of a DS component instance. Invokes the @Modified annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
@@ -306,8 +388,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate configuration modification of service instance. Invokes the @Modified annotated method.
-     * @param target Service instance.
+     * Simulates configuration modification of a DS component instance. Invokes the @Modified annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
@@ -319,8 +401,8 @@ public final class MockOsgi {
     }
 
     /**
-     * Simulate configuration modification of service instance. Invokes the @Modified annotated method.
-     * @param target Service instance.
+     * Simulates configuration modification of a DS component instance. Invokes the @Modified annotated method.
+     * @param target DS component instance
      * @param bundleContext Bundle context
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
@@ -372,7 +454,7 @@ public final class MockOsgi {
     }
 
     /**
-     * Get configuration admin.
+     * Gets configuration admin.
      * @param bundleContext Bundle context
      * @return Configuration admin or null if not registered.
      */
