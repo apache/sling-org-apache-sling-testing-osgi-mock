@@ -44,7 +44,7 @@ final class MapMergeUtil {
     }
 
     /**
-     * Merge service properties relevant for DS components from the following sources (with this precedence):
+     * Merge DS component properties from the following sources (with this precedence):
      * 1. Automatically generated DS service properties
      * 2. Properties defined in calling unit test code
      * 3. Properties from ConfigurationAdmin
@@ -62,7 +62,7 @@ final class MapMergeUtil {
     }
 
     /**
-     * Merge service properties relevant for DS components from the following sources (with this precedence):
+     * Merge DS component properties relevant for DS components from the following sources (with this precedence):
      * 1. Automatically generated DS service properties
      * 2. Properties defined in calling unit test code
      * 3. Properties from ConfigurationAdmin

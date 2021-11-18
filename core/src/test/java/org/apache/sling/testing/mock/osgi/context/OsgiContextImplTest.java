@@ -20,9 +20,12 @@ package org.apache.sling.testing.mock.osgi.context;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,6 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -122,7 +126,7 @@ public class OsgiContextImplTest {
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
         Service3 service = context.registerInjectActivateService(new Service3());
         assertNotNull(service.getReference1());
-        assertEquals(1, service.getReferences2().size());
+        assertEquals(2, service.getReferences2().size());
         assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
         assertNotNull(service.getConfig().get("component.id"));
     }
@@ -133,7 +137,7 @@ public class OsgiContextImplTest {
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
         Service3 service = context.registerInjectActivateService(Service3.class);
         assertNotNull(service.getReference1());
-        assertEquals(1, service.getReferences2().size());
+        assertEquals(2, service.getReferences2().size());
         assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
         assertNotNull(service.getConfig().get("component.id"));
     }
@@ -147,13 +151,21 @@ public class OsgiContextImplTest {
     }
 
     @Test
-    public void testRegisterInjectActivateWithProperties_Class() {
+    public void testRegisterInjectActivateWithProperties_Class() throws InvalidSyntaxException {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        Service3 service = context.registerInjectActivateService(Service3.class, "prop1", "value3");
+        Service3 service = context.registerInjectActivateService(Service3.class, "prop1", "value3", ".privateProp", "privateValue");
         assertEquals("value3", service.getConfig().get("prop1"));
+        // private key visible in component properties
+        assertTrue(service.getConfig().containsKey(".privateProp"));
         assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
         assertNotNull(service.getConfig().get("component.id"));
+        Collection<ServiceReference<ServiceInterface2>> serviceReferences = context.bundleContext().getServiceReferences(ServiceInterface2.class, "(component.name="+Service3.class.getName()+")");
+        assertEquals("Expected only one service reference matching filter", 1, serviceReferences.size());
+        ServiceReference<ServiceInterface2> serviceReference = serviceReferences.iterator().next();
+        assertEquals("value3", serviceReference.getProperty("prop1"));
+        // private key not visible in service properties
+        assertNull(serviceReference.getProperty(".privateProp"));
     }
 
     @Test

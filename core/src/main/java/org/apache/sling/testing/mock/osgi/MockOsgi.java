@@ -25,6 +25,8 @@ import static org.apache.sling.testing.mock.osgi.MapUtil.toMap;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.jetbrains.annotations.NotNull;
@@ -220,7 +222,7 @@ public final class MockOsgi {
      * @param <T> DS Component type
      * @param component a DS component instance
      * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
-     * @param properties Service properties (optional)
+     * @param properties component properties (optional)
      */
     public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
         Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(component.getClass(), getConfigAdmin(bundleContext), properties);
@@ -229,7 +231,9 @@ public final class MockOsgi {
         OsgiServiceUtil.activateDeactivate(component, (MockComponentContext)componentContext, true);
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(component.getClass());
         if (!metadata.getServiceInterfaces().isEmpty()) {
-            bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, toDictionary(mergedProperties));
+            // convert component properties to service properties (http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-service.properties)
+            Dictionary<String, Object> serviceProperties = mergedProperties.entrySet().stream().filter(e -> e.getKey() != null && !e.getKey().startsWith(".")).collect(new DictionaryCollector<String, Object>(Entry::getKey, Entry::getValue));
+            bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, serviceProperties);
         }
     }
 
@@ -238,7 +242,7 @@ public final class MockOsgi {
      * @param <T> DS Component type
      * @param component a DS component instance
      * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services.
-     * @param properties Service properties (optional)
+     * @param properties component properties (optional)
      */
     public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
         registerInjectActivateService(component, bundleContext, MapUtil.toMap(properties));
@@ -269,7 +273,9 @@ public final class MockOsgi {
         T component = OsgiServiceUtil.activateInjectServices(dsComponentClass, (MockComponentContext)componentContext);
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(dsComponentClass);
         if (!metadata.getServiceInterfaces().isEmpty()) {
-            bundleContext.registerService( metadata.getServiceInterfaces().toArray(new String[0]), component,  toDictionary(mergedProperties));
+            // convert component properties to service properties (http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-service.properties)
+            Dictionary<String, Object> serviceProperties = mergedProperties.entrySet().stream().filter(e -> e.getKey() != null && !e.getKey().startsWith(".")).collect(new DictionaryCollector<String, Object>(Entry::getKey, Entry::getValue));
+            bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, serviceProperties);
         }
         return component;
     }
