@@ -123,6 +123,8 @@ public class OsgiContextImplTest {
         Service3 service = context.registerInjectActivateService(new Service3());
         assertNotNull(service.getReference1());
         assertEquals(1, service.getReferences2().size());
+        assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
+        assertNotNull(service.getConfig().get("component.id"));
     }
 
     @Test
@@ -132,6 +134,8 @@ public class OsgiContextImplTest {
         Service3 service = context.registerInjectActivateService(Service3.class);
         assertNotNull(service.getReference1());
         assertEquals(1, service.getReferences2().size());
+        assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
+        assertNotNull(service.getConfig().get("component.id"));
     }
 
     @Test
@@ -148,6 +152,8 @@ public class OsgiContextImplTest {
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
         Service3 service = context.registerInjectActivateService(Service3.class, "prop1", "value3");
         assertEquals("value3", service.getConfig().get("prop1"));
+        assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
+        assertNotNull(service.getConfig().get("component.id"));
     }
 
     @Test
@@ -173,6 +179,8 @@ public class OsgiContextImplTest {
         props.put(null, null);
         Service3 service = context.registerInjectActivateService(new Service3(), props);
         assertEquals("value3", service.getConfig().get("prop1"));
+        assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
+        assertNotNull(service.getConfig().get("component.id"));
     }
 
     @Test(expected=RuntimeException.class)
