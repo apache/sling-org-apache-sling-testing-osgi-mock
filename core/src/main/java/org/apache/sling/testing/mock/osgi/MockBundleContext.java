@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -449,20 +448,11 @@ class MockBundleContext implements BundleContext {
     }
 
     /**
-     * Deactivates all bundles registered in this mocked bundle context.
+     * Cleans up the bundle's data file.
+     * It does not unregister the services which have been registered with this context!
      */
     @SuppressWarnings("null")
     public void shutdown() {
-        List<MockServiceRegistration> reversedRegisteredServices = new ArrayList<>(registeredServices);
-        Collections.reverse(reversedRegisteredServices);
-        for (MockServiceRegistration<?> serviceRegistration : reversedRegisteredServices) {
-            try {
-                MockOsgi.deactivate(serviceRegistration.getService(), this, serviceRegistration.getProperties());
-            }
-            catch (NoScrMetadataException ex) {
-                // ignore, no deactivate method is available then
-            }
-        }
         if (dataFileBaseDir != null) {
             try {
                 FileUtils.deleteDirectory(dataFileBaseDir);
