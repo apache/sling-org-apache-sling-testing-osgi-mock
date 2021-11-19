@@ -25,29 +25,35 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentConstants;
 
 /**
  * Map util merge methods.
  */
 final class MapMergeUtil {
 
+    static final AtomicLong COMPONENT_ID_COUNTER = new AtomicLong();
+
     private MapMergeUtil() {
         // static methods only
     }
 
     /**
-     * Merge service properties from three sources (with this precedence):
-     * 1. Properties defined in calling unit test code
-     * 2. Properties from ConfigurationAdmin
-     * 3. Properties from OSGi SCR metadata
+     * Merge DS component properties from the following sources (with this precedence):
+     * 1. Automatically generated DS service properties
+     * 2. Properties defined in calling unit test code
+     * 3. Properties from ConfigurationAdmin
+     * 4. Properties from the OSGi DS Component Description (in the context of Apache Felix referred to as SCR metadata)
      * @param targetClass Target service class
      * @param configAdmin Configuration admin or null if none is registered
      * @param properties Properties from unit test code or null if none where passed
      * @return Merged properties
+     * @see <a href="http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-component.properties">Component Properties</a>
      */
     static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Class<?> targetClass,
             ConfigurationAdmin configAdmin,
@@ -56,14 +62,16 @@ final class MapMergeUtil {
     }
 
     /**
-     * Merge service properties from three sources (with this precedence):
-     * 1. Properties defined in calling unit test code
-     * 2. Properties from ConfigurationAdmin
-     * 3. Properties from OSGi SCR metadata
+     * Merge DS component properties relevant for DS components from the following sources (with this precedence):
+     * 1. Automatically generated DS service properties
+     * 2. Properties defined in calling unit test code
+     * 3. Properties from ConfigurationAdmin
+     * 4. Properties from the OSGi DS Component Description (in the context of Apache Felix referred to as SCR metadata)
      * @param targetClass Target service class
      * @param configAdmin Configuration admin or null if none is registered
      * @param properties Properties from unit test code or null if none where passed
      * @return Merged properties
+     * @see <a href="http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-component.properties">Component Properties</a>
      */
     static Map<String, Object> propertiesMergeWithOsgiMetadata(Class<?> targetClass,
             ConfigurationAdmin configAdmin,
@@ -98,6 +106,9 @@ final class MapMergeUtil {
             mergedProperties.putAll(properties);
         }
 
+        // add non overwritable auto-generated properties
+        mergedProperties.put(ComponentConstants.COMPONENT_NAME, targetClass.getName());
+        mergedProperties.put(ComponentConstants.COMPONENT_ID, COMPONENT_ID_COUNTER.getAndIncrement());
         return mergedProperties;
     }
 

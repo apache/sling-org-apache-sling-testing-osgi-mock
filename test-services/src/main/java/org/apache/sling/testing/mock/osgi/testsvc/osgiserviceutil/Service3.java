@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 @Component(reference = { @Reference(name = "reference2", service = ServiceInterface2.class, cardinality = ReferenceCardinality.AT_LEAST_ONE,
         policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
         bind="bindReference2", unbind="unbindReference2") })
-public class Service3 {
+public class Service3 implements ServiceInterface2 {
 
     @Reference(bind="bindReference1", unbind="unbindReference1", policy = ReferencePolicy.DYNAMIC)
     private volatile ServiceInterface1 reference1;
