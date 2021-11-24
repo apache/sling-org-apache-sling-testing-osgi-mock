@@ -511,6 +511,7 @@ final class OsgiServiceUtil {
             throws InstantiationException, IllegalAccessException {
         Iterator<Reference> referenceIterator = constructorInjectionReferences.iterator();
         List<Object> values = new ArrayList<>();
+        int parameterIndex = 0;
         for (Parameter parameter : constructor.getParameters()) {
             // check for well-known parameter types first
             if (parameter.getType() == ComponentContext.class) {
@@ -530,7 +531,7 @@ final class OsgiServiceUtil {
             // check for reference injection
             else if (referenceIterator.hasNext()) {
                 Reference reference = referenceIterator.next();
-                Optional<?> referenceValue = buildConstructorInjectionValue(targetClass, parameter.getType(), reference, componentContext);
+                Optional<?> referenceValue = buildConstructorInjectionValue(targetClass, parameter.getType(), reference, componentContext, parameterIndex++);
                 if (referenceValue != null) {
                     values.add(referenceValue.isPresent() ? referenceValue.get() : null);
                 }
@@ -550,22 +551,24 @@ final class OsgiServiceUtil {
     /**
      * Build value to be injected in constructor parameter.
      * @param <T> Parameter type
-     * @param targetClass Target class
+     * @param targetClass Target class containing the constructor
      * @param parameterType Parameter type
      * @param reference Reference
      * @param componentContext Component context
+     * @param parameterIndex 0-based index of the constructor parameter for which the injection value is calculated
      * @return null if parameter could not be injected, empty Optional if null value should be injected, or value wrapped in Optional otherwise
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
     private static <T> @Nullable Optional<?> buildConstructorInjectionValue(Class<?> targetClass, Class<T> parameterType, Reference reference,
-            MockComponentContext componentContext) throws InstantiationException, IllegalAccessException {
+            MockComponentContext componentContext, int parameterIndex) throws InstantiationException, IllegalAccessException {
+        Class<?> type = reference.getInterfaceTypeAsClass();
         // get matching service references
-        List<ServiceInfo<?>> matchingServices = getMatchingServices(reference.getInterfaceTypeAsClass(),
+        List<ServiceInfo<?>> matchingServices = getMatchingServices(type,
                 componentContext.getBundleContext(), reference.getTarget());
 
         if (matchingServices.isEmpty() && !reference.isCardinalityOptional()) {
-            throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' for class " + targetClass.getName() + " : no matching services were found.");
+            throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' (" + type.getName() +  ") into constructor parameter " + parameterIndex + " for class " + targetClass.getName() + " : no matching services were found.");
         }
 
         // check for field with list/collection reference
@@ -584,7 +587,7 @@ final class OsgiServiceUtil {
                     break;
                 default:
                     throw new RuntimeException("Field collection type '" + reference.getFieldCollectionType() + "' not supported "
-                            + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
+                            + "for reference '" + reference.getName()  + "' (" + type.getName() +  ") into constructor parameter " + parameterIndex + " for class " +  targetClass.getName());
             }
             return Optional.of(collection);
         }
@@ -620,7 +623,7 @@ final class OsgiServiceUtil {
         // no references found? check if reference was optional
         if (matchingServices.isEmpty()) {
             if (!reference.isCardinalityOptional()) {
-                throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' for class " + targetClass.getName() + " : no matching services were found.");
+                throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' (" + type.getName() +  ") for class " + targetClass.getName() + " : no matching services were found.");
             }
             if (reference.isCardinalityMultiple()) {
                 // make sure at least empty array is set
@@ -656,7 +659,7 @@ final class OsgiServiceUtil {
 
         if (StringUtils.isEmpty(methodName) && StringUtils.isEmpty(fieldName)) {
             throw new RuntimeException("No bind/unbind method name or file name defined "
-                    + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
+                    + "for reference '" + reference.getName() + "' (" + reference.getInterfaceTypeAsClass().getName() +  ") for class " +  targetClass.getName());
         }
 
         if (StringUtils.isNotEmpty(methodName) && serviceInfo != null) {
@@ -745,7 +748,7 @@ final class OsgiServiceUtil {
                         break;
                     default:
                         throw new RuntimeException("Field collection type '" + reference.getFieldCollectionType() + "' not supported "
-                                + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
+                                + "for reference '" + reference.getName() + "' (" + reference.getInterfaceTypeAsClass().getName() +  ") for class " +  targetClass.getName());
                 }
             }
 
