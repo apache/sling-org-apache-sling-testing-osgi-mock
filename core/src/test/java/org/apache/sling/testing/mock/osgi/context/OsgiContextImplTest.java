@@ -37,6 +37,7 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service8;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -193,6 +194,11 @@ public class OsgiContextImplTest {
         assertEquals("value3", service.getConfig().get("prop1"));
         assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
         assertNotNull(service.getConfig().get("component.id"));
+    }
+
+    @Test
+    public void testRegisterInjectActivateWithAdditionalManualServiceRegistration() {
+        context.registerInjectActivateService(new Service8());
     }
 
     @Test(expected=RuntimeException.class)
