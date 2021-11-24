@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.jetbrains.annotations.NotNull;
