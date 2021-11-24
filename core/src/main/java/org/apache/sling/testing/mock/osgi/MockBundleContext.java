@@ -455,13 +455,19 @@ class MockBundleContext implements BundleContext {
     public void shutdown() {
         List<MockServiceRegistration> reversedRegisteredServices = new ArrayList<>(registeredServices);
         Collections.reverse(reversedRegisteredServices);
+        Set<Object> shutdownInnstances = new HashSet<>();
         for (MockServiceRegistration<?> serviceRegistration : reversedRegisteredServices) {
+            Object componentInstance = serviceRegistration.getService();
+            if (shutdownInnstances.contains(componentInstance)) {
+                continue;
+            }
             try {
                 MockOsgi.deactivate(serviceRegistration.getService(), this, serviceRegistration.getProperties());
             }
             catch (NoScrMetadataException ex) {
                 // ignore, no deactivate method is available then
             }
+            shutdownInnstances.add(componentInstance);
         }
         if (dataFileBaseDir != null) {
             try {

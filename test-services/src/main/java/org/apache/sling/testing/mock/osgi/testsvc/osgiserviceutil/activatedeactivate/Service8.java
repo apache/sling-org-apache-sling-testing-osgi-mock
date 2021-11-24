@@ -40,7 +40,8 @@ public class Service8 implements ServiceInterface1, ServiceInterface2, ServiceIn
     @Deactivate
     private void deactivate(BundleContext bundleContext) {
         serviceRegistration.unregister();
-        //serviceRegistration = null; // this may cause a NPE with subsequent deactivate() calls
+        // explicitly set to null to ensure deactivate is never called twice
+        serviceRegistration = null;
     }
 
 }
