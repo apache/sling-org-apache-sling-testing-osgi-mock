@@ -25,6 +25,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service1Constructor;
@@ -40,6 +41,8 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeacti
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service6Constructor;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service7;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service7Constructor;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceReferenceInConstructor;
+import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
@@ -229,4 +232,14 @@ public class OsgiServiceUtilActivateDeactivateTest {
         assertFalse(service.isActivated());
     }
 
+    @Test
+    public void testReferenceInConstructor() {
+        try {
+            MockOsgi.activateInjectServices(ServiceReferenceInConstructor.class, bundleContext);
+            Assert.fail("Unresolvable mandatory reference in constructor should lead to ReferenceViolationException");
+        } catch (ReferenceViolationException e) {
+            String regex = "Unable to inject mandatory reference '.*' " + Pattern.quote("(org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service1) into constructor parameter 0 for class org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceReferenceInConstructor : no matching services were found.");
+            assertTrue("Expected exception message matching regex:\n" + regex + "\nbut got:\n" + e.getMessage(), e.getMessage().matches(regex));
+        }
+    }
 }
