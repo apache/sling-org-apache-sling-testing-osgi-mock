@@ -32,15 +32,16 @@ import java.util.Hashtable;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest.ServiceWithMetadata;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-
-import com.google.common.collect.ImmutableMap;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+
+import com.google.common.collect.ImmutableMap;
 
 public class MockConfigurationAdminTest {
 
@@ -51,6 +52,13 @@ public class MockConfigurationAdminTest {
 
     @Rule
     public OsgiContext context = new OsgiContext();
+
+    private ConfigurationAdmin underTest;
+
+    @Before
+    public void setUp() {
+        underTest = context.getService(ConfigurationAdmin.class);
+    }
 
     @Test
     public void testGetConfigurationString() throws IOException {
@@ -117,41 +125,62 @@ public class MockConfigurationAdminTest {
         MockOsgi.setConfigForPid(context.bundleContext(), "Configuration2", "prop1", 2, "prop2", "A");
         MockOsgi.setConfigForPid(context.bundleContext(), "Configuration3", "prop1", 3, "prop2", "A");
 
-        final ConfigurationAdmin configurationAdmin = context.bundleContext().getService(context.bundleContext().getServiceReference(ConfigurationAdmin.class));
-        final Configuration[] allConfigurations = configurationAdmin.listConfigurations("(prop1=*)");
+        final Configuration[] allConfigurations = underTest.listConfigurations("(prop1=*)");
         assertEquals(3, allConfigurations.length);
-        final Configuration[] prop2AConfigurations = configurationAdmin.listConfigurations("(prop2=A)");
+        final Configuration[] prop2AConfigurations = underTest.listConfigurations("(prop2=A)");
         assertEquals(2, prop2AConfigurations.length);
-        final Configuration[] searchForAllConfigurations = configurationAdmin.listConfigurations(null);
+        final Configuration[] searchForAllConfigurations = underTest.listConfigurations(null);
         assertTrue(searchForAllConfigurations.length >= 3); // Other configurations could be registered outside this method as well
-        final Configuration[] noConfigurations = configurationAdmin.listConfigurations("(nonexistingprop=nonexistingvalue)");
+        final Configuration[] noConfigurations = underTest.listConfigurations("(nonexistingprop=nonexistingvalue)");
         assertNull(noConfigurations);
     }
 
     @Test
-    public void testGetUpdateDeleteGetConfiguration() throws IOException {
-        final ConfigurationAdmin configurationAdmin = context.bundleContext().getService(context.bundleContext().getServiceReference(ConfigurationAdmin.class));
+    public void testGetConfigurationViaConfigAdmin_NonExisting() throws IOException {
+        Configuration config = underTest.getConfiguration("Configuration1");
+        assertNotNull(config);
+        assertEquals("Configuration1", config.getPid());
 
-        Configuration configurationNew  = configurationAdmin.getConfiguration("new-pid");
+        config = underTest.getConfiguration("Configuration1", "location1");
+        assertNotNull(config);
+        assertEquals("Configuration1", config.getPid());
+    }
+
+    @Test
+    public void testGetConfigurationViaConfigAdmin_Existing() throws IOException {
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration1", "prop1", 1);
+
+        Configuration config = underTest.getConfiguration("Configuration1");
+        assertNotNull(config);
+        assertEquals("Configuration1", config.getPid());
+        assertEquals(1, config.getProperties().get("prop1"));
+
+        config = underTest.getConfiguration("Configuration1", "location1");
+        assertNotNull(config);
+        assertEquals("Configuration1", config.getPid());
+        assertEquals(1, config.getProperties().get("prop1"));
+    }
+
+    @Test
+    public void testGetUpdateDeleteGetConfiguration() throws IOException {
+        Configuration configurationNew  = underTest.getConfiguration("new-pid");
         assertNull(configurationNew.getProperties());
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("key", "value");
         configurationNew.update(properties);
 
-        Configuration configurationExisting = configurationAdmin.getConfiguration("new-pid");
+        Configuration configurationExisting = underTest.getConfiguration("new-pid");
         assertEquals("value", configurationNew.getProperties().get("key"));
         assertNotNull(configurationExisting.getProperties().get(Constants.SERVICE_PID));
         configurationExisting.delete();
 
-        Configuration configurationDeleted  = configurationAdmin.getConfiguration("new-pid");
+        Configuration configurationDeleted  = underTest.getConfiguration("new-pid");
         assertNull(configurationDeleted.getProperties());
     }
 
     @Test
     public void testUpdateIfDifferent() throws IOException {
-        final ConfigurationAdmin configurationAdmin = context.bundleContext().getService(context.bundleContext().getServiceReference(ConfigurationAdmin.class));
-
-        Configuration configurationNew  = configurationAdmin.getConfiguration("new-pid");
+        Configuration configurationNew  = underTest.getConfiguration("new-pid");
         assertNull(configurationNew.getProperties());
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("key", "value");
