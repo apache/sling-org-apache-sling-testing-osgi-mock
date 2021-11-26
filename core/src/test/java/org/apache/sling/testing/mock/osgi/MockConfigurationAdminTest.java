@@ -20,10 +20,15 @@ package org.apache.sling.testing.mock.osgi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest.ServiceWithMetadata;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
@@ -121,6 +126,48 @@ public class MockConfigurationAdminTest {
         assertTrue(searchForAllConfigurations.length >= 3); // Other configurations could be registered outside this method as well
         final Configuration[] noConfigurations = configurationAdmin.listConfigurations("(nonexistingprop=nonexistingvalue)");
         assertNull(noConfigurations);
+    }
+
+    @Test
+    public void testGetUpdateDeleteGetConfiguration() throws IOException {
+        final ConfigurationAdmin configurationAdmin = context.bundleContext().getService(context.bundleContext().getServiceReference(ConfigurationAdmin.class));
+
+        Configuration configurationNew  = configurationAdmin.getConfiguration("new-pid");
+        assertNull(configurationNew.getProperties());
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put("key", "value");
+        configurationNew.update(properties);
+
+        Configuration configurationExisting = configurationAdmin.getConfiguration("new-pid");
+        assertEquals("value", configurationNew.getProperties().get("key"));
+        assertNotNull(configurationExisting.getProperties().get(Constants.SERVICE_PID));
+        configurationExisting.delete();
+
+        Configuration configurationDeleted  = configurationAdmin.getConfiguration("new-pid");
+        assertNull(configurationDeleted.getProperties());
+    }
+
+    @Test
+    public void testUpdateIfDifferent() throws IOException {
+        final ConfigurationAdmin configurationAdmin = context.bundleContext().getService(context.bundleContext().getServiceReference(ConfigurationAdmin.class));
+
+        Configuration configurationNew  = configurationAdmin.getConfiguration("new-pid");
+        assertNull(configurationNew.getProperties());
+        Dictionary<String, Object> properties = new Hashtable<String, Object>();
+        properties.put("key", "value");
+        properties.put("keyArray", new String[] {"A", "B"});
+        properties.put("keyCollection", Arrays.asList("X", "Y"));
+        configurationNew.update(properties);
+
+        Dictionary<String, Object> propertiesNew = new Hashtable<String, Object>(MapUtil.toMap(properties));
+        assertFalse(configurationNew.updateIfDifferent(propertiesNew));
+        propertiesNew.put("keyArray", new String[] {"A", "B"});
+        propertiesNew.put("keyCollection", Arrays.asList("X", "Y"));
+        assertFalse(configurationNew.updateIfDifferent(propertiesNew));
+        propertiesNew.put("keyArray", new String[] {"A", "B", "C"});
+        assertTrue(configurationNew.updateIfDifferent(propertiesNew));
+        propertiesNew.put("keyCollection", Arrays.asList("X", "Y", "Z"));
+        assertTrue(configurationNew.updateIfDifferent(propertiesNew));
     }
 
     static class ServiceWithConfigurationPID {}
