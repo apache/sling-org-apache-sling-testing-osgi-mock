@@ -90,13 +90,13 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
+            <version>0.10.2</version>
             <scope>compile</scope>
             <!-- exclude all optional dependencies -->
             <exclusions>
                 <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
+                    <groupId>com.google.code.findbugs</groupId>
+                    <artifactId>jsr305</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>dom4j</groupId>
@@ -113,6 +113,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jboss</groupId>
+                    <artifactId>jboss-vfs</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

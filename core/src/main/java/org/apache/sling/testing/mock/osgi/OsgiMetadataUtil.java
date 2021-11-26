@@ -52,7 +52,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -74,9 +74,6 @@ final class OsgiMetadataUtil {
     static {
         DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
         DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
-
-        // suppress log entries from Reflections library
-        Reflections.log = null;
     }
 
     private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
@@ -156,7 +153,7 @@ final class OsgiMetadataUtil {
         }
 
         // get all OSGI-INF/*.xml files from classpath
-        Reflections reflections = new Reflections(METADATA_PATH, new ResourcesScanner());
+        Reflections reflections = new Reflections(METADATA_PATH, Scanners.Resources);
         Pattern xmlFilesPattern = Pattern.compile("^.*\\.xml$");
         Set<String> paths = reflections.getResources(xmlFilesPattern);
 
