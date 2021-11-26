@@ -90,7 +90,10 @@ final class MapMergeUtil {
                         if (pid != null) {
                             try {
                                 Configuration config = configAdmin.getConfiguration(pid);
-                                mergedProperties.putAll(toMap(config.getProperties()));
+                                Dictionary<String, Object> caProperties = config.getProperties();
+                                if (caProperties != null) {
+                                    mergedProperties.putAll(toMap(caProperties));
+                                }
                             }
                             catch (IOException ex) {
                                 throw new RuntimeException("Unable to read config for pid " + pid, ex);
