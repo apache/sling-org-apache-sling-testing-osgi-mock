@@ -18,20 +18,21 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 /**
  * Mock implementation of {@link ConfigurationAdmin}.
  */
 class MockConfigurationAdmin implements ConfigurationAdmin {
+
     private final BundleContext bundleContext;
     private final ConcurrentMap<String, Configuration> configs = new ConcurrentHashMap<>();
 
@@ -43,6 +44,21 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
     public Configuration getConfiguration(final String pid) throws IOException {
         configs.putIfAbsent(pid, new MockConfiguration(pid));
         return configs.get(pid);
+    }
+
+    @Override
+    @SuppressWarnings("squid:S1168")
+    public Configuration[] listConfigurations(final String filter) throws IOException, InvalidSyntaxException {
+        final Filter filterObject = bundleContext.createFilter(filter);
+        final Configuration[] filtered = configs
+                .values()
+                .stream()
+                .filter(configuration -> filterObject.match(configuration.getProperties()))
+                .toArray(Configuration[]::new);
+        if (filtered.length != 0) {
+            return filtered;
+        }
+        return null;
     }
 
     // --- unsupported operations ---
@@ -60,21 +76,6 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
     @Override
     public Configuration createFactoryConfiguration(final String factoryPid, final String location) throws IOException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    @SuppressWarnings("squid:S1168")
-    public Configuration[] listConfigurations(final String filter) throws IOException, InvalidSyntaxException {
-        final Filter filterObject = bundleContext.createFilter(filter);
-        final Configuration[] filtered = configs
-                .values()
-                .stream()
-                .filter(configuration -> filterObject.match(configuration.getProperties()))
-                .toArray(Configuration[]::new);
-        if (filtered.length != 0) {
-            return filtered;
-        }
-        return null;
     }
 
     @Override
