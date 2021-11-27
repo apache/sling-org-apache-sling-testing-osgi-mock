@@ -623,7 +623,7 @@ final class OsgiServiceUtil {
         // no references found? check if reference was optional
         if (matchingServices.isEmpty()) {
             if (!reference.isCardinalityOptional()) {
-                throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' (" + type.getName() +  ") for class " + targetClass.getName() + " : no matching services were found.");
+                throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' (" + type.getName() +  ") for class " + targetClass.getName() + " : no matching services were found. bundleContext=" + bundleContext);
             }
             if (reference.isCardinalityMultiple()) {
                 // make sure at least empty array is set

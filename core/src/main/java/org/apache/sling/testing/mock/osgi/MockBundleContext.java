@@ -63,6 +63,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Mock {@link BundleContext} implementation.
@@ -78,7 +80,11 @@ class MockBundleContext implements BundleContext {
 
     private final Bundle systemBundle;
 
+    private static final Logger log = LoggerFactory.getLogger(MockBundleContext.class);
+
     public MockBundleContext() {
+        log.debug("Creating MockBundleContext, bundleContext={}", this);
+
         this.systemBundle = new MockBundle(this, Constants.SYSTEM_BUNDLE_ID);
         this.bundle = new MockBundle(this);
 
@@ -122,6 +128,10 @@ class MockBundleContext implements BundleContext {
     @SuppressWarnings("unchecked")
     @Override
     public ServiceRegistration registerService(final String[] clazzes, final Object service, final Dictionary properties) {
+        if (log.isDebugEnabled()) {
+            log.debug("Register {} ({}), bundleContext={}", service.getClass().getName(), StringUtils.join(clazzes, ","), this);
+        }
+
         MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, properties, this);
         this.registeredServices.add(registration);
         handleRefsUpdateOnRegister(registration, this);
@@ -194,6 +204,12 @@ class MockBundleContext implements BundleContext {
     }
 
     void unregisterService(MockServiceRegistration<?> registration) {
+        if (log.isDebugEnabled()) {
+            Object componentInstance = registration.getService();
+            log.debug("Unregister {} ({}), bundleContext={}", componentInstance != null ? componentInstance.getClass() : "",
+                    StringUtils.join(registration.getClasses(), ","), this);
+        }
+
         boolean wasRemoved = this.registeredServices.remove(registration);
         if (wasRemoved) {
             handleRefsUpdateOnUnregister(registration, this);
@@ -453,6 +469,8 @@ class MockBundleContext implements BundleContext {
      */
     @SuppressWarnings("null")
     public void shutdown() {
+        log.debug("Shutting down MockBundleContext, bundleContext={}", this);
+
         List<MockServiceRegistration> reversedRegisteredServices = new ArrayList<>(registeredServices);
         Collections.reverse(reversedRegisteredServices);
         Set<Object> deactivatedComponents = new HashSet<>();

@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.ServiceUtil;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -52,14 +53,16 @@ public final class MockEventAdmin implements EventAdmin {
     @Reference(name="eventHandler", service=EventHandler.class,
             cardinality=ReferenceCardinality.MULTIPLE, policy=ReferencePolicy.DYNAMIC,
             bind="bindEventHandler", unbind="unbindEventHandler")
-    private final Map<Object, EventHandlerItem> eventHandlers = new TreeMap<Object, EventHandlerItem>();
+    private final Map<Object, EventHandlerItem> eventHandlers = new TreeMap<>();
 
     private ExecutorService asyncHandler;
+    private BundleContext bundleContext;
 
     private static final Logger log = LoggerFactory.getLogger(MockEventAdmin.class);
 
     @Activate
     protected void activate(ComponentContext componentContext) {
+        this.bundleContext = componentContext.getBundleContext();
         asyncHandler = Executors.newCachedThreadPool();
     }
 
@@ -70,6 +73,9 @@ public final class MockEventAdmin implements EventAdmin {
 
     @Override
     public void postEvent(final Event event) {
+        if (log.isDebugEnabled()) {
+            log.debug("Send event: {}, bundleContext={}", event.getTopic(), this.bundleContext);
+        }
         try {
             asyncHandler.execute(new Runnable() {
                 @Override
@@ -94,10 +100,13 @@ public final class MockEventAdmin implements EventAdmin {
             for (EventHandlerItem item : eventHandlers.values()) {
                 if (item.matches(event)) {
                     try {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Distribute event: {} to {}, bundleContext={}", event.getTopic(), item.getEventHandler().getClass(), this.bundleContext);
+                        }
                         item.getEventHandler().handleEvent(event);
                     }
                     catch (Throwable ex) {
-                        log.error("Error handlihng event {} in {}", event, item.getEventHandler());
+                        log.error("Error handling event {} in {}", event, item.getEventHandler().getClass(), ex);
                     }
                 }
             }
