@@ -30,10 +30,12 @@ import java.util.Set;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferenceCardinality;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ScopePrototypeService;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
 import org.junit.Test;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.ServiceScope;
 
 public class OsgiMetadataUtilTest {
 
@@ -46,6 +48,7 @@ public class OsgiMetadataUtilTest {
         Set<String> serviceInterfaces = metadata.getServiceInterfaces();
         assertEquals(1, serviceInterfaces.size());
         assertTrue(serviceInterfaces.contains("java.lang.Comparable"));
+        assertEquals(ServiceScope.DEFAULT, metadata.getServiceScope());
 
         Map<String, Object> props = metadata.getProperties();
         assertEquals(3, props.size());
@@ -79,6 +82,12 @@ public class OsgiMetadataUtilTest {
     public void testActivateMethodName() {
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(Service3.class);
         assertEquals("activate", metadata.getActivateMethodName());
+    }
+
+    @Test
+    public void testServiceScope() {
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(ScopePrototypeService.class);
+        assertEquals(ServiceScope.PROTOTYPE, metadata.getServiceScope());
     }
 
     static class ServiceWithMetadata {

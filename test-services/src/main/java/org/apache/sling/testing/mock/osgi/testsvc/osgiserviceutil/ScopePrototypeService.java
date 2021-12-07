@@ -18,9 +18,20 @@
  */
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
-import org.osgi.service.component.annotations.Component;
+import java.util.concurrent.atomic.AtomicLong;
 
-@Component(service = ServiceFactory1.class, servicefactory = true)
-public class ServiceFactory1 {
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
+
+@Component(service = ScopePrototypeService.class, scope = ServiceScope.PROTOTYPE)
+public class ScopePrototypeService {
+
+    private static final AtomicLong INSTANCE_COUNTER = new AtomicLong();
+
+    private final long instanceId = INSTANCE_COUNTER.incrementAndGet();
+
+    public long getInstanceId() {
+        return instanceId;
+    }
 
 }

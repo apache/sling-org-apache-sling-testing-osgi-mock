@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,10 +48,12 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.TreeBidiMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.framework.FilterImpl;
+import org.jetbrains.annotations.NotNull;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.annotations.ServiceScope;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
@@ -287,6 +290,22 @@ final class OsgiMetadataUtil {
         return serviceInterfaces;
     }
 
+    @SuppressWarnings("null")
+    private static @NotNull ServiceScope getServiceScope(Class clazz, Document metadata) {
+        String query = getComponentXPathQuery(clazz) + "/service";
+        String scopeValue;
+        NodeList nodes = queryNodes(metadata, query);
+        if (nodes != null && nodes.getLength() > 0) {
+            scopeValue = getAttributeValue(nodes.item(0), "scope");
+        }
+        else {
+            scopeValue = null;
+        }
+        return Arrays.stream(ServiceScope.values())
+                .filter(serviceScope -> StringUtils.equals(scopeValue, serviceScope.toString()))
+                .findFirst().orElse(ServiceScope.DEFAULT);
+    }
+
     private static Map<String, Object> getProperties(Class clazz, Document metadata) {
         Map<String, Object> props = new HashMap<String, Object>();
         String query = getComponentXPathQuery(clazz) + "/property[@name!='' and @value!='']";
@@ -384,6 +403,7 @@ final class OsgiMetadataUtil {
         private final String name;
         private final String[] configurationPID;
         private final Set<String> serviceInterfaces;
+        private final ServiceScope serviceScope;
         private final Map<String, Object> properties;
         private final List<Reference> references;
         private final String activateMethodName;
@@ -395,6 +415,7 @@ final class OsgiMetadataUtil {
             this.name = OsgiMetadataUtil.getComponentName(clazz, metadataDocument);
             this.configurationPID = OsgiMetadataUtil.getConfigurationPID(clazz, metadataDocument);
             this.serviceInterfaces = OsgiMetadataUtil.getServiceInterfaces(clazz, metadataDocument);
+            this.serviceScope = OsgiMetadataUtil.getServiceScope(clazz, metadataDocument);
             this.properties = OsgiMetadataUtil.getProperties(clazz, metadataDocument);
             this.references = OsgiMetadataUtil.getReferences(clazz, metadataDocument);
             this.activateMethodName = OsgiMetadataUtil.getLifecycleMethodName(clazz, metadataDocument, "activate");
@@ -407,6 +428,7 @@ final class OsgiMetadataUtil {
             this.name = null;
             this.configurationPID = null;
             this.serviceInterfaces = null;
+            this.serviceScope = ServiceScope.DEFAULT;
             this.properties = null;
             this.references = null;
             this.activateMethodName = null;
@@ -436,6 +458,10 @@ final class OsgiMetadataUtil {
 
         public Set<String> getServiceInterfaces() {
             return serviceInterfaces;
+        }
+
+        public @NotNull ServiceScope getServiceScope() {
+            return serviceScope;
         }
 
         public Map<String, Object> getProperties() {

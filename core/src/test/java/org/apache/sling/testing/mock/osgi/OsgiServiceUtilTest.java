@@ -21,6 +21,7 @@ package org.apache.sling.testing.mock.osgi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -32,13 +33,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ScopePrototypeService;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ScopePrototypeServiceFactory;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ScopePrototypeServiceFactory.ScopePrototpyeInstance;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service2;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service4;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service5;
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceFactory1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface3;
@@ -48,10 +51,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.ServiceReference;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -210,34 +211,38 @@ public class OsgiServiceUtilTest {
     }
 
     @Test
-    public void testServiceFactoryViaScr() {
-        ServiceFactory1 serviceFactory1 = new ServiceFactory1();
+    public void testScopePrototypeService() {
+        MockOsgi.registerInjectActivateService(ScopePrototypeService.class, bundleContext);
 
-        MockOsgi.injectServices(serviceFactory1, bundleContext);
-        MockOsgi.activate(serviceFactory1, bundleContext, (Dictionary<String, Object>) null);
-        bundleContext.registerService(ServiceFactory1.class.getName(), serviceFactory1, null);
+        ServiceReference<ScopePrototypeService> ref = bundleContext.getServiceReference(ScopePrototypeService.class);
+        assertNotNull(ref);
 
-        assertSame(serviceFactory1, bundleContext.getService(
-                bundleContext.getServiceReference(ServiceFactory1.class.getName())));
+        ScopePrototypeService instance1 = bundleContext.getService(ref);
+        assertNotNull(instance1);
+
+        ScopePrototypeService instance2 = bundleContext.getService(ref);
+        assertNotNull(instance2);
+
+        assertNotSame(instance1, instance2);
+        assertTrue(instance2.getInstanceId() > instance1.getInstanceId());
     }
 
     @Test
-    public void testServiceFactoryViaManualRegistration() {
-        final ServiceFactory1 serviceFactory1 = new ServiceFactory1();
+    @SuppressWarnings("unchecked")
+    public void testScopePrototypeServiceFactory() {
+        MockOsgi.registerInjectActivateService(ScopePrototypeServiceFactory.class, bundleContext);
 
-        bundleContext.registerService(ServiceFactory1.class.getName(), new ServiceFactory() {
-            @Override
-            public Object getService(Bundle bundle, ServiceRegistration registration) {
-                return serviceFactory1;
-            }
-            @Override
-            public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-                // nothing to do
-            }
-        }, null);
+        ServiceReference<ScopePrototpyeInstance> ref = (ServiceReference)bundleContext.getServiceReference(ScopePrototypeServiceFactory.class);
+        assertNotNull(ref);
 
-        assertSame(serviceFactory1, bundleContext.getService(
-                bundleContext.getServiceReference(ServiceFactory1.class.getName())));
+        ScopePrototpyeInstance instance1 = bundleContext.getService(ref);
+        assertNotNull(instance1);
+
+        ScopePrototpyeInstance instance2 = bundleContext.getService(ref);
+        assertNotNull(instance2);
+
+        assertNotSame(instance1, instance2);
+        assertTrue(instance2.getInstanceId() > instance1.getInstanceId());
     }
 
 }
