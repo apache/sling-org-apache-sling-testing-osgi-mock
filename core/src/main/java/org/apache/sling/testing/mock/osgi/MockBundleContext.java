@@ -82,6 +82,14 @@ class MockBundleContext implements BundleContext {
 
     private static final Logger log = LoggerFactory.getLogger(MockBundleContext.class);
 
+    private static final Comparator<ServiceReference> SR_COMPARATOR_HIGHEST_RANKING_FIRST = new Comparator<ServiceReference>() {
+        @Override
+        public int compare(ServiceReference o1, ServiceReference o2) {
+            // reverse sort order to get highest ranking first
+            return o2.compareTo(o1);
+        }
+    };
+
     public MockBundleContext() {
         log.debug("Creating MockBundleContext, bundleContext={}", this);
 
@@ -315,13 +323,7 @@ class MockBundleContext implements BundleContext {
          * https://docs.osgi.org/specification/osgi.core/7.0.0/framework.api.html#org.osgi.framework.BundleContext.getServiceReferences-String-String-
          * for backward compatibility with previous implementation of osgi-mock we stick with highest-ranking first here
          */
-        Set<ServiceReference> result = new TreeSet<>(new Comparator<ServiceReference>() {
-            @Override
-            public int compare(ServiceReference o1, ServiceReference o2) {
-                // reverse sort order to get highest ranking first
-                return o2.compareTo(o1);
-            }
-        });
+        Set<ServiceReference> result = new TreeSet<>(SR_COMPARATOR_HIGHEST_RANKING_FIRST);
         for (MockServiceRegistration serviceRegistration : this.registeredServices) {
             if (serviceRegistration.matches(clazz, filter)) {
                 result.add(serviceRegistration.getReference());
