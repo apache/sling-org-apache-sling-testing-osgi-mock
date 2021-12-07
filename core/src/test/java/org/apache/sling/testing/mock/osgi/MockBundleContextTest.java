@@ -50,7 +50,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -188,30 +187,6 @@ public class MockBundleContextTest {
     }
 
     @Test
-    public void testServiceFactoryRegistration() throws InvalidSyntaxException {
-        // prepare test services
-        Class<String> clazz = String.class;
-        final String service = "abc";
-        Dictionary<String, Object> properties1 = ranking(null);
-        ServiceRegistration reg = bundleContext.registerService(clazz, new ServiceFactory<String>() {
-            @Override
-            public String getService(Bundle bundle, ServiceRegistration<String> registration) {
-                return service;
-            }
-            @Override
-            public void ungetService(Bundle bundle, ServiceRegistration<String> registration, String service) {
-                // do nothing
-            }
-        }, properties1);
-
-        ServiceReference<String> ref = bundleContext.getServiceReference(clazz);
-        assertNotNull(ref);
-        assertSame(reg.getReference(), ref);
-        assertSame(service, bundleContext.getService(ref));
-        bundleContext.ungetService(ref);
-    }
-
-    @Test
     public void testNoServiceReferences() throws InvalidSyntaxException {
         ServiceReference<?>[] refs = bundleContext.getServiceReferences(String.class.getName(), null);
         assertNull(refs);
@@ -234,7 +209,7 @@ public class MockBundleContextTest {
         reg1.unregister();
 
         assertNull(bundleContext.getServiceReference(clazz1));
-        
+
         try {
             reg1.unregister();
             Assert.fail("Unregistering a non existant service should throw IllegalStateException");

@@ -38,7 +38,6 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service4;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service5;
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceFactory1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface3;
@@ -48,10 +47,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceRegistration;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -207,37 +203,6 @@ public class OsgiServiceUtilTest {
         assertSame(service5, bundleContext.getService(
                 bundleContext.getServiceReference(ServiceInterface5.class.getName())));
         assertEquals(true, service5.doRemoteThing());
-    }
-
-    @Test
-    public void testServiceFactoryViaScr() {
-        ServiceFactory1 serviceFactory1 = new ServiceFactory1();
-
-        MockOsgi.injectServices(serviceFactory1, bundleContext);
-        MockOsgi.activate(serviceFactory1, bundleContext, (Dictionary<String, Object>) null);
-        bundleContext.registerService(ServiceFactory1.class.getName(), serviceFactory1, null);
-
-        assertSame(serviceFactory1, bundleContext.getService(
-                bundleContext.getServiceReference(ServiceFactory1.class.getName())));
-    }
-
-    @Test
-    public void testServiceFactoryViaManualRegistration() {
-        final ServiceFactory1 serviceFactory1 = new ServiceFactory1();
-
-        bundleContext.registerService(ServiceFactory1.class.getName(), new ServiceFactory() {
-            @Override
-            public Object getService(Bundle bundle, ServiceRegistration registration) {
-                return serviceFactory1;
-            }
-            @Override
-            public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-                // nothing to do
-            }
-        }, null);
-
-        assertSame(serviceFactory1, bundleContext.getService(
-                bundleContext.getServiceReference(ServiceFactory1.class.getName())));
     }
 
 }

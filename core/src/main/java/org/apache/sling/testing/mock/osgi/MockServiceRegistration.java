@@ -34,7 +34,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
@@ -52,18 +51,12 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     private final ServiceReference<T> serviceReference;
     private final MockBundleContext bundleContext;
 
-    @SuppressWarnings("unchecked")
     public MockServiceRegistration(final Bundle bundle, final String[] clazzes, final T service,
             final Dictionary<String, Object> properties, MockBundleContext bundleContext) {
         this.serviceId = SERVICE_ID_COUNTER.incrementAndGet();
         this.clazzes = new HashSet<String>(Arrays.asList(clazzes));
 
-        if (service instanceof ServiceFactory) {
-            this.service = ((ServiceFactory<T>)service).getService(bundleContext.getBundle(), this);
-        }
-        else {
-            this.service = service;
-        }
+        this.service = service;
 
         readOsgiMetadata();
 
@@ -119,15 +112,8 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         return clazzes;
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
     T getService() {
-        if (this.service instanceof ServiceFactory) {
-            ServiceFactory<T> factory = (ServiceFactory<T>)this.service;
-            return factory.getService(this.bundleContext.getBundle(), this);
-        }
-        else {
-            return this.service;
-        }
+        return this.service;
     }
 
     @Override
