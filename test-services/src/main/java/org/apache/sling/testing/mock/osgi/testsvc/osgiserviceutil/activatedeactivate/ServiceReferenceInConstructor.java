@@ -25,6 +25,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component
 public class ServiceReferenceInConstructor {
 
+    @SuppressWarnings("unused")
     private final Service1 service1;
 
     @Activate
