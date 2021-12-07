@@ -29,6 +29,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -41,7 +42,7 @@ import org.osgi.framework.Version;
  */
 public final class MockBundle implements Bundle {
 
-    private static volatile long bundleCounter;
+    private static final AtomicLong BUNDLE_ID_COUNTER = new AtomicLong();
 
     private final long bundleId;
     private final BundleContext bundleContext;
@@ -65,7 +66,7 @@ public final class MockBundle implements Bundle {
      * @param bundleContext Bundle context
      */
     public MockBundle(BundleContext bundleContext) {
-        this(bundleContext, ++bundleCounter);
+        this(bundleContext, BUNDLE_ID_COUNTER.incrementAndGet());
     }
 
     @Override

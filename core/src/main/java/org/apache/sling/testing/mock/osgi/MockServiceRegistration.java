@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.framework.FilterImpl;
@@ -42,7 +43,7 @@ import org.osgi.framework.ServiceRegistration;
  */
 class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<MockServiceRegistration<T>> {
 
-    private static volatile long serviceCounter;
+    private static final AtomicLong SERVICE_ID_COUNTER = new AtomicLong();
 
     private final Long serviceId;
     private final Set<String> clazzes;
@@ -54,7 +55,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     @SuppressWarnings("unchecked")
     public MockServiceRegistration(final Bundle bundle, final String[] clazzes, final T service,
             final Dictionary<String, Object> properties, MockBundleContext bundleContext) {
-        this.serviceId = ++serviceCounter;
+        this.serviceId = SERVICE_ID_COUNTER.incrementAndGet();
         this.clazzes = new HashSet<String>(Arrays.asList(clazzes));
 
         if (service instanceof ServiceFactory) {
