@@ -50,6 +50,8 @@ public final class MockBundle implements Bundle {
     private String symbolicName;
     private long lastModified;
 
+	private Version version;
+
     /**
      * Constructor
      * @param bundleContext Bundle context
@@ -195,6 +197,14 @@ public final class MockBundle implements Bundle {
         }
     }
 
+    @Override
+    public Version getVersion() {
+	if (version == null) {
+	    throw new IllegalStateException("no version set");
+	}
+	return version;
+    }
+
     // --- unsupported operations ---
     @Override
     public Enumeration<URL> findEntries(final String path, final String filePattern, final boolean recurse) {
@@ -271,10 +281,6 @@ public final class MockBundle implements Bundle {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public Version getVersion() {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public int compareTo(Bundle o) {
