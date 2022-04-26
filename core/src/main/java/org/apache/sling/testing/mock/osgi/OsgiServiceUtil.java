@@ -657,11 +657,6 @@ final class OsgiServiceUtil {
         String methodName = bind ? reference.getBind() : reference.getUnbind();
         String fieldName = reference.getField();
 
-        if (StringUtils.isEmpty(methodName) && StringUtils.isEmpty(fieldName)) {
-            throw new RuntimeException("No bind/unbind method name or file name defined "
-                    + "for reference '" + reference.getName() + "' (" + reference.getInterfaceTypeAsClass().getName() +  ") for class " +  targetClass.getName());
-        }
-
         if (StringUtils.isNotEmpty(methodName) && serviceInfo != null) {
 
             // 1. ServiceReference
