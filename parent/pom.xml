@@ -28,14 +28,14 @@
     </parent>
 
     <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
-    <version>3.3.0</version>
+    <version>3.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache Sling Testing OSGi Mock Parent</name>
     <description>Mock implementation of selected OSGi APIs.</description>
 
     <properties>
-        <project.build.outputTimestamp>2022-05-05T16:23:44Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2022-05-05T16:24:26Z</project.build.outputTimestamp>
     </properties>
 
     <dependencies>
@@ -169,7 +169,7 @@
     </profiles>
 
   <scm>
-    <tag>org.apache.sling.testing.osgi-mock.reactor-3.3.0</tag>
+    <tag>HEAD</tag>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</developerConnection>
     <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-testing-osgi-mock.git</url>
