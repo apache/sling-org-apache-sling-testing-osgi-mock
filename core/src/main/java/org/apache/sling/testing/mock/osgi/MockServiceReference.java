@@ -129,4 +129,9 @@ class MockServiceReference<T> implements ServiceReference<T> {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Dictionary<String, Object> getProperties() {
+        throw new UnsupportedOperationException();
+    }
+
 }
