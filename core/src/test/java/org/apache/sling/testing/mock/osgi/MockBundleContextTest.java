@@ -287,7 +287,15 @@ public class MockBundleContextTest {
 
     @Test
     public void testGetProperty() {
-        assertNull(bundleContext.getProperty("anyProperty"));
+        String propName = this.getClass().getName();
+        System.setProperty(propName, "random");
+        try {
+            assertEquals("random",bundleContext.getProperty(propName));
+        } finally {
+            System.getProperties().remove(propName);
+        }
+        assertNull(bundleContext.getProperty(propName));
+        
     }
 
     @Test
