@@ -440,8 +440,9 @@ class MockBundleContext implements BundleContext {
 
     @Override
     public String getProperty(final String s) {
-        // no mock implementation, simulate that no property is found and return null
-        return null;
+        // not full support for Framework properties yet, but we can fall back to system properties,
+        // as it is defined by the OSGI spec
+        return System.getProperty(s);
     }
 
     @Override
