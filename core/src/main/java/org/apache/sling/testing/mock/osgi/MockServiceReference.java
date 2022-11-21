@@ -65,6 +65,11 @@ class MockServiceReference<T> implements ServiceReference<T> {
     }
 
     @Override
+    public Dictionary<String, Object> getProperties() {
+        return this.serviceRegistration.getProperties();
+    }
+
+    @Override
     public Object getProperty(final String key) {
         return this.serviceRegistration.getProperties().get(key);
     }
@@ -126,11 +131,6 @@ class MockServiceReference<T> implements ServiceReference<T> {
 
     @Override
     public boolean isAssignableTo(final Bundle otherBundle, final String className) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Dictionary<String, Object> getProperties() {
         throw new UnsupportedOperationException();
     }
 

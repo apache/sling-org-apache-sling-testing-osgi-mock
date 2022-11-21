@@ -68,6 +68,10 @@ public class MockServiceReferenceTest {
         // mandatory properties set by the container
         assertNotNull(this.serviceReference.getProperty(Constants.SERVICE_ID));
         assertArrayEquals((String[]) this.serviceReference.getProperty(Constants.OBJECTCLASS), new String[] { String.class.getName() });
+
+        // via dictionary
+        assertEquals(3, this.serviceReference.getProperties().size());
+        assertEquals("value1", this.serviceReference.getProperties().get("customProp1"));
     }
 
 }
