@@ -35,7 +35,12 @@
       This module is only used in the unit tests of osgi-mock.core.
       The sample OSGi components and services are not part of the osgi-mock test source to allow bnd plugin to auto-generate the metadata for them.
     </description>
-    
+
+    <properties>
+        <!-- Skip sonarqube analysis for this test services project - it's only used for unit tests -->
+        <sonar.skip>true</sonar.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
