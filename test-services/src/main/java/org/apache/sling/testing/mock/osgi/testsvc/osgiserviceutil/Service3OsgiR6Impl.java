@@ -19,7 +19,7 @@
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,30 +36,40 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-@Component(reference = { @Reference(name = "reference2", service = ServiceInterface2.class, cardinality = ReferenceCardinality.AT_LEAST_ONE,
-        policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
-        bind="bindReference2", unbind="unbindReference2") })
-public class Service3 implements ServiceInterface2 {
+@Component
+public class Service3OsgiR6Impl implements Service3OsgiR6 {
 
-    @Reference(bind="bindReference1", unbind="unbindReference1", policy = ReferencePolicy.DYNAMIC)
-    private volatile ServiceInterface1 reference1;
+    @Reference
+    private ServiceInterface1 reference1;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC,
-            bind="bindReference1Optional", unbind="unbindReference1Optional")
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     private volatile ServiceInterface1Optional reference1Optional;
 
-    private List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
+    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
 
-    @Reference(name = "reference3", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile List<ServiceSuperInterface3> references3;
+
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE, target="(prop1=abc)",
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile List<ServiceSuperInterface3> references3Filtered;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
-            bind="bindReference3", unbind="unbindReference3")
-    private volatile List<ServiceSuperInterface3> references3 = new ArrayList<>();
-    private List<Map<String, Object>> reference3Configs = new ArrayList<>();
+            name = "reference3DynamicFiltered")
+    private volatile ServiceSuperInterface3 reference3DynamicFiltered;
 
-    @Reference(name = "references3Set", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
             fieldOption = FieldOption.UPDATE)
-    private volatile Set<ServiceSuperInterface3> references3Set = new HashSet<>();
+    private volatile Set<ServiceSuperInterface3> references3Set;
+
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile Collection<ServiceSuperInterface3> references3Collection;
 
     private ComponentContext componentContext;
     private Map<String, Object> config;
@@ -89,7 +99,7 @@ public class Service3 implements ServiceInterface2 {
     }
 
     public List<ServiceInterface2> getReferences2() {
-        List<ServiceInterface2> services = new ArrayList<>();
+        List<ServiceInterface2> services = new ArrayList<ServiceInterface2>();
         for (ServiceReference<?> serviceReference : references2) {
             services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
         }
@@ -100,12 +110,20 @@ public class Service3 implements ServiceInterface2 {
         return this.references3;
     }
 
-    public List<Map<String, Object>> getReference3Configs() {
-        return this.reference3Configs;
+    public List<ServiceSuperInterface3> getReferences3Filtered() {
+        return this.references3Filtered;
+    }
+
+    public ServiceSuperInterface3 getReference3DynamicFiltered() {
+        return this.reference3DynamicFiltered;
     }
 
     public Set<ServiceSuperInterface3> getReferences3Set() {
         return this.references3Set;
+    }
+
+    public Collection<ServiceSuperInterface3> getReferences3Collection() {
+        return this.references3Collection;
     }
 
     public ComponentContext getComponentContext() {
@@ -114,49 +132,6 @@ public class Service3 implements ServiceInterface2 {
 
     public Map<String, Object> getConfig() {
         return config;
-    }
-
-    void bindReference1Optional(ServiceInterface1Optional service) {
-        reference1Optional = service;
-    }
-
-    void unbindReference1Optional(ServiceInterface1Optional service) {
-        reference1Optional = null;
-    }
-
-    void bindReference1(ServiceInterface1 service) {
-        reference1 = service;
-    }
-
-    void unbindReference1(ServiceInterface1 service) {
-        reference1 = null;
-    }
-
-    void bindReference2(ServiceReference<ServiceInterface2> serviceReference) {
-        references2.add(serviceReference);
-    }
-
-    void unbindReference2(ServiceReference<ServiceInterface2> serviceReference) {
-        references2.remove(serviceReference);
-    }
-
-    void bindReference3(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3.add(service);
-        reference3Configs.add(serviceConfig);
-    }
-
-    void unbindReference3(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3.remove(service);
-        reference3Configs.remove(serviceConfig);
-    }
-
-
-    void bindReference3Set(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3Set.add(service);
-    }
-
-    void unbindReference3Set(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3Set.remove(service);
     }
 
 }
