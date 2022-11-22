@@ -142,7 +142,7 @@ class MockBundleContext implements BundleContext {
 
         MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, properties, this);
         this.registeredServices.add(registration);
-        handleRefsUpdateOnRegister(registration, this);
+        handleRefsUpdateOnRegister(registration);
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
         return registration;
     }
@@ -160,7 +160,7 @@ class MockBundleContext implements BundleContext {
      * @param bundleContext Bundle context
      */
     @SuppressWarnings("unchecked")
-    private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
+    private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);

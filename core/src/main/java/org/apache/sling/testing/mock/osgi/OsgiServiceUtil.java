@@ -846,7 +846,7 @@ final class OsgiServiceUtil {
      * @param serviceInfo Service on which to invoke the method
      * @param bundleContext Bundle context
      */
-    public static void invokeBindMethod(Reference reference, Object target, ServiceInfo serviceInfo) {
+    public static void invokeBindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo) {
         invokeBindUnbindMethod(reference,  target, serviceInfo, true);
     }
 
@@ -857,7 +857,7 @@ final class OsgiServiceUtil {
      * @param serviceInfo Service on which to invoke the method
      * @param bundleContext Bundle context
      */
-    public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo) {
+    public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo) {
         invokeBindUnbindMethod(reference,  target, serviceInfo, false);
     }
 
