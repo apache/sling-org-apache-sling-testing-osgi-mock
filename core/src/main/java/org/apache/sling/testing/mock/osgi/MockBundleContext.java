@@ -219,7 +219,7 @@ class MockBundleContext implements BundleContext {
 
         boolean wasRemoved = this.registeredServices.remove(registration);
         if (wasRemoved) {
-            handleRefsUpdateOnUnregister(registration, this);
+            handleRefsUpdateOnUnregister(registration);
             notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
         } else {
             throw new IllegalStateException("Service was already unregistered");
@@ -250,7 +250,7 @@ class MockBundleContext implements BundleContext {
      * @param bundleContext Bundle context
      */
     @SuppressWarnings("unchecked")
-    private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
+    private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
