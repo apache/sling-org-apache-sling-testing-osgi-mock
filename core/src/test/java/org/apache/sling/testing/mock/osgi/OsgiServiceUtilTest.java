@@ -36,6 +36,8 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service2;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6ComponentServiceObjectsImpl;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6Impl;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service4;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service5;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceFactory1;
@@ -110,7 +112,15 @@ public class OsgiServiceUtilTest {
 
     @Test
     public void testService3OsgiR6() {
-        Service3OsgiR6 service3 = new Service3OsgiR6();
+        testService3OsgiR6(new Service3OsgiR6Impl());
+    }
+
+    @Test
+    public void testService3OsgiR6ComponentServiceObjects() {
+        testService3OsgiR6(new Service3OsgiR6ComponentServiceObjectsImpl());
+    }
+
+    private void testService3OsgiR6(Service3OsgiR6 service3) {
         assertTrue(MockOsgi.injectServices(service3, bundleContext));
 
         Dictionary<String, Object> service3Config = new Hashtable<String, Object>();

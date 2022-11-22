@@ -19,8 +19,6 @@
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -69,14 +67,7 @@ public class Service3 implements ServiceInterface2 {
     @Activate
     private void activate(ComponentContext ctx) {
         this.componentContext = ctx;
-
-        // copy properties dictionary to config map
-        this.config = new HashMap<>();
-        Enumeration<String> keys = ctx.getProperties().keys();
-        while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            this.config.put(key, ctx.getProperties().get(key));
-        }
+        this.config = DictionaryTo.map(ctx.getProperties());
     }
 
     @Deactivate

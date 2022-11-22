@@ -142,7 +142,7 @@ class MockBundleContext implements BundleContext {
 
         MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, properties, this);
         this.registeredServices.add(registration);
-        handleRefsUpdateOnRegister(registration, this);
+        handleRefsUpdateOnRegister(registration);
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
         return registration;
     }
@@ -160,7 +160,7 @@ class MockBundleContext implements BundleContext {
      * @param bundleContext Bundle context
      */
     @SuppressWarnings("unchecked")
-    private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
+    private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
@@ -179,8 +179,7 @@ class MockBundleContext implements BundleContext {
                 case MANDATORY_MULTIPLE:
                 case OPTIONAL_MULTIPLE:
                 case OPTIONAL_UNARY:
-                    OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration), bundleContext);
+                    OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(), new ServiceInfo(registration));
                     break;
                 default:
                     throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
@@ -220,7 +219,7 @@ class MockBundleContext implements BundleContext {
 
         boolean wasRemoved = this.registeredServices.remove(registration);
         if (wasRemoved) {
-            handleRefsUpdateOnUnregister(registration, this);
+            handleRefsUpdateOnUnregister(registration);
             notifyServiceListeners(ServiceEvent.UNREGISTERING, registration.getReference());
         } else {
             throw new IllegalStateException("Service was already unregistered");
@@ -251,7 +250,7 @@ class MockBundleContext implements BundleContext {
      * @param bundleContext Bundle context
      */
     @SuppressWarnings("unchecked")
-    private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration, BundleContext bundleContext) {
+    private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
         List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
@@ -264,8 +263,7 @@ class MockBundleContext implements BundleContext {
                 case OPTIONAL_MULTIPLE:
                 case OPTIONAL_UNARY:
                     // it is currently not checked if for a MANDATORY_UNARY or MANDATORY_MULTIPLE reference the last reference is removed
-                    OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration), bundleContext);
+                    OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(), new ServiceInfo(registration));
                     break;
                 default:
                     throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());

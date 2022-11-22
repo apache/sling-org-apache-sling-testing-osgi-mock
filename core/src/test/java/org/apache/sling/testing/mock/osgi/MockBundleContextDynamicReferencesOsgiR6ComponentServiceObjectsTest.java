@@ -16,35 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
+package org.apache.sling.testing.mock.osgi;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6ComponentServiceObjectsImpl;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import org.osgi.service.component.ComponentContext;
+@RunWith(MockitoJUnitRunner.class)
+public class MockBundleContextDynamicReferencesOsgiR6ComponentServiceObjectsTest extends MockBundleContextDynamicReferencesOsgiR6Test {
 
-public interface Service3OsgiR6 {
-
-    ServiceInterface1 getReference1();
-
-    ServiceInterface1Optional getReference1Optional();
-
-    List<ServiceInterface2> getReferences2();
-
-    List<ServiceSuperInterface3> getReferences3();
-
-    List<ServiceSuperInterface3> getReferences3Filtered();
-
-    ServiceSuperInterface3 getReference3DynamicFiltered();
-
-    Set<ServiceSuperInterface3> getReferences3Set();
-
-    Collection<ServiceSuperInterface3> getReferences3Collection();
-
-    ComponentContext getComponentContext();
-
-    Map<String, Object> getConfig();
+    @Override
+    protected Service3OsgiR6 newService3OsgiR6() {
+        return new Service3OsgiR6ComponentServiceObjectsImpl();
+    }
 
 }

@@ -19,45 +19,57 @@
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.FieldOption;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-@Component(service= Service3StaticGreedy.class,
-        reference = { @Reference(name = "reference2", service = ServiceInterface2.class, cardinality = ReferenceCardinality.AT_LEAST_ONE,
-        policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY,
-        bind="bindReference2", unbind="unbindReference2") })
-public class Service3StaticGreedyImpl implements Service3StaticGreedy {
+@Component
+public class Service3OsgiR6Impl implements Service3OsgiR6 {
 
-    @Reference(bind="bindReference1", unbind="unbindReference1",
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference
     private ServiceInterface1 reference1;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, bind="bindReference1Optional", unbind="unbindReference1Optional",
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-    private ServiceInterface1Optional reference1Optional;
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    private volatile ServiceInterface1Optional reference1Optional;
 
-    private List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
+    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
 
-    @Reference(name = "reference3", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY,
-            bind="bindReference3", unbind="unbindReference3")
-    private List<ServiceSuperInterface3> references3 = new ArrayList<>();
-    private List<Map<String, Object>> reference3Configs = new ArrayList<>();
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile List<ServiceSuperInterface3> references3;
 
     @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE, target="(prop1=abc)",
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-    private List<ServiceSuperInterface3> references3Filtered;
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile List<ServiceSuperInterface3> references3Filtered;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
+            name = "reference3DynamicFiltered")
+    private volatile ServiceSuperInterface3 reference3DynamicFiltered;
+
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
+            fieldOption = FieldOption.UPDATE)
+    private volatile Set<ServiceSuperInterface3> references3Set;
+
+    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private volatile Collection<ServiceSuperInterface3> references3Collection;
 
     private ComponentContext componentContext;
     private Map<String, Object> config;
@@ -78,17 +90,14 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
         this.config = newConfig;
     }
 
-    @Override
     public ServiceInterface1 getReference1() {
         return this.reference1;
     }
 
-    @Override
     public ServiceInterface1Optional getReference1Optional() {
         return this.reference1Optional;
     }
 
-    @Override
     public List<ServiceInterface2> getReferences2() {
         List<ServiceInterface2> services = new ArrayList<>();
         for (ServiceReference<?> serviceReference : references2) {
@@ -97,19 +106,24 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
         return services;
     }
 
-    @Override
     public List<ServiceSuperInterface3> getReferences3() {
         return this.references3;
     }
 
-    @Override
-    public List<Map<String, Object>> getReference3Configs() {
-        return this.reference3Configs;
-    }
-
-    @Override
     public List<ServiceSuperInterface3> getReferences3Filtered() {
         return this.references3Filtered;
+    }
+
+    public ServiceSuperInterface3 getReference3DynamicFiltered() {
+        return this.reference3DynamicFiltered;
+    }
+
+    public Set<ServiceSuperInterface3> getReferences3Set() {
+        return this.references3Set;
+    }
+
+    public Collection<ServiceSuperInterface3> getReferences3Collection() {
+        return this.references3Collection;
     }
 
     public ComponentContext getComponentContext() {
@@ -118,40 +132,6 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
 
     public Map<String, Object> getConfig() {
         return config;
-    }
-
-    protected void bindReference1Optional(ServiceInterface1Optional service) {
-        reference1Optional = service;
-    }
-
-    protected void unbindReference1Optional(ServiceInterface1Optional service) {
-        reference1Optional = null;
-    }
-
-    protected void bindReference1(ServiceInterface1 service) {
-        reference1 = service;
-    }
-
-    protected void unbindReference1(ServiceInterface1 service) {
-        reference1 = null;
-    }
-
-    protected void bindReference2(ServiceReference<ServiceInterface2> serviceReference) {
-        references2.add(serviceReference);
-    }
-
-    protected void unbindReference2(ServiceReference<ServiceInterface2> serviceReference) {
-        references2.remove(serviceReference);
-    }
-
-    protected void bindReference3(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3.add(service);
-        reference3Configs.add(serviceConfig);
-    }
-
-    protected void unbindReference3(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3.remove(service);
-        reference3Configs.remove(serviceConfig);
     }
 
 }

@@ -72,13 +72,17 @@ public class MockBundleContextStaticGreedyConstructorInjectionReferencesTest {
         reg1a = bundleContext.registerService(ServiceInterface1.class.getName(), dependency1a, null);
         reg2a = bundleContext.registerService(ServiceInterface2.class.getName(), dependency2a, null);
 
-        Service3StaticGreedy service = MockOsgi.activateInjectServices(Service3StaticGreedyConstructorInjectionImpl.class, bundleContext);
+        Service3StaticGreedy service = MockOsgi.activateInjectServices(getService3StaticGreedyClass(), bundleContext);
         bundleContext.registerService(Service3StaticGreedy.class.getName(), service, null);
 
         assertDependency1(dependency1a);
         assertDependency1Optional(null);
         assertDependencies2(dependency2a);
         assertDependencies3();
+    }
+
+    protected Class<? extends Service3StaticGreedy> getService3StaticGreedyClass() {
+        return Service3StaticGreedyConstructorInjectionImpl.class;
     }
 
     @Test

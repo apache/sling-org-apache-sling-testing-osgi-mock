@@ -18,12 +18,14 @@
  */
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentServiceObjects;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -32,23 +34,23 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 @Component(service= Service3StaticGreedy.class)
-public class Service3StaticGreedyConstructorInjectionImpl implements Service3StaticGreedy {
+public class Service3StaticGreedyConstructorInjectionComponentServiceObjectsImpl implements Service3StaticGreedy {
 
-    private final ServiceInterface1 reference1;
-    private final ServiceInterface1Optional reference1Optional;
-    private final List<ServiceReference<ServiceInterface2>> references2;
-    private final List<ServiceSuperInterface3> references3;
+    private final ComponentServiceObjects<ServiceInterface1> reference1;
+    private final ComponentServiceObjects<ServiceInterface1Optional> reference1Optional;
+    private final List<ComponentServiceObjects<ServiceInterface2>> references2;
+    private final List<ComponentServiceObjects<ServiceSuperInterface3>> references3;
 
     private final ComponentContext componentContext;
     private final Map<String, Object> config;
 
     // this constructor should be ignored as it contains additional parameters not valid for injection
     @SuppressWarnings("java:S1172") // unused parameter by intention
-    public Service3StaticGreedyConstructorInjectionImpl(
-            ServiceInterface1 reference1,
-            ServiceInterface1Optional reference1Optional,
-            List<ServiceReference<ServiceInterface2>> references2,
-            List<ServiceSuperInterface3> references3,
+    public Service3StaticGreedyConstructorInjectionComponentServiceObjectsImpl(
+            ComponentServiceObjects<ServiceInterface1> reference1,
+            ComponentServiceObjects<ServiceInterface1Optional> reference1Optional,
+            List<ComponentServiceObjects<ServiceInterface2>> references2,
+            List<ComponentServiceObjects<ServiceSuperInterface3>> references3,
             ComponentContext ctx,
             Map<String, Object> config,
             Object illegalParameter) {
@@ -64,22 +66,22 @@ public class Service3StaticGreedyConstructorInjectionImpl implements Service3Sta
     }
 
     @Activate
-    public Service3StaticGreedyConstructorInjectionImpl(
+    public Service3StaticGreedyConstructorInjectionComponentServiceObjectsImpl(
 
             @Reference(policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            ServiceInterface1 reference1,
+            ComponentServiceObjects<ServiceInterface1> reference1,
 
             @Reference(cardinality = ReferenceCardinality.OPTIONAL,
                     policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            ServiceInterface1Optional reference1Optional,
+            ComponentServiceObjects<ServiceInterface1Optional> reference1Optional,
 
             @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,
                     policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            List<ServiceReference<ServiceInterface2>> references2,
+            List<ComponentServiceObjects<ServiceInterface2>> references2,
 
             @Reference(name = "reference3", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
                     policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            List<ServiceSuperInterface3> references3,
+            List<ComponentServiceObjects<ServiceSuperInterface3>> references3,
 
             ComponentContext ctx,
             Map<String, Object> config) {
@@ -96,31 +98,39 @@ public class Service3StaticGreedyConstructorInjectionImpl implements Service3Sta
 
     @Override
     public ServiceInterface1 getReference1() {
-        return this.reference1;
+        return Optional.ofNullable(this.reference1)
+                .map(ComponentServiceObjects::getService)
+                .orElse(null);
     }
 
     @Override
     public ServiceInterface1Optional getReference1Optional() {
-        return this.reference1Optional;
+        return Optional.ofNullable(this.reference1Optional)
+                .map(ComponentServiceObjects::getService)
+                .orElse(null);
     }
 
     @Override
     public List<ServiceInterface2> getReferences2() {
-        List<ServiceInterface2> services = new ArrayList<>();
-        for (ServiceReference<?> serviceReference : references2) {
-            services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
-        }
-        return services;
+        return references2.stream()
+                .map(ComponentServiceObjects::getService)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ServiceSuperInterface3> getReferences3() {
-        return this.references3;
+        return this.references3.stream()
+                .map(ComponentServiceObjects::getService)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Map<String, Object>> getReference3Configs() {
-        return null;
+        return this.references3.stream()
+                .map(ComponentServiceObjects::getServiceReference)
+                .map(ServiceReference::getProperties)
+                .map(DictionaryTo::map)
+                .collect(Collectors.toList());
     }
 
     @Override

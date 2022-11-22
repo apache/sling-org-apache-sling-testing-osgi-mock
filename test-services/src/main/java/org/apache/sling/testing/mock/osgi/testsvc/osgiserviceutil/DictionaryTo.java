@@ -18,33 +18,25 @@
  */
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import org.osgi.service.component.ComponentContext;
+final class DictionaryTo {
 
-public interface Service3OsgiR6 {
+    private DictionaryTo() {
+        // static methods only
+    }
 
-    ServiceInterface1 getReference1();
-
-    ServiceInterface1Optional getReference1Optional();
-
-    List<ServiceInterface2> getReferences2();
-
-    List<ServiceSuperInterface3> getReferences3();
-
-    List<ServiceSuperInterface3> getReferences3Filtered();
-
-    ServiceSuperInterface3 getReference3DynamicFiltered();
-
-    Set<ServiceSuperInterface3> getReferences3Set();
-
-    Collection<ServiceSuperInterface3> getReferences3Collection();
-
-    ComponentContext getComponentContext();
-
-    Map<String, Object> getConfig();
+    public static Map<String,Object> map(Dictionary<String,Object> dictionary) {
+        Map<String,Object> result = new HashMap<>();
+        Enumeration<String> keys = dictionary.keys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            result.put(key, dictionary.get(key));
+        }
+        return result;
+    }
 
 }

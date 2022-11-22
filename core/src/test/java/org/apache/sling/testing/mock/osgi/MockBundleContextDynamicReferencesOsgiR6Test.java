@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6Impl;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1Optional;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
@@ -74,7 +75,7 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
         reg1a = bundleContext.registerService(ServiceInterface1.class.getName(), dependency1a, null);
         reg2a = bundleContext.registerService(ServiceInterface2.class.getName(), dependency2a, null);
 
-        service = new Service3OsgiR6();
+        service = newService3OsgiR6();
         MockOsgi.injectServices(service, bundleContext);
         MockOsgi.activate(service, bundleContext);
         bundleContext.registerService(Service3OsgiR6.class.getName(), service, MapUtil.toDictionary(ImmutableMap.<String,Object>of("reference3DynamicFiltered.target","(prop1=def)")));
@@ -83,6 +84,10 @@ public class MockBundleContextDynamicReferencesOsgiR6Test {
         assertDependency1Optional(null);
         assertDependencies2(dependency2a);
         assertDependencies3();
+    }
+
+    protected Service3OsgiR6 newService3OsgiR6() {
+        return new Service3OsgiR6Impl();
     }
 
     @Test
