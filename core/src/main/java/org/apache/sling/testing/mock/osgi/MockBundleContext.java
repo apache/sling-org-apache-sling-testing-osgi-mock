@@ -179,8 +179,7 @@ class MockBundleContext implements BundleContext {
                 case MANDATORY_MULTIPLE:
                 case OPTIONAL_MULTIPLE:
                 case OPTIONAL_UNARY:
-                    OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration), bundleContext);
+                    OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(), new ServiceInfo(registration));
                     break;
                 default:
                     throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
@@ -264,8 +263,7 @@ class MockBundleContext implements BundleContext {
                 case OPTIONAL_MULTIPLE:
                 case OPTIONAL_UNARY:
                     // it is currently not checked if for a MANDATORY_UNARY or MANDATORY_MULTIPLE reference the last reference is removed
-                    OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(),
-                            new ServiceInfo(registration), bundleContext);
+                    OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(), new ServiceInfo(registration));
                     break;
                 default:
                     throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());

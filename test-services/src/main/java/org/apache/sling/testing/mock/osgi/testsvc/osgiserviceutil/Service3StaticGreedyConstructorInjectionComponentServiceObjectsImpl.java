@@ -45,6 +45,7 @@ public class Service3StaticGreedyConstructorInjectionComponentServiceObjectsImpl
     private final Map<String, Object> config;
 
     // this constructor should be ignored as it contains additional parameters not valid for injection
+    @SuppressWarnings("java:S1172") // unused parameter by intention
     public Service3StaticGreedyConstructorInjectionComponentServiceObjectsImpl(
             ComponentServiceObjects<ServiceInterface1> reference1,
             ComponentServiceObjects<ServiceInterface1Optional> reference1Optional,

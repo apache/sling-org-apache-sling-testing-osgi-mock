@@ -43,6 +43,7 @@ public class Service3StaticGreedyConstructorInjectionImpl implements Service3Sta
     private final Map<String, Object> config;
 
     // this constructor should be ignored as it contains additional parameters not valid for injection
+    @SuppressWarnings("java:S1172") // unused parameter by intention
     public Service3StaticGreedyConstructorInjectionImpl(
             ServiceInterface1 reference1,
             ServiceInterface1Optional reference1Optional,

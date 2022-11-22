@@ -634,7 +634,7 @@ final class OsgiServiceUtil {
             }
             if (reference.isCardinalityMultiple()) {
                 // make sure at least empty array is set
-                invokeBindUnbindMethod(reference, target, null, bundleContext, true);
+                invokeBindUnbindMethod(reference, target, null, true);
             }
         }
 
@@ -653,11 +653,11 @@ final class OsgiServiceUtil {
 
         // try to invoke bind method
         for (ServiceInfo<?> matchingService : matchingServices) {
-            invokeBindUnbindMethod(reference, target, matchingService, bundleContext, true);
+            invokeBindUnbindMethod(reference, target, matchingService, true);
         }
     }
 
-    private static void invokeBindUnbindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo, BundleContext bundleContext, boolean bind) {
+    private static void invokeBindUnbindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo, boolean bind) {
         Class<?> targetClass = target.getClass();
 
         // try to invoke bind method
@@ -846,8 +846,8 @@ final class OsgiServiceUtil {
      * @param serviceInfo Service on which to invoke the method
      * @param bundleContext Bundle context
      */
-    public static void invokeBindMethod(Reference reference, Object target, ServiceInfo serviceInfo, BundleContext bundleContext) {
-        invokeBindUnbindMethod(reference,  target, serviceInfo, bundleContext, true);
+    public static void invokeBindMethod(Reference reference, Object target, ServiceInfo serviceInfo) {
+        invokeBindUnbindMethod(reference,  target, serviceInfo, true);
     }
 
     /**
@@ -857,8 +857,8 @@ final class OsgiServiceUtil {
      * @param serviceInfo Service on which to invoke the method
      * @param bundleContext Bundle context
      */
-    public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo, BundleContext bundleContext) {
-        invokeBindUnbindMethod(reference,  target, serviceInfo, bundleContext, false);
+    public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo serviceInfo) {
+        invokeBindUnbindMethod(reference,  target, serviceInfo, false);
     }
 
     @SuppressWarnings("unchecked")

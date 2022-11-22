@@ -99,7 +99,7 @@ public class Service3OsgiR6Impl implements Service3OsgiR6 {
     }
 
     public List<ServiceInterface2> getReferences2() {
-        List<ServiceInterface2> services = new ArrayList<ServiceInterface2>();
+        List<ServiceInterface2> services = new ArrayList<>();
         for (ServiceReference<?> serviceReference : references2) {
             services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
         }
