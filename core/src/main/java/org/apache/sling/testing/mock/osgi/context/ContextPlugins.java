@@ -21,6 +21,8 @@ package org.apache.sling.testing.mock.osgi.context;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
@@ -68,15 +70,11 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param plugin Plugin
      */
-    @SuppressWarnings("unused")
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addPlugin(@NotNull ContextPlugin<T> @NotNull ... plugin) {
-        for (final ContextPlugin<T> item : plugin) {
-            if (item == null) {
-                continue;
-            }
-            plugins.add(item);
-        }
+    public final void addPlugin(@NotNull ContextPlugin<? extends OsgiContextImpl> @NotNull ... plugin) {
+        Stream.of(plugin)
+            .filter(Objects::nonNull)
+            .forEach(plugins::add);
     }
 
     /**
@@ -84,24 +82,25 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param beforeSetUpCallback Allows the application to register an own callback function that is called before the built-in setup rules are executed.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings("null")
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addBeforeSetUpCallback(@NotNull final ContextCallback<T> @NotNull ... beforeSetUpCallback) {
-        for (final ContextCallback<T> item : beforeSetUpCallback) {
-            if (item == null) {
-                continue;
+    public final void addBeforeSetUpCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeSetUpCallback) {
+        Stream.of(beforeSetUpCallback)
+            .filter(Objects::nonNull)
+            .forEach(this::addBeforeSetUpCallbackItem);
+    }
+
+    private final <T extends OsgiContextImpl> void addBeforeSetUpCallbackItem(@NotNull final ContextCallback<T> item) {
+        plugins.add(new AbstractContextPlugin<T>() {
+            @Override
+            public void beforeSetUp(@NotNull T context) throws Exception {
+                item.execute(context);
             }
-            plugins.add(new AbstractContextPlugin<T>() {
-                @Override
-                public void beforeSetUp(@NotNull T context) throws Exception {
-                    item.execute(context);
-                }
-                @Override
-                public String toString() {
-                    return item.toString();
-                }
-            });
-        }
+            @Override
+            public String toString() {
+                return item.toString();
+            }
+        });
     }
 
     /**
@@ -109,49 +108,52 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings("null")
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addAfterSetUpCallback(@NotNull final ContextCallback<T> @NotNull ... afterSetUpCallback) {
-        for (final ContextCallback<T> item : afterSetUpCallback) {
-            if (item == null) {
-                continue;
-            }
-            plugins.add(new AbstractContextPlugin<T>() {
-                @Override
-                public void afterSetUp(@NotNull T context) throws Exception {
-                    item.execute(context);
-                }
-                @Override
-                public String toString() {
-                    return item.toString();
-                }
-            });
-        }
+    public final void addAfterSetUpCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... afterSetUpCallback) {
+        Stream.of(afterSetUpCallback)
+            .filter(Objects::nonNull)
+            .forEach(this::addAfterSetUpCallbackItem);
     }
+
+    private final <T extends OsgiContextImpl> void addAfterSetUpCallbackItem(@NotNull final ContextCallback<T> item) {
+        plugins.add(new AbstractContextPlugin<T>() {
+            @Override
+            public void afterSetUp(@NotNull T context) throws Exception {
+                item.execute(context);
+            }
+            @Override
+            public String toString() {
+                return item.toString();
+            }
+        });
+    }
+
 
     /**
      * Add callback
      * @param <T> context type
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings("null")
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addBeforeTearDownCallback(@NotNull final ContextCallback<T> @NotNull ... beforeTearDownCallback) {
-        for (final ContextCallback<T> item : beforeTearDownCallback) {
-            if (item == null) {
-                continue;
+    public final void addBeforeTearDownCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeTearDownCallback) {
+        Stream.of(beforeTearDownCallback)
+            .filter(Objects::nonNull)
+            .forEach(this::addBeforeTearDownCallbackItem);
+    }
+
+    private final <T extends OsgiContextImpl> void addBeforeTearDownCallbackItem(@NotNull final ContextCallback<T> item) {
+        plugins.add(new AbstractContextPlugin<T>() {
+            @Override
+            public void beforeTearDown(@NotNull T context) throws Exception {
+                item.execute(context);
             }
-            plugins.add(new AbstractContextPlugin<T>() {
-                @Override
-                public void beforeTearDown(@NotNull T context) throws Exception {
-                    item.execute(context);
-                }
-                @Override
-                public String toString() {
-                    return item.toString();
-                }
-            });
-        }
+            @Override
+            public String toString() {
+                return item.toString();
+            }
+        });
     }
 
     /**
@@ -159,24 +161,25 @@ public final class ContextPlugins {
      * @param <T> context type
      * @param afterTearDownCallback Allows the application to register an own callback function that is after before the built-in teardown rules are executed.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings("null")
     @SafeVarargs
-    public final <T extends OsgiContextImpl> void addAfterTearDownCallback(@NotNull final ContextCallback<T> @NotNull ... afterTearDownCallback) {
-        for (final ContextCallback<T> item : afterTearDownCallback) {
-            if (item == null) {
-                continue;
+    public final void addAfterTearDownCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... afterTearDownCallback) {
+        Stream.of(afterTearDownCallback)
+            .filter(Objects::nonNull)
+            .forEach(this::addAfterTearDownCallbackItem);
+    }
+
+    private final <T extends OsgiContextImpl> void addAfterTearDownCallbackItem(@NotNull final ContextCallback<T> item) {
+        plugins.add(new AbstractContextPlugin<T>() {
+            @Override
+            public void afterTearDown(@NotNull T context) throws Exception {
+                item.execute(context);
             }
-            plugins.add(new AbstractContextPlugin<T>() {
-                @Override
-                public void afterTearDown(@NotNull T context) throws Exception {
-                    item.execute(context);
-                }
-                @Override
-                public String toString() {
-                    return item.toString();
-                }
-            });
-        }
+            @Override
+            public String toString() {
+                return item.toString();
+            }
+        });
     }
 
     /**
