@@ -39,7 +39,6 @@ public final class OsgiContextBuilder {
     public OsgiContextBuilder() {}
 
     /**
-     * @param <T> context type
      * @param plugin Context plugin which listens to context lifecycle events.
      * @return this
      */
@@ -50,7 +49,6 @@ public final class OsgiContextBuilder {
     }
 
     /**
-     * @param <T> context type
      * @param beforeSetUpCallback Allows the application to register an own callback function that is called before the built-in setup rules are executed.
      * @return this
      */
@@ -61,7 +59,6 @@ public final class OsgiContextBuilder {
     }
 
     /**
-     * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      * @return this
      */
@@ -72,7 +69,6 @@ public final class OsgiContextBuilder {
     }
 
     /**
-     * @param <T> context type
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      * @return this
      */
@@ -83,7 +79,6 @@ public final class OsgiContextBuilder {
     }
 
     /**
-     * @param <T> context type
      * @param afterTearDownCallback Allows the application to register an own callback function that is after before the built-in teardown rules are executed.
      * @return this
      */

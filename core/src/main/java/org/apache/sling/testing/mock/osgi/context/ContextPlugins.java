@@ -67,7 +67,6 @@ public final class ContextPlugins {
 
     /**
      * Add plugin
-     * @param <T> context type
      * @param plugin Plugin
      */
     @SafeVarargs
@@ -79,7 +78,6 @@ public final class ContextPlugins {
 
     /**
      * Add callback
-     * @param <T> context type
      * @param beforeSetUpCallback Allows the application to register an own callback function that is called before the built-in setup rules are executed.
      */
     @SuppressWarnings("null")
@@ -105,7 +103,6 @@ public final class ContextPlugins {
 
     /**
      * Add callback
-     * @param <T> context type
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      */
     @SuppressWarnings("null")
@@ -132,7 +129,6 @@ public final class ContextPlugins {
 
     /**
      * Add callback
-     * @param <T> context type
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
     @SuppressWarnings("null")
@@ -158,7 +154,6 @@ public final class ContextPlugins {
 
     /**
      * Add callback
-     * @param <T> context type
      * @param afterTearDownCallback Allows the application to register an own callback function that is after before the built-in teardown rules are executed.
      */
     @SuppressWarnings("null")
