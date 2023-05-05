@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service9;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.bindunbind.Service1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.bindunbind.Service2;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.bindunbind.Service3;
@@ -164,6 +165,19 @@ public class OsgiServiceUtilBindUnbindTest {
                 .map(actualItem -> Maps.filterEntries(actualItem, item -> item.getKey().equals("prop1")))
                 .collect(Collectors.toList());
         assertItems(actualFiltered, expected);
+    }
+
+
+    /**
+     * SLING-11860 verify OsgiServiceUtil#invokeBindUnbindMethod invokes the correct bind and unbind methods
+     */
+    @Test 
+    public void testService9BindUnbind() {
+        Service9 service9 = registerInjectService(new Service9());
+        assertEquals(Service9.class, service9.getBindSvc1FromClass());
+
+        reg1a.unregister();
+        assertEquals(Service9.class, service9.getUnbindSvc1FromClass());
     }
 
 }

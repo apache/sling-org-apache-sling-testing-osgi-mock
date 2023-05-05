@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -136,6 +137,35 @@ final class OsgiServiceUtil {
     }
 
     /**
+     * SLING-11860 - find the nearest match.  First find any match in the class itself.
+     *     If none is found, then walk up the ancestor super classes to look for a match
+     *
+     * @param targetClass the class to start from
+     * @param fn the function to find the method
+     * @return the found method or null if not found
+     */
+    private static boolean findAndInvokeNearestMethod(Class<?> targetClass, Predicate<Class<?>> fn) {
+        boolean found = false;
+        do {
+            found = fn.test(targetClass);
+
+            if (!found) {
+                // not found? check super classes
+                Class<?> superClass = targetClass.getSuperclass();
+                if (superClass != null && superClass != Object.class) {
+                    // make the superClass the next candidate
+                    targetClass = superClass;
+                } else {
+                    // top walking up
+                    targetClass = null;
+                }
+            }
+        } while (!found && targetClass != null);
+
+        return found;
+    }
+
+    /**
      * Invokes a lifecycle method (activation, deactivation or modified) with variable method arguments.
      * @param target Target object
      * @param targetClass Target object class
@@ -149,92 +179,95 @@ final class OsgiServiceUtil {
             String methodName, boolean allowIntegerArgument,
             MockComponentContext componentContext, Map<String,Object> properties) {
 
-        // 1. componentContext
-        Method method = getMethod(targetClass, methodName, new Class<?>[] { ComponentContext.class });
-        if (method != null) {
-            invokeMethod(target, method, new Object[] { componentContext });
-            return true;
-        }
-
-        // 2. bundleContext
-        method = getMethod(targetClass, methodName, new Class<?>[] { BundleContext.class });
-        if (method != null) {
-            invokeMethod(target, method, new Object[] { componentContext.getBundleContext() });
-            return true;
-        }
-
-        // 3. map
-        method = getMethod(targetClass, methodName, new Class<?>[] { Map.class });
-        if (method != null) {
-            invokeMethod(target, method, new Object[] { componentContext.getPropertiesAsMap() });
-            return true;
-        }
-
-        // 4. Component property type (annotation lass)
-        method = getMethod(targetClass, methodName, new Class<?>[] { Annotation.class });
-        if (method != null) {
-            invokeMethod(target, method, new Object[] { Annotations.toObject(method.getParameterTypes()[0],
-                    componentContext.getPropertiesAsMap(),
-                    componentContext.getBundleContext().getBundle(), false) });
-            return true;
-        }
-
-        // 5. int (deactivation only)
-        if (allowIntegerArgument) {
-            method = getMethod(targetClass, methodName, new Class<?>[] { int.class });
+        return findAndInvokeNearestMethod(targetClass, candidateClass -> {
+            // 1. componentContext
+            Method method = getMethod(candidateClass, methodName, new Class<?>[] { ComponentContext.class });
             if (method != null) {
-                invokeMethod(target, method, new Object[] { 0 });
+                invokeMethod(target, method, new Object[] { componentContext });
                 return true;
             }
-        }
 
-        // 6. Integer (deactivation only)
-        if (allowIntegerArgument) {
-            method = getMethod(targetClass, methodName, new Class<?>[] { Integer.class });
+            // 2. bundleContext
+            method = getMethod(candidateClass, methodName, new Class<?>[] { BundleContext.class });
             if (method != null) {
-                invokeMethod(target, method, new Object[] { 0 });
+                invokeMethod(target, method, new Object[] { componentContext.getBundleContext() });
                 return true;
             }
-        }
 
-        // 7. mixed arguments
-        Class<?>[] mixedArgsAllowed = allowIntegerArgument ?
-                new Class<?>[] { ComponentContext.class, BundleContext.class, Map.class, Annotation.class, int.class, Integer.class }
-                : new Class<?>[] { ComponentContext.class, BundleContext.class, Map.class, Annotation.class };
-        method = getMethodWithAnyCombinationArgs(targetClass, methodName, mixedArgsAllowed);
-        if (method != null) {
-            Object[] args = new Object[method.getParameterTypes().length];
-            for (int i=0; i<args.length; i++) {
-                if (method.getParameterTypes()[i] == ComponentContext.class) {
-                    args[i] = componentContext;
-                }
-                else if (method.getParameterTypes()[i] == BundleContext.class) {
-                    args[i] = componentContext.getBundleContext();
-                }
-                else if (method.getParameterTypes()[i] == Map.class) {
-                    args[i] = componentContext.getPropertiesAsMap();
-                }
-                else if (method.getParameterTypes()[i].isAnnotation()) {
-                    args[i] = Annotations.toObject(method.getParameterTypes()[i],
-                            componentContext.getPropertiesAsMap(),
-                            componentContext.getBundleContext().getBundle(), false);
-                }
-                else if (method.getParameterTypes()[i] == int.class || method.getParameterTypes()[i] == Integer.class) {
-                    args[i] = 0;
+            // 3. map
+            method = getMethod(candidateClass, methodName, new Class<?>[] { Map.class });
+            if (method != null) {
+                invokeMethod(target, method, new Object[] { componentContext.getPropertiesAsMap() });
+                return true;
+            }
+
+            // 4. Component property type (annotation lass)
+            method = getMethod(candidateClass, methodName, new Class<?>[] { Annotation.class });
+            if (method != null) {
+                invokeMethod(target, method, new Object[] { Annotations.toObject(method.getParameterTypes()[0],
+                        componentContext.getPropertiesAsMap(),
+                        componentContext.getBundleContext().getBundle(), false) });
+                return true;
+            }
+
+            // 5. int (deactivation only)
+            if (allowIntegerArgument) {
+                method = getMethod(candidateClass, methodName, new Class<?>[] { int.class });
+                if (method != null) {
+                    invokeMethod(target, method, new Object[] { 0 });
+                    return true;
                 }
             }
-            invokeMethod(target, method, args);
-            return true;
-        }
 
-        // 8. noargs
-        method = getMethod(targetClass, methodName, new Class<?>[0]);
-        if (method != null) {
-            invokeMethod(target, method, new Object[0]);
-            return true;
-        }
+            // 6. Integer (deactivation only)
+            if (allowIntegerArgument) {
+                method = getMethod(candidateClass, methodName, new Class<?>[] { Integer.class });
+                if (method != null) {
+                    invokeMethod(target, method, new Object[] { 0 });
+                    return true;
+                }
+            }
 
-        return false;
+            // 7. mixed arguments
+            Class<?>[] mixedArgsAllowed = allowIntegerArgument ?
+                    new Class<?>[] { ComponentContext.class, BundleContext.class, Map.class, Annotation.class, int.class, Integer.class }
+                    : new Class<?>[] { ComponentContext.class, BundleContext.class, Map.class, Annotation.class };
+            method = getMethodWithAnyCombinationArgs(candidateClass, methodName, mixedArgsAllowed);
+            if (method != null) {
+                Object[] args = new Object[method.getParameterTypes().length];
+                for (int i=0; i<args.length; i++) {
+                    if (method.getParameterTypes()[i] == ComponentContext.class) {
+                        args[i] = componentContext;
+                    }
+                    else if (method.getParameterTypes()[i] == BundleContext.class) {
+                        args[i] = componentContext.getBundleContext();
+                    }
+                    else if (method.getParameterTypes()[i] == Map.class) {
+                        args[i] = componentContext.getPropertiesAsMap();
+                    }
+                    else if (method.getParameterTypes()[i].isAnnotation()) {
+                        args[i] = Annotations.toObject(method.getParameterTypes()[i],
+                                componentContext.getPropertiesAsMap(),
+                                componentContext.getBundleContext().getBundle(), false);
+                    }
+                    else if (method.getParameterTypes()[i] == int.class || method.getParameterTypes()[i] == Integer.class) {
+                        args[i] = 0;
+                    }
+                }
+                invokeMethod(target, method, args);
+                return true;
+            }
+
+            // 8. noargs
+            method = getMethod(candidateClass, methodName, new Class<?>[0]);
+            if (method != null) {
+                invokeMethod(target, method, new Object[0]);
+                return true;
+            }
+
+            // no match found
+            return false;
+        });
     }
 
     private static Method getMethod(Class clazz, String methodName, Class<?>[] types) {
@@ -253,11 +286,6 @@ final class OsgiServiceUtil {
                     return method;
                 }
             }
-        }
-        // not found? check super classes
-        Class<?> superClass = clazz.getSuperclass();
-        if (superClass != null && superClass != Object.class) {
-            return getMethod(superClass, methodName, types);
         }
         return null;
     }
@@ -278,11 +306,7 @@ final class OsgiServiceUtil {
                 }
             }
         }
-        // not found? check super classes
-        Class<?> superClass = clazz.getSuperclass();
-        if (superClass != null && superClass != Object.class) {
-            return getMethodWithAssignableTypes(superClass, methodName, types);
-        }
+
         return null;
     }
 
@@ -323,11 +347,7 @@ final class OsgiServiceUtil {
                 }
             }
         }
-        // not found? check super classes
-        Class<?> superClass = clazz.getSuperclass();
-        if (superClass != null && superClass != Object.class) {
-            return getMethodWithAnyCombinationArgs(superClass, methodName, types);
-        }
+
         return null;
     }
 
@@ -666,60 +686,66 @@ final class OsgiServiceUtil {
 
         if (StringUtils.isNotEmpty(methodName) && serviceInfo != null) {
 
-            // 1. ServiceReference
-            Method method = getMethod(targetClass, methodName, new Class<?>[] { ServiceReference.class });
-            if (method != null) {
-                invokeMethod(target, method, new Object[] { serviceInfo.getServiceReference() });
-                return;
-            }
-
-            // 2. ComponentServiceObjects
-            method = getMethod(targetClass, methodName, new Class<?>[] { ComponentServiceObjects.class });
-            if (method != null) {
-                invokeMethod(target, method, new Object[] { serviceInfo });
-                return;
-            }
-
-            // 3. assignable from service instance
-            Class<?> interfaceType = reference.getInterfaceTypeAsClass();
-            method = getMethodWithAssignableTypes(targetClass, methodName, new Class<?>[] { interfaceType });
-            if (method != null) {
-                invokeMethod(target, method, new Object[] { serviceInfo.getService() });
-                return;
-            }
-
-            // 4. Map
-            method = getMethod(targetClass, methodName, new Class<?>[] { Map.class });
-            if (method != null) {
-                invokeMethod(target, method, new Object[] { serviceInfo.getServiceConfig() });
-                return;
-            }
-
-            // 5. mixed arguments
-            Class<?>[] mixedArgsAllowed = new Class<?>[] { ServiceReference.class, ComponentServiceObjects.class, interfaceType, Map.class };
-            method = getMethodWithAnyCombinationArgs(targetClass, methodName, mixedArgsAllowed);
-            if (method != null) {
-                Object[] args = new Object[method.getParameterTypes().length];
-                for (int i=0; i<args.length; i++) {
-                    if (method.getParameterTypes()[i] == ServiceReference.class) {
-                        args[i] = serviceInfo.getServiceReference();
-                    }
-                    else if (method.getParameterTypes()[i] == ComponentServiceObjects.class) {
-                        args[i] = serviceInfo;
-                    }
-                    else if (method.getParameterTypes()[i].isAssignableFrom(interfaceType)) {
-                        args[i] = serviceInfo.getService();
-                    }
-                    else if (method.getParameterTypes()[i] == Map.class) {
-                        args[i] = serviceInfo.getServiceConfig();
-                    }
+            boolean found = findAndInvokeNearestMethod(targetClass, candidateClass -> {
+                // 1. ServiceReference
+                Method method = getMethod(candidateClass, methodName, new Class<?>[] { ServiceReference.class });
+                if (method != null) {
+                    invokeMethod(target, method, new Object[] { serviceInfo.getServiceReference() });
+                    return true;
                 }
-                invokeMethod(target, method, args);
-                return;
-            }
 
-            throw new RuntimeException((bind ? "Bind" : "Unbind") + " method with name " + methodName + " not found "
-                    + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
+                // 2. ComponentServiceObjects
+                method = getMethod(candidateClass, methodName, new Class<?>[] { ComponentServiceObjects.class });
+                if (method != null) {
+                    invokeMethod(target, method, new Object[] { serviceInfo });
+                    return true;
+                }
+
+                // 3. assignable from service instance
+                Class<?> interfaceType = reference.getInterfaceTypeAsClass();
+                method = getMethodWithAssignableTypes(candidateClass, methodName, new Class<?>[] { interfaceType });
+                if (method != null) {
+                    invokeMethod(target, method, new Object[] { serviceInfo.getService() });
+                    return true;
+                }
+
+                // 4. Map
+                method = getMethod(candidateClass, methodName, new Class<?>[] { Map.class });
+                if (method != null) {
+                    invokeMethod(target, method, new Object[] { serviceInfo.getServiceConfig() });
+                    return true;
+                }
+
+                // 5. mixed arguments
+                Class<?>[] mixedArgsAllowed = new Class<?>[] { ServiceReference.class, ComponentServiceObjects.class, interfaceType, Map.class };
+                method = getMethodWithAnyCombinationArgs(candidateClass, methodName, mixedArgsAllowed);
+                if (method != null) {
+                    Object[] args = new Object[method.getParameterTypes().length];
+                    for (int i=0; i<args.length; i++) {
+                        if (method.getParameterTypes()[i] == ServiceReference.class) {
+                            args[i] = serviceInfo.getServiceReference();
+                        }
+                        else if (method.getParameterTypes()[i] == ComponentServiceObjects.class) {
+                            args[i] = serviceInfo;
+                        }
+                        else if (method.getParameterTypes()[i].isAssignableFrom(interfaceType)) {
+                            args[i] = serviceInfo.getService();
+                        }
+                        else if (method.getParameterTypes()[i] == Map.class) {
+                            args[i] = serviceInfo.getServiceConfig();
+                        }
+                    }
+                    invokeMethod(target, method, args);
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (!found) {
+                throw new RuntimeException((bind ? "Bind" : "Unbind") + " method with name " + methodName + " not found "
+                        + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
+            }
         }
 
         // OSGi declarative services 1.3 supports modifying the field directly
