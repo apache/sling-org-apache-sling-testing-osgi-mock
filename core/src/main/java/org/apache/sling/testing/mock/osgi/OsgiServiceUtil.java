@@ -141,7 +141,7 @@ final class OsgiServiceUtil {
      *     If none is found, then walk up the ancestor super classes to look for a match
      *
      * @param targetClass the class to start from
-     * @param fn the function to find the method
+     * @param fn the function to find and invoke the method
      * @return the found method or null if not found
      */
     private static boolean findAndInvokeNearestMethod(Class<?> targetClass, Predicate<Class<?>> fn) {
@@ -156,7 +156,7 @@ final class OsgiServiceUtil {
                     // make the superClass the next candidate
                     targetClass = superClass;
                 } else {
-                    // top walking up
+                    // stop walking up
                     targetClass = null;
                 }
             }

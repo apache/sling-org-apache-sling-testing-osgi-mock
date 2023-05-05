@@ -23,7 +23,7 @@ import java.util.Map;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
 
 /**
- * SLING-11860 - Superclass that provides generic activate/deactivate methods
+ * SLING-11860 - Superclass that provides generic activate/deactivate/bind/unbind methods
  */
 public abstract class Service9Super1 implements ServiceInterface1 {
 

@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * SLING-11860 - subclass to provide more specific activate/deactivate methods
+ * SLING-11860 - subclass to provide more specific activate/deactivate/bind/unbind methods
  */
 @Component(service = ServiceInterface1.class)
 public class Service9 extends Service9Super1 {
