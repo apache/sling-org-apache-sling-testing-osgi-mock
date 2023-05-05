@@ -40,11 +40,11 @@ public abstract class Service9Super1 implements ServiceInterface1 {
         deactivateFromClass = Service9Super1.class;
     }
 
-    protected void bindServiceInterface2(ServiceInterface1 svc1) {
+    protected void bindServiceInterface1(ServiceInterface1 svc1) {
         bindSvc1FromClass = Service9Super1.class;
     }
 
-    protected void unbindServiceInterface2(ServiceInterface1 svc1) {
+    protected void unbindServiceInterface1(ServiceInterface1 svc1) {
         unbindSvc1FromClass = Service9Super1.class;
     }
 
