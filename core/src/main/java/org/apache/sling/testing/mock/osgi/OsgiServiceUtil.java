@@ -141,8 +141,8 @@ final class OsgiServiceUtil {
      *     If none is found, then walk up the ancestor super classes to look for a match
      *
      * @param targetClass the class to start from
-     * @param fn the function to find and invoke the method
-     * @return the found method or null if not found
+     * @param fn the function to find and invoke the method, returns true if handled
+     * @return true if the method was found and invoked, false otherwise
      */
     private static boolean findAndInvokeNearestMethod(Class<?> targetClass, Predicate<Class<?>> fn) {
         boolean found = false;
