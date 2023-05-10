@@ -41,6 +41,7 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeacti
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service6Constructor;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service7;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service7Constructor;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service9;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceReferenceInConstructor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -242,4 +243,17 @@ public class OsgiServiceUtilActivateDeactivateTest {
             assertTrue("Expected exception message matching regex:\n" + regex + "\nbut got:\n" + e.getMessage(), e.getMessage().matches(regex));
         }
     }
+
+    /**
+     * SLING-11860 verify OsgiServiceUtil#activateDeactivate invokes the correct activate and deactivate methods
+     */
+    @Test 
+    public void testService9ActivateDeactivate() {
+        Service9 service = MockOsgi.activateInjectServices(Service9.class, bundleContext, map);
+        assertEquals(Service9.class, service.getActivateFromClass());
+
+        MockOsgi.deactivate(service, bundleContext, map);
+        assertEquals(Service9.class, service.getDeactivateFromClass());
+    }
+
 }
