@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
-        <version>3.3.7-SNAPSHOT</version>
+        <version>3.3.8</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -37,13 +37,13 @@
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
-            <version>3.3.7-SNAPSHOT</version>
+            <version>3.3.8</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>
             <artifactId>org.apache.sling.testing.osgi-mock.core</artifactId>
-            <version>3.3.7-SNAPSHOT</version>
+            <version>3.3.8</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
