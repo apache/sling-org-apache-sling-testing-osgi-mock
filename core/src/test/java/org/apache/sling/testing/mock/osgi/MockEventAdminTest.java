@@ -20,10 +20,10 @@ package org.apache.sling.testing.mock.osgi;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Before;
@@ -119,7 +119,7 @@ public class MockEventAdminTest {
 
     private static class DummyEventHandler implements EventHandler {
 
-        private final List<Event> receivedEvents = new ArrayList<Event>();
+        private final List<Event> receivedEvents = new CopyOnWriteArrayList<>();
 
         @Override
         public void handleEvent(Event event) {
