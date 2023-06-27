@@ -49,6 +49,7 @@ public final class MockBundle implements Bundle {
     private Map<String, String> headers = Collections.emptyMap();
     private String symbolicName;
     private long lastModified;
+    private Version version = Version.emptyVersion;
 
     /**
      * Constructor
@@ -194,6 +195,20 @@ public final class MockBundle implements Bundle {
             return null;
         }
     }
+    
+    @Override
+    public Version getVersion() {
+        return version;
+    }
+    
+    /**
+     * Sets a new version for this bundle
+     * 
+     * @param version the new version
+     */
+    public void setVersion(Version version) {
+        this.version = version;
+    }
 
     // --- unsupported operations ---
     @Override
@@ -268,11 +283,6 @@ public final class MockBundle implements Bundle {
 
     @Override
     public Map<X509Certificate, List<X509Certificate>> getSignerCertificates(final int signersType) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Version getVersion() {
         throw new UnsupportedOperationException();
     }
 
