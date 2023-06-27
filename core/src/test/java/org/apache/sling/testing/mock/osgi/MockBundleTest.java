@@ -30,6 +30,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Version;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -154,4 +155,16 @@ public class MockBundleTest {
         assertTrue(paths.contains("bundleData/nested/first.txt"));
         assertTrue(paths.contains("bundleData/nested/second.txt"));
     }
+    
+    @Test
+    public void getVersion_default() {
+        assertEquals(Version.emptyVersion, bundle.getVersion());
+    }
+    
+    @Test
+    public void getVersion_custom() {
+        bundle.setVersion(new Version(3, 2, 1));
+        assertEquals("3.2.1", bundle.getVersion().toString());
+    }
+    
 }
