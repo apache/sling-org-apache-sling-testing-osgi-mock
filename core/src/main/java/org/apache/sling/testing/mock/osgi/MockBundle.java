@@ -23,12 +23,12 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.osgi.framework.Bundle;
@@ -100,7 +100,7 @@ public final class MockBundle implements Bundle {
 
     @Override
     public Dictionary<String, String> getHeaders(final String locale) {
-        // localziation not supported, always return default headers
+        // localization not supported, always return default headers
         return getHeaders();
     }
 
@@ -148,7 +148,7 @@ public final class MockBundle implements Bundle {
             return null;
         }
 
-        Vector<String> matching = new Vector<String>();
+        List<String> matching = new ArrayList<>();
 
         try {
             File file = new File(res.toURI());
@@ -158,9 +158,7 @@ public final class MockBundle implements Bundle {
                     matching.add(relativeWithTrailingSlash(queryPath.substring(1, queryPath.length())) + name);
                 }
             }
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Failed opening file from " + res , e);
-        } catch ( RuntimeException e) {
+        } catch (URISyntaxException | RuntimeException e) {
             throw new RuntimeException("Failed opening file from " + res , e);
         }
 
@@ -168,7 +166,7 @@ public final class MockBundle implements Bundle {
             return null;
         }
 
-        return matching.elements();
+        return Collections.enumeration(matching);
     }
 
     private String relativeWithTrailingSlash(String queryPath) {
