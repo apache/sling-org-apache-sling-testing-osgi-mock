@@ -652,10 +652,9 @@ final class OsgiServiceUtil {
             if (!reference.isCardinalityOptional()) {
                 throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' (" + type.getName() +  ") for class " + targetClass.getName() + " : no matching services were found. bundleContext=" + bundleContext);
             }
-            if (reference.isCardinalityMultiple()) {
-                // make sure at least empty array is set
-                invokeBindUnbindMethod(reference, target, null, true);
-            }
+
+            // make sure at least empty array or empty Optional is set
+            invokeBindUnbindMethod(reference, target, null, true);
         }
 
         // multiple references found? inject only first one with highest ranking
@@ -789,22 +788,30 @@ final class OsgiServiceUtil {
                 // 1. assignable from service instance
                 Class<?> interfaceType = reference.getInterfaceTypeAsClass();
                 Field field = getFieldWithAssignableType(targetClass, fieldName, interfaceType);
+                final boolean servicePresent = bind && serviceInfo != null;
                 if (field != null) {
-                    setField(target, field, bind && serviceInfo != null ? serviceInfo.getService() : null);
+                    setField(target, field, servicePresent ? serviceInfo.getService() : null);
                     return;
                 }
 
                 // 2. ServiceReference
                 field = getField(targetClass, fieldName, ServiceReference.class);
                 if (field != null) {
-                    setField(target, field, bind && serviceInfo != null ? serviceInfo.getServiceReference() : null);
+                    setField(target, field, servicePresent ? serviceInfo.getServiceReference() : null);
                     return;
                 }
 
                 // 3. ComponentServiceObjects
                 field = getField(targetClass, fieldName, ComponentServiceObjects.class);
                 if (field != null) {
-                    setField(target, field, bind && serviceInfo != null ? serviceInfo : null);
+                    setField(target, field, servicePresent ? serviceInfo : null);
+                    return;
+                }
+
+                // 4. Optional
+                field = getField(targetClass, fieldName, Optional.class);
+                if (field != null) {
+                    setField(target, field, servicePresent ? Optional.of(serviceInfo.getService()) : Optional.empty());
                     return;
                 }
             }

@@ -38,6 +38,7 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6ComponentServiceObjectsImpl;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR6Impl;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3OsgiR8OptionalFieldImpl;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service4;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service5;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceFactory1;
@@ -173,6 +174,20 @@ public class OsgiServiceUtilTest {
 
         MockOsgi.modified(service3, bundleContext, "prop3", "value4");
         assertEquals("value4", service3.getConfig().get("prop3"));
+    }
+
+    @Test
+    public void testService3OsgiR8OptionalField() {
+        final Service3OsgiR8OptionalFieldImpl service3OsgiR8OptionalField = new Service3OsgiR8OptionalFieldImpl();
+        MockOsgi.registerInjectActivateService(service3OsgiR8OptionalField, bundleContext);
+        assertTrue(service3OsgiR8OptionalField.getOptionalService1().isPresent());
+        assertSame(service1, service3OsgiR8OptionalField.getOptionalService1().get());
+        assertFalse(service3OsgiR8OptionalField.getOptionalService5().isPresent());
+
+        final Service5 service5 = new Service5();
+        bundleContext.registerService(ServiceInterface5.class, service5, new Hashtable<>());
+        assertTrue(service3OsgiR8OptionalField.getOptionalService5().isPresent());
+        assertSame(service5, service3OsgiR8OptionalField.getOptionalService5().get());
     }
 
     @Test
