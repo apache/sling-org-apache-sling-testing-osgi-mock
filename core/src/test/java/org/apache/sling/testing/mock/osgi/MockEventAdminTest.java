@@ -19,6 +19,7 @@
 package org.apache.sling.testing.mock.osgi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Dictionary;
 import java.util.List;
@@ -107,7 +108,7 @@ public class MockEventAdminTest {
         eventAdmin.postEvent(EVENT_SAMPLE_2);
         eventAdmin.postEvent(EVENT_OTHER_3);
 
-        // wait until result is as expected (with timeout)
+        // wait until result is as expected (with timeout) - events are distributed in async manner
         boolean expectedResult = false;
         while (!expectedResult) {
             expectedResult = Objects.equals(ImmutableList.of(), eventHandler1.getReceivedEvents())
@@ -115,6 +116,7 @@ public class MockEventAdminTest {
                     && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents())
                     && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2, EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
         }
+        assertTrue(expectedResult);
     }
 
     private static class DummyEventHandler implements EventHandler {
