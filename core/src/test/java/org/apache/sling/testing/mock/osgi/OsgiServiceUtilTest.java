@@ -56,8 +56,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 
-import com.google.common.collect.ImmutableMap;
-
 public class OsgiServiceUtilTest {
 
     private BundleContext bundleContext = MockOsgi.newBundleContext();
@@ -157,17 +155,17 @@ public class OsgiServiceUtilTest {
     public void testService3_Config() {
         BundleContext bundleContext = MockOsgi.newBundleContext();
 
-        Map<String,Object> initialProperites = ImmutableMap.<String, Object>of("prop1", "value1");
+        Map<String,Object> initialProperites = Map.<String, Object>of("prop1", "value1");
 
         Service3 service3 = new Service3();
         MockOsgi.activate(service3, bundleContext, initialProperites);
         assertEquals(initialProperites.get("prop1"), service3.getConfig().get("prop1"));
 
-        Map<String,Object> newProperties = ImmutableMap.<String, Object>of("prop2", "value2");
+        Map<String,Object> newProperties = Map.<String, Object>of("prop2", "value2");
         MockOsgi.modified(service3, bundleContext, newProperties);
         assertEquals(newProperties.get("prop2"), service3.getConfig().get("prop2"));
 
-        newProperties = ImmutableMap.<String, Object>of("prop3", "value3");
+        newProperties = Map.<String, Object>of("prop3", "value3");
         Dictionary<String,Object> newPropertiesDictonary = new Hashtable<String,Object>(newProperties);
         MockOsgi.modified(service3, bundleContext, newPropertiesDictonary);
         assertEquals(newProperties.get("prop3"), service3.getConfig().get("prop3"));
@@ -217,7 +215,7 @@ public class OsgiServiceUtilTest {
 
     @Test(expected=NoScrMetadataException.class)
     public void testModifiedNoMetadata() {
-        MockOsgi.modified(new Object(), MockOsgi.newBundleContext(), ImmutableMap.<String,Object>of());
+        MockOsgi.modified(new Object(), MockOsgi.newBundleContext(), Map.<String,Object>of());
     }
 
     @Test
