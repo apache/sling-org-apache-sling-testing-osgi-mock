@@ -21,6 +21,7 @@ package org.apache.sling.testing.mock.osgi;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service7ServiceVsSuperInterface;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface3;
@@ -32,8 +33,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
-import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MockBundleContextServiceVsSuperinterfaceTest {
@@ -93,7 +92,7 @@ public class MockBundleContextServiceVsSuperinterfaceTest {
 
     @SafeVarargs
     private static void assertDeps(List<?> actual, Object... expected) {
-        assertEquals(ImmutableSet.copyOf(expected), ImmutableSet.copyOf(actual));
+        assertEquals(Set.of(expected), Set.copyOf(actual));
     }
 
 }

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest.ServiceWithMetadata;
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
@@ -40,8 +41,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-
-import com.google.common.collect.ImmutableMap;
 
 public class MockConfigurationAdminTest {
 
@@ -67,10 +66,9 @@ public class MockConfigurationAdminTest {
                 "adaptables", TEST_ADAPTABLES,
                 "prop2", 2);
 
-        context.registerInjectActivateService(new ServiceWithMetadata(), ImmutableMap.<String, Object>builder()
-                .put(Constants.SERVICE_RANKING, 4000)
-                .put("prop1", 1)
-                .build());
+        context.registerInjectActivateService(new ServiceWithMetadata(), Map.<String, Object>of(
+                Constants.SERVICE_RANKING, 4000,
+                "prop1", 1));
 
         ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
 
@@ -92,9 +90,8 @@ public class MockConfigurationAdminTest {
         MockOsgi.setConfigForPid(context.bundleContext(), ServiceWithConfigurationPID.class.getSimpleName(),
                 "prop1", 1);
 
-        context.registerInjectActivateService(new ServiceWithConfigurationPID(), ImmutableMap.<String, Object>builder()
-                .put("prop2", 2)
-                .build());
+        context.registerInjectActivateService(new ServiceWithConfigurationPID(), Map.<String, Object>of(
+                "prop2", 2));
 
         ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
 
@@ -109,9 +106,8 @@ public class MockConfigurationAdminTest {
         MockOsgi.setConfigForPid(context.bundleContext(), "Configuration2",
                 "prop1", 2);
 
-        context.registerInjectActivateService(new ServiceWithMultipleConfigurationPID(), ImmutableMap.<String, Object>builder()
-                .put("prop2", 2)
-                .build());
+        context.registerInjectActivateService(new ServiceWithMultipleConfigurationPID(), Map.<String, Object>of(
+                "prop2", 2));
 
         ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
 

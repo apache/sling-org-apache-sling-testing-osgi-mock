@@ -21,8 +21,10 @@ package org.apache.sling.testing.mock.osgi;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
@@ -33,9 +35,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("null")
 public class MockEventAdminTest {
@@ -60,11 +59,11 @@ public class MockEventAdminTest {
     @Before
     public void setUp() {
         eventHandler1 = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler(),
-                ImmutableMap.<String, Object>of(EventConstants.EVENT_TOPIC, TOPIC_SAMPLE_1));
+                Map.<String, Object>of(EventConstants.EVENT_TOPIC, TOPIC_SAMPLE_1));
         eventHandler12 = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler(),
-                ImmutableMap.<String, Object>of(EventConstants.EVENT_TOPIC, new String[] { TOPIC_SAMPLE_1, TOPIC_SAMPLE_2 }));
+                Map.<String, Object>of(EventConstants.EVENT_TOPIC, new String[] { TOPIC_SAMPLE_1, TOPIC_SAMPLE_2 }));
         eventHandlerSampleAll = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler(),
-                ImmutableMap.<String, Object>of(EventConstants.EVENT_TOPIC, TOPIC_SAMPLE_ALL));
+                Map.<String, Object>of(EventConstants.EVENT_TOPIC, TOPIC_SAMPLE_ALL));
         eventHandlerAll = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler());
     }
 
@@ -73,10 +72,10 @@ public class MockEventAdminTest {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.sendEvent(EVENT_SAMPLE_1);
 
-        assertEquals(ImmutableList.of(EVENT_SAMPLE_1), eventHandler1.getReceivedEvents());
-        assertEquals(ImmutableList.of(EVENT_SAMPLE_1), eventHandler12.getReceivedEvents());
-        assertEquals(ImmutableList.of(EVENT_SAMPLE_1), eventHandlerSampleAll.getReceivedEvents());
-        assertEquals(ImmutableList.of(EVENT_SAMPLE_1), eventHandlerAll.getReceivedEvents());
+        assertEquals(List.of(EVENT_SAMPLE_1), eventHandler1.getReceivedEvents());
+        assertEquals(List.of(EVENT_SAMPLE_1), eventHandler12.getReceivedEvents());
+        assertEquals(List.of(EVENT_SAMPLE_1), eventHandlerSampleAll.getReceivedEvents());
+        assertEquals(List.of(EVENT_SAMPLE_1), eventHandlerAll.getReceivedEvents());
     }
 
     @Test
@@ -84,10 +83,10 @@ public class MockEventAdminTest {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.sendEvent(EVENT_SAMPLE_2);
 
-        assertEquals(ImmutableList.of(), eventHandler1.getReceivedEvents());
-        assertEquals(ImmutableList.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents());
-        assertEquals(ImmutableList.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents());
-        assertEquals(ImmutableList.of(EVENT_SAMPLE_2), eventHandlerAll.getReceivedEvents());
+        assertEquals(List.of(), eventHandler1.getReceivedEvents());
+        assertEquals(List.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents());
+        assertEquals(List.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents());
+        assertEquals(List.of(EVENT_SAMPLE_2), eventHandlerAll.getReceivedEvents());
     }
 
     @Test
@@ -95,10 +94,10 @@ public class MockEventAdminTest {
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.sendEvent(EVENT_OTHER_3);
 
-        assertEquals(ImmutableList.of(), eventHandler1.getReceivedEvents());
-        assertEquals(ImmutableList.of(), eventHandler12.getReceivedEvents());
-        assertEquals(ImmutableList.of(), eventHandlerSampleAll.getReceivedEvents());
-        assertEquals(ImmutableList.of(EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
+        assertEquals(List.of(), eventHandler1.getReceivedEvents());
+        assertEquals(List.of(), eventHandler12.getReceivedEvents());
+        assertEquals(List.of(), eventHandlerSampleAll.getReceivedEvents());
+        assertEquals(List.of(EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
     }
 
     @Test(timeout = 3000)
@@ -110,10 +109,10 @@ public class MockEventAdminTest {
         // wait until result is as expected (with timeout)
         boolean expectedResult = false;
         while (!expectedResult) {
-            expectedResult = Objects.equals(ImmutableList.of(), eventHandler1.getReceivedEvents())
-                    && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents())
-                    && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents())
-                    && Objects.equals(ImmutableList.of(EVENT_SAMPLE_2, EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
+            expectedResult = Objects.equals(List.of(), eventHandler1.getReceivedEvents())
+                    && Objects.equals(List.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents())
+                    && Objects.equals(List.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents())
+                    && Objects.equals(List.of(EVENT_SAMPLE_2, EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
         }
     }
 
@@ -127,7 +126,7 @@ public class MockEventAdminTest {
         }
 
         public List<Event> getReceivedEvents() {
-            return ImmutableList.copyOf(receivedEvents);
+            return Collections.unmodifiableList(receivedEvents);
         }
 
     }

@@ -26,13 +26,12 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
-
-import com.google.common.collect.ImmutableMap;
 
 public class MockBundleTest {
 
@@ -67,7 +66,7 @@ public class MockBundleTest {
 
     @Test
     public void testGetHeaders() {
-        bundle.setHeaders(ImmutableMap.of("prop1", "value1"));
+        bundle.setHeaders(Map.of("prop1", "value1"));
         assertEquals("value1", bundle.getHeaders().get("prop1"));
         assertEquals("value1", bundle.getHeaders("en").get("prop1"));
     }
@@ -155,16 +154,16 @@ public class MockBundleTest {
         assertTrue(paths.contains("bundleData/nested/first.txt"));
         assertTrue(paths.contains("bundleData/nested/second.txt"));
     }
-    
+
     @Test
     public void getVersion_default() {
         assertEquals(Version.emptyVersion, bundle.getVersion());
     }
-    
+
     @Test
     public void getVersion_custom() {
         bundle.setVersion(new Version(3, 2, 1));
         assertEquals("3.2.1", bundle.getVersion().toString());
     }
-    
+
 }

@@ -22,6 +22,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3StaticGreedy;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3StaticGreedyImpl;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
@@ -37,9 +40,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MockBundleContextStaticGreedyReferencesTest {
@@ -154,10 +154,10 @@ public class MockBundleContextStaticGreedyReferencesTest {
         assertDependencies3Filtered();
 
         bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a,
-                MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "abc")));
+                MapUtil.toDictionary(Map.<String, Object>of("prop1", "abc")));
 
         bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b,
-                MapUtil.toDictionary(ImmutableMap.<String, Object>of("prop1", "def")));
+                MapUtil.toDictionary(Map.<String, Object>of("prop1", "def")));
 
         assertDependencies3Filtered(dependency3a);
     }
@@ -184,14 +184,14 @@ public class MockBundleContextStaticGreedyReferencesTest {
 
     private void assertDependencies2(ServiceInterface2... instances) {
         Service3StaticGreedy service = getService();
-        assertEquals(ImmutableSet.<ServiceInterface2>copyOf(instances),
-                ImmutableSet.<ServiceInterface2>copyOf(service.getReferences2()));
+        assertEquals(Set.<ServiceInterface2>of(instances),
+                Set.<ServiceInterface2>copyOf(service.getReferences2()));
     }
 
     private void assertDependencies3(ServiceSuperInterface3... instances) {
         Service3StaticGreedy service = getService();
-        assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances),
-                ImmutableSet.<ServiceSuperInterface3>copyOf(service.getReferences3()));
+        assertEquals(Set.<ServiceSuperInterface3>of(instances),
+                Set.<ServiceSuperInterface3>copyOf(service.getReferences3()));
     }
 
     private Service3StaticGreedy getService() {
@@ -201,8 +201,8 @@ public class MockBundleContextStaticGreedyReferencesTest {
 
     private void assertDependencies3Filtered(ServiceSuperInterface3... instances) {
         Service3StaticGreedy service = getService();
-        assertEquals(ImmutableSet.<ServiceSuperInterface3>copyOf(instances),
-                ImmutableSet.<ServiceSuperInterface3>copyOf(service.getReferences3Filtered()));
+        assertEquals(Set.<ServiceSuperInterface3>of(instances),
+                Set.<ServiceSuperInterface3>copyOf(service.getReferences3Filtered()));
     }
 
 }

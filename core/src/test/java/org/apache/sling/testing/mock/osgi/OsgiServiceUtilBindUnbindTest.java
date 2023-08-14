@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
@@ -39,9 +40,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 
 /**
  * Test different variants of bind/unbind methods with varying signatures.
@@ -155,14 +153,15 @@ public class OsgiServiceUtilBindUnbindTest {
 
     @SafeVarargs
     private final <T> void assertItems(List<T> actual, T... expected) {
-        assertEquals(ImmutableSet.copyOf(expected), ImmutableSet.copyOf(actual));
+        assertEquals(Set.of(expected), Set.copyOf(actual));
     }
 
     @SafeVarargs
-    @SuppressWarnings("null")
     private final <T> void assertMaps(List<Map<String,Object>> actual, Map<String,Object>... expected) {
         List<Map<String,Object>> actualFiltered = actual.stream()
-                .map(actualItem -> Maps.filterEntries(actualItem, item -> item.getKey().equals("prop1")))
+                .map(actualItem -> actualItem.entrySet().stream()
+                        .filter(entry -> entry.getKey().equals("prop1"))
+                        .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())))
                 .collect(Collectors.toList());
         assertItems(actualFiltered, expected);
     }
@@ -171,7 +170,7 @@ public class OsgiServiceUtilBindUnbindTest {
     /**
      * SLING-11860 verify OsgiServiceUtil#invokeBindUnbindMethod invokes the correct bind and unbind methods
      */
-    @Test 
+    @Test
     public void testService9BindUnbind() {
         Service9 service9 = registerInjectService(new Service9());
         assertEquals(Service9.class, service9.getBindSvc1FromClass());
