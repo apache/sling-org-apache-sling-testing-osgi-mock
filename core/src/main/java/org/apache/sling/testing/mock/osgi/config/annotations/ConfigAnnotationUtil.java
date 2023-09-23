@@ -71,7 +71,7 @@ public final class ConfigAnnotationUtil {
     public static Optional<Class<?>> determineSupportedConfigType(@NotNull Class<?> type) {
         if (type.isArray()) {
             return determineSupportedConfigType(type.getComponentType());
-        } else if (type.isInterface() || type.isAnnotation()) {
+        } else if (type.isAnnotation() || type.isInterface()) {
             return Optional.of(type);
         } else {
             return Optional.empty();

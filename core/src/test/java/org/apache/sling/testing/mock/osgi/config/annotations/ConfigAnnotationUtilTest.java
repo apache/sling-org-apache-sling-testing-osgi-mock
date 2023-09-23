@@ -179,6 +179,13 @@ public class ConfigAnnotationUtilTest {
         doAnswer(call -> type1Values.stream()).when(configCollection).configStream(ParameterType1.class);
 
         Executable executable = ExecutableClass.getExecutable();
+        // expect empty result if index is less than 0
+        assertNull(ConfigAnnotationUtil.resolveParameterToValue(
+                configCollection,
+                ParameterType1.class,
+                executable.getParameterTypes(),
+                -1).orElse(null));
+
         assertEquals("one", ConfigAnnotationUtil.resolveParameterToValue(
                 configCollection,
                 ParameterType1.class,
@@ -210,5 +217,19 @@ public class ConfigAnnotationUtilTest {
                 ParameterType1.class,
                 executable.getParameterTypes(),
                 4).orElseThrow().value());
+
+        // expect empty result if index is equal to the number of signature args
+        assertNull(ConfigAnnotationUtil.resolveParameterToValue(
+                configCollection,
+                ParameterType1.class,
+                executable.getParameterTypes(),
+                executable.getParameterTypes().length).orElse(null));
+
+        // expect empty result if index is greater than the number of signature args
+        assertNull(ConfigAnnotationUtil.resolveParameterToValue(
+                configCollection,
+                ParameterType1.class,
+                executable.getParameterTypes(),
+                executable.getParameterTypes().length + 1).orElse(null));
     }
 }
