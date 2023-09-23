@@ -193,19 +193,33 @@ public final class MockBundle implements Bundle {
             return null;
         }
     }
-    
+
     @Override
     public Version getVersion() {
         return version;
     }
-    
+
     /**
      * Sets a new version for this bundle
-     * 
+     *
      * @param version the new version
      */
     public void setVersion(Version version) {
         this.version = version;
+    }
+
+    /**
+     * This is primarily used within the context of unit testing by
+     * {@link org.apache.felix.scr.impl.inject.Annotations#toObject(Class, Map, Bundle, boolean)} for injection of
+     * {@code Class}-typed OSGi config attributes for default values and String properties representing FQDNs.
+     *
+     * @param name The name of the class to load.
+     * @return the class
+     * @throws ClassNotFoundException for more obvious reasons than if this was running in actual OSGi framework
+     */
+    @Override
+    public Class<?> loadClass(final String name) throws ClassNotFoundException {
+        return getClass().getClassLoader().loadClass(name);
     }
 
     // --- unsupported operations ---
@@ -236,11 +250,6 @@ public final class MockBundle implements Bundle {
 
     @Override
     public boolean hasPermission(final Object permission) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Class<?> loadClass(final String name) {
         throw new UnsupportedOperationException();
     }
 

@@ -16,8 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.sling.testing.mock.osgi.config.annotations;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
- * JUnit 5 extensions for OSGi context.
+ * {@link java.lang.annotation.Repeatable} container annotation for {@link DynamicConfig}. This annotation is used
+ * either implicitly or explicitly to specify multiple {@link DynamicConfig} annotations on a single
+ * {@link java.lang.reflect.AnnotatedElement}.
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.apache.sling.testing.mock.osgi.junit5;
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DynamicConfigs {
+
+    /**
+     * Return an array of nested {@link DynamicConfig} annotations.
+     *
+     * @return the array of config mappings
+     */
+    DynamicConfig[] value() default {};
+}

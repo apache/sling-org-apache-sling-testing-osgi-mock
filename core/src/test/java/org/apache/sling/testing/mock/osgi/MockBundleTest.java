@@ -21,6 +21,7 @@ package org.apache.sling.testing.mock.osgi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -166,4 +167,13 @@ public class MockBundleTest {
         assertEquals("3.2.1", bundle.getVersion().toString());
     }
 
+    @Test
+    public void loadClass_String() throws ClassNotFoundException {
+        assertSame(String.class, bundle.loadClass(String.class.getName()));
+    }
+
+    @Test(expected = ClassNotFoundException.class)
+    public void loadClass_Unknown() throws ClassNotFoundException {
+        bundle.loadClass("Unknown");
+    }
 }

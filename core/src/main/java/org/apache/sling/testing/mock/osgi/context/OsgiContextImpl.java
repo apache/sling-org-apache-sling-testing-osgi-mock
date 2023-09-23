@@ -22,9 +22,12 @@ import java.lang.reflect.Array;
 import java.util.Dictionary;
 import java.util.Map;
 
+import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
+import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
+import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ConsumerType;
@@ -242,6 +245,17 @@ public class OsgiContextImpl {
         } catch (InvalidSyntaxException ex) {
             throw new RuntimeException("Invalid filter syntax: " + filter, ex);
         }
+    }
+
+    /**
+     * Return a concrete instance of the OSGi config / Component Property Type represented by the given
+     * {@link DynamicConfig} annotation discovered via reflection.
+     * @param annotation the {@link DynamicConfig}
+     * @return a concrete instance of the type specified by the provided {@link DynamicConfig#value()}
+     */
+    public final Object reifyDynamicConfig(@NotNull final DynamicConfig annotation) {
+        Map<String, Object> props = ComponentPropertyParser.parse(annotation.value(), annotation.property());
+        return Annotations.toObject(annotation.value(), props, bundleContext().getBundle(), false);
     }
 
 }

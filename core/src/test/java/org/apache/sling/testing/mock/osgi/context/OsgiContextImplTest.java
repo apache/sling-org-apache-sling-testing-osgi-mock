@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
+import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
@@ -44,6 +45,7 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.util.tracker.ServiceTracker;
 
 @SuppressWarnings("null")
@@ -235,4 +237,17 @@ public class OsgiContextImplTest {
         tracker.close();
     }
 
+    @DynamicConfig(value = ServiceRanking.class, property = "service.ranking:Integer=42")
+    public static class Configured {
+
+    }
+
+    @Test
+    public void testReifyDynamicConfig() {
+        DynamicConfig configAnnotation = Configured.class.getAnnotation(DynamicConfig.class);
+        Object reified = context.reifyDynamicConfig(configAnnotation);
+        assertTrue(reified instanceof ServiceRanking);
+        ServiceRanking serviceRanking = (ServiceRanking) reified;
+        assertEquals(42, serviceRanking.value());
+    }
 }

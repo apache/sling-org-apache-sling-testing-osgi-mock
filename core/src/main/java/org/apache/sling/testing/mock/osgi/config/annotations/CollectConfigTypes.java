@@ -16,8 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.sling.testing.mock.osgi.config.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
- * JUnit 5 extensions for OSGi context.
+ * Annotate a {@link ConfigCollection} test parameter to specify the config types to collect within the given parameter
+ * context.
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.apache.sling.testing.mock.osgi.junit5;
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+public @interface CollectConfigTypes {
+
+    /**
+     * Specify the config types to collect. An empty value will result in an empty {@link ConfigCollection}.
+     *
+     * @return the config types to collect
+     */
+    Class<?>[] value();
+}
