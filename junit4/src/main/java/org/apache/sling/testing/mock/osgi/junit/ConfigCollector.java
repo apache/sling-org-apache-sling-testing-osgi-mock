@@ -22,8 +22,9 @@ import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUti
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
-import org.junit.rules.TestWatcher;
+import org.junit.rules.TestRule;
 import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import java.util.stream.Stream;
  * {@link org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig} annotations from the current test method
  * and test class.
  */
-public class ConfigCollector extends TestWatcher implements ConfigCollection {
+public class ConfigCollector implements TestRule, ConfigCollection {
     private final OsgiContext osgiContext;
     private final Set<Class<?>> configTypes;
     private final ThreadLocal<Optional<Context>> context = ThreadLocal.withInitial(Optional::empty);
@@ -67,15 +68,18 @@ public class ConfigCollector extends TestWatcher implements ConfigCollection {
     }
 
     @Override
-    protected void starting(Description description) {
-        super.starting(description);
-        context.set(Optional.of(new Context(description)));
-    }
-
-    @Override
-    protected void finished(Description description) {
-        context.remove();
-        super.finished(description);
+    public Statement apply(Statement base, Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                context.set(Optional.of(new Context(description)));
+                try {
+                    base.evaluate();
+                } finally {
+                    context.remove();
+                }
+            }
+        };
     }
 
     private class Context implements ConfigCollection {
