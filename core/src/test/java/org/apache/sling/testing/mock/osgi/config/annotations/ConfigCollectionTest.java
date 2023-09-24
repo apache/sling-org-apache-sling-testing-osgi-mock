@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection.Entry;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
@@ -41,8 +40,8 @@ import static org.mockito.Mockito.withSettings;
 public class ConfigCollectionTest {
 
     @SuppressWarnings("unchecked")
-    private <T> Entry<T> newMockEntry(@NotNull final Class<T> configType, @NotNull final T config) {
-        Entry<T> mocked = (Entry<T>) mock(Entry.class, withSettings().lenient());
+    private <T> TypedConfig<T> newMockEntry(@NotNull final Class<T> configType, @NotNull final T config) {
+        TypedConfig<T> mocked = (TypedConfig<T>) mock(TypedConfig.class, withSettings().lenient());
         doReturn(configType).when(mocked).getType();
         doReturn(config).when(mocked).getConfig();
         doCallRealMethod().when(mocked).stream(any(Class.class));
@@ -51,7 +50,7 @@ public class ConfigCollectionTest {
     }
 
     @SuppressWarnings("unchecked")
-    private ConfigCollection newMockConfigCollection(@NotNull final Supplier<Stream<Entry<?>>> entryStreamSupplier) {
+    private ConfigCollection newMockConfigCollection(@NotNull final Supplier<Stream<TypedConfig<?>>> entryStreamSupplier) {
         ConfigCollection mocked = mock(ConfigCollection.class, withSettings().lenient());
         doCallRealMethod().when(mocked).stream(any(Class.class));
         doCallRealMethod().when(mocked).configStream(any(Class.class));
@@ -64,7 +63,7 @@ public class ConfigCollectionTest {
         ServiceRanking serviceRanking = mock(ServiceRanking.class);
         ServiceVendor serviceVendor = mock(ServiceVendor.class);
 
-        Entry<ServiceRanking> serviceRankingEntry = newMockEntry(ServiceRanking.class, serviceRanking);
+        TypedConfig<ServiceRanking> serviceRankingEntry = newMockEntry(ServiceRanking.class, serviceRanking);
         assertSame(serviceRankingEntry, serviceRankingEntry.stream(ServiceRanking.class).findFirst().orElseThrow());
         assertEquals(1, serviceRankingEntry.stream(ServiceRanking.class).count());
         assertEquals(0, serviceRankingEntry.stream(ServiceVendor.class).count());
@@ -72,7 +71,7 @@ public class ConfigCollectionTest {
         assertEquals(1, serviceRankingEntry.configStream(ServiceRanking.class).count());
         assertEquals(0, serviceRankingEntry.configStream(ServiceVendor.class).count());
 
-        Entry<ServiceVendor> serviceVendorEntry = newMockEntry(ServiceVendor.class, serviceVendor);
+        TypedConfig<ServiceVendor> serviceVendorEntry = newMockEntry(ServiceVendor.class, serviceVendor);
         assertSame(serviceVendorEntry, serviceVendorEntry.stream(ServiceVendor.class).findFirst().orElseThrow());
         assertEquals(1, serviceVendorEntry.stream(ServiceVendor.class).count());
         assertEquals(0, serviceVendorEntry.stream(ServiceRanking.class).count());
@@ -80,11 +79,11 @@ public class ConfigCollectionTest {
         assertEquals(1, serviceVendorEntry.configStream(ServiceVendor.class).count());
         assertEquals(0, serviceVendorEntry.configStream(ServiceRanking.class).count());
 
-        final List<Entry<?>> entries = List.of(serviceRankingEntry, serviceVendorEntry);
+        final List<TypedConfig<?>> entries = List.of(serviceRankingEntry, serviceVendorEntry);
 
         ConfigCollection configCollection = newMockConfigCollection(entries::stream);
-        assertArrayEquals(new Entry<?>[]{serviceRankingEntry}, configCollection.stream(ServiceRanking.class).toArray());
-        assertArrayEquals(new Entry<?>[]{serviceVendorEntry}, configCollection.stream(ServiceVendor.class).toArray());
+        assertArrayEquals(new TypedConfig<?>[]{serviceRankingEntry}, configCollection.stream(ServiceRanking.class).toArray());
+        assertArrayEquals(new TypedConfig<?>[]{serviceVendorEntry}, configCollection.stream(ServiceVendor.class).toArray());
         assertArrayEquals(new ServiceRanking[]{serviceRanking}, configCollection.configStream(ServiceRanking.class).toArray());
         assertArrayEquals(new ServiceVendor[]{serviceVendor}, configCollection.configStream(ServiceVendor.class).toArray());
     }

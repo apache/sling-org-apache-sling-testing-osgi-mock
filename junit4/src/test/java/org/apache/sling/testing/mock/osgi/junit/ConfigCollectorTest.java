@@ -16,29 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.testing.mock.osgi.junit5;
+package org.apache.sling.testing.mock.osgi.junit;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.CollectConfigTypes;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
 
-@DynamicConfig(value = ServiceVendor.class, property = "Apache Software Foundation")
-@ExtendWith(OsgiConfigParametersExtension.class)
-class ConfigCollectionImplTest {
+@DynamicConfig(ServiceRanking.class)
+@RunWith(MockitoJUnitRunner.class)
+public class ConfigCollectorTest {
 
-    @SuppressWarnings("unchecked")
-    @DynamicConfig(ServiceRanking.class)
+    @Rule
+    public OsgiContext osgiContext = new OsgiContextBuilder().build();
+
+    @Rule
+    public ConfigCollector configCollector = new ConfigCollector(osgiContext,
+            ServiceRanking.class, ServiceVendor.class);
+
+    @Rule
+    public ConfigCollector justRankings = new ConfigCollector(osgiContext, ServiceRanking.class);
+
+    @DynamicConfig(ServiceVendor.class)
     @Test
-    void collectConfigTypes(@CollectConfigTypes(ServiceRanking.class)
-                            ConfigCollection configs) {
-        assertTrue(configs.stream().map(TypedConfig::getType).anyMatch(ServiceRanking.class::isAssignableFrom));
-        assertTrue(configs.stream().map(TypedConfig::getType).noneMatch(DynamicConfig.class::isAssignableFrom));
+    public void testEvaluate() {
+        assertEquals(2, configCollector.stream().count());
+        assertEquals(1, justRankings.stream().count());
     }
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.Dictionary;
 import java.util.Map;
@@ -27,7 +28,9 @@ import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
+import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ConsumerType;
@@ -254,8 +257,27 @@ public class OsgiContextImpl {
      * @return a concrete instance of the type specified by the provided {@link DynamicConfig#value()}
      */
     public final Object reifyDynamicConfig(@NotNull final DynamicConfig annotation) {
+        if (!annotation.value().isAnnotation() && !annotation.value().isInterface()) {
+            throw new IllegalArgumentException("illegal value for DynamicConfig " + annotation.value());
+        }
         Map<String, Object> props = ComponentPropertyParser.parse(annotation.value(), annotation.property());
         return Annotations.toObject(annotation.value(), props, bundleContext().getBundle(), false);
     }
 
+    /**
+     * Construct a collection typed config for the provided annotation.
+     * @param annotation a component property type annotation or {@link DynamicConfig} annotation
+     * @return a typed config
+     */
+    public final TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation) {
+        if (annotation instanceof DynamicConfig) {
+            DynamicConfig osgiConfig = (DynamicConfig) annotation;
+            Class<?> mappingType = osgiConfig.value();
+            return AnnotationTypedConfig.newInstance(mappingType,
+                    mappingType.cast(this.reifyDynamicConfig(osgiConfig)),
+                    annotation);
+        } else {
+            return AnnotationTypedConfig.newInstance(annotation.annotationType(), annotation, annotation);
+        }
+    }
 }

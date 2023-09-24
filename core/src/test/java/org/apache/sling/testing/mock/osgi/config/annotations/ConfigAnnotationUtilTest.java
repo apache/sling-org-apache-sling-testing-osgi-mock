@@ -27,6 +27,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Executable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,8 +61,30 @@ public class ConfigAnnotationUtilTest {
     }
 
     @Test
-    public void findAnnotations() {
+    public void findAnnotationsFromAnnotatedElement() {
         List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(Configured.class,
+                        Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class))
+                .collect(Collectors.toList());
+
+        assertEquals(4, annotations.size());
+
+        assertTrue(annotations.get(0) instanceof DynamicConfig);
+        assertSame(ServiceRanking.class, ((DynamicConfig) annotations.get(0)).value());
+
+        assertTrue(annotations.get(1) instanceof RuntimeRetained);
+        assertEquals("expected", ((RuntimeRetained) annotations.get(1)).property());
+
+        assertTrue(annotations.get(2) instanceof DynamicConfig);
+        assertSame(ServiceRanking.class, ((DynamicConfig) annotations.get(2)).value());
+
+        assertTrue(annotations.get(3) instanceof DynamicConfig);
+        assertSame(ServiceVendor.class, ((DynamicConfig) annotations.get(3)).value());
+    }
+
+    @Test
+    public void findAnnotationsFromCollection() {
+        List<Annotation> allAnnotations = Arrays.asList(Configured.class.getAnnotations());
+        List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(allAnnotations,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class))
                 .collect(Collectors.toList());
 

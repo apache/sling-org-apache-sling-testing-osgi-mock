@@ -22,6 +22,7 @@ package org.apache.sling.testing.mock.osgi.junit5;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -52,8 +53,8 @@ final class ConfigCollectionImpl implements ConfigCollection {
     }
 
     @Override
-    public Stream<Entry<?>> stream() {
-        return streamAnnotations().map(this::toEntry);
+    public Stream<TypedConfig<?>> stream() {
+        return streamAnnotations().map(osgiContext::newTypedConfig);
     }
 
     Stream<Annotation> streamAnnotations() {
@@ -66,56 +67,10 @@ final class ConfigCollectionImpl implements ConfigCollection {
                                 .streamAnnotations()));
     }
 
-    EntryImpl<?> toEntry(@NotNull Annotation annotation) {
-        if (annotation instanceof DynamicConfig) {
-            DynamicConfig osgiConfig = (DynamicConfig) annotation;
-            Class<?> mappingType = osgiConfig.value();
-            if (!configTypes.contains(mappingType)) {
-                throw new IllegalArgumentException("osgi config mapping type " + mappingType
-                        + " does not match expected parameter types " + new ArrayList<>(configTypes));
-            }
-            return EntryImpl.of(mappingType, mappingType.cast(osgiContext.reifyDynamicConfig(osgiConfig)), annotation);
-        } else if (configTypes.contains(annotation.annotationType())) {
-            return EntryImpl.of(annotation.annotationType(), annotation, annotation);
-        } else {
-            throw new IllegalArgumentException("annotation type " + annotation.getClass()
-                    + " does not match expected parameter types " + new ArrayList<>(configTypes));
-        }
-    }
-
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
                                         @NotNull ExtensionContext extensionContext,
                                         @NotNull OsgiContext osgiContext,
                                         @NotNull Set<Class<?>> configTypes) {
         return new ConfigCollectionImpl(parameterContext, extensionContext, osgiContext, configTypes);
-    }
-
-    static final class EntryImpl<T> implements ConfigCollection.Entry<T> {
-        private final Class<T> type;
-        private final T config;
-
-        private EntryImpl(@NotNull Class<T> type, @NotNull T config, @NotNull Annotation annotation) {
-            if (!type.isInstance(config)) {
-                throw new IllegalArgumentException("config " + config + " must be instance of type " + type + " from annotation " + annotation);
-            }
-            this.type = type;
-            this.config = config;
-        }
-
-        @Override
-        @NotNull
-        public Class<T> getType() {
-            return type;
-        }
-
-        @Override
-        @NotNull
-        public T getConfig() {
-            return config;
-        }
-
-        static <T> EntryImpl<T> of(@NotNull Class<T> type, @NotNull Object config, @NotNull Annotation annotation) {
-            return new EntryImpl<>(type, type.cast(config), annotation);
-        }
     }
 }

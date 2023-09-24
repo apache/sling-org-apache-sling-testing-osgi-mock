@@ -33,6 +33,7 @@ import java.util.Set;
 
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
@@ -249,5 +250,47 @@ public class OsgiContextImplTest {
         assertTrue(reified instanceof ServiceRanking);
         ServiceRanking serviceRanking = (ServiceRanking) reified;
         assertEquals(42, serviceRanking.value());
+    }
+
+    @DynamicConfig(value = String.class, property = "service.ranking:Integer=42")
+    public static class IllegallyConfigured {
+
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testReifyDynamicConfigThrows() {
+        DynamicConfig configAnnotation = IllegallyConfigured.class.getAnnotation(DynamicConfig.class);
+        context.reifyDynamicConfig(configAnnotation);
+    }
+
+    public interface AnInterface {
+        int service_ranking();
+    }
+
+    @DynamicConfig(value = AnInterface.class, property = "service.ranking:Integer=42")
+    public static class ConfiguredWithInterface {
+
+    }
+
+    @Test
+    public void testReifyDynamicConfigInterface() {
+        DynamicConfig configAnnotation = ConfiguredWithInterface.class.getAnnotation(DynamicConfig.class);
+        Object reified = context.reifyDynamicConfig(configAnnotation);
+        assertTrue(reified instanceof AnInterface);
+        AnInterface serviceRanking = (AnInterface) reified;
+        assertEquals(42, serviceRanking.service_ranking());
+    }
+
+    @Test
+    public void testNewTypedConfig() {
+        DynamicConfig configAnnotation = Configured.class.getAnnotation(DynamicConfig.class);
+        TypedConfig<?> typedConfig = context.newTypedConfig(configAnnotation);
+        assertTrue(typedConfig.getConfig() instanceof ServiceRanking);
+        ServiceRanking serviceRanking = (ServiceRanking) typedConfig.getConfig();
+        assertEquals(42, serviceRanking.value());
+        TypedConfig<?> typedConfigFromResult = context.newTypedConfig(serviceRanking);
+        assertTrue(typedConfigFromResult.getConfig() instanceof ServiceRanking);
+        ServiceRanking serviceRanking2 = (ServiceRanking) typedConfigFromResult.getConfig();
+        assertEquals(42, serviceRanking2.value());
     }
 }

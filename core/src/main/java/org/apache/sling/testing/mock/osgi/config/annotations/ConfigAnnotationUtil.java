@@ -23,8 +23,10 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -49,16 +51,56 @@ public final class ConfigAnnotationUtil {
     public static Stream<Annotation> findAnnotations(@NotNull AnnotatedElement element,
                                                      @NotNull Set<Class<?>> configTypes) {
         return Stream.of(element.getAnnotations())
-                .flatMap(annotation -> {
-                    if (DynamicConfigs.class.isAssignableFrom(annotation.annotationType())) {
-                        return Stream.of(((DynamicConfigs) annotation).value());
-                    } else {
-                        return Stream.of(annotation);
-                    }
-                })
-                .filter(annotation -> configTypes.contains(annotation.annotationType())
-                        || DynamicConfig.class.isAssignableFrom(annotation.annotationType())
-                        && configTypes.contains(((DynamicConfig) annotation).value()));
+                .flatMap(ConfigAnnotationUtil::flattenAnnotation)
+                .filter(ConfigAnnotationUtil.annotationPredicate(configTypes));
+    }
+
+    /**
+     * Find candidate OSGi config annotations in the given collection, returning a stream of only those
+     * matching one of the desired config types. An annotation matches a config type only if the annotation's own type
+     * is the same as the config type, or if the annotation is a {@link DynamicConfig} and its
+     * {@link DynamicConfig#value()} is the same as the config type. If the collection has a
+     * {@link DynamicConfigs} annotation, its nested {@link DynamicConfig} annotations will be considered as well.
+     *
+     * @param annotations a collection of annotations
+     * @param configTypes the desired config types
+     * @return a stream of annotations
+     */
+    public static Stream<Annotation> findAnnotations(@NotNull Collection<Annotation> annotations,
+                                                     @NotNull Set<Class<?>> configTypes) {
+        return annotations.stream()
+                .flatMap(ConfigAnnotationUtil::flattenAnnotation)
+                .filter(ConfigAnnotationUtil.annotationPredicate(configTypes));
+    }
+
+    /**
+     * Utility function for use as a flatMap expression for {@link #findAnnotations(AnnotatedElement, Set)} and
+     * {@link #findAnnotations(Collection, Set)} that expands a {@link DynamicConfigs} annotation into a substream
+     * of {@link DynamicConfig} annotations.
+     *
+     * @param annotation input annotation
+     * @return the flattened stream of annotations
+     */
+    private static Stream<Annotation> flattenAnnotation(@NotNull Annotation annotation) {
+        if (DynamicConfigs.class.isAssignableFrom(annotation.annotationType())) {
+            return Stream.of(((DynamicConfigs) annotation).value());
+        } else {
+            return Stream.of(annotation);
+        }
+    }
+
+    /**
+     * Utility function that returns a predicate for use as a filter expression for
+     * {@link #findAnnotations(AnnotatedElement, Set)} and {@link #findAnnotations(Collection, Set)} that
+     * reduces the input stream of annotations based on provided set of allowed config types.
+     *
+     * @param configTypes the allowed config types
+     * @return an annotation stream predicate
+     */
+    private static Predicate<Annotation> annotationPredicate(@NotNull Set<Class<?>> configTypes) {
+        return annotation -> configTypes.contains(annotation.annotationType())
+                || DynamicConfig.class.isAssignableFrom(annotation.annotationType())
+                && configTypes.contains(((DynamicConfig) annotation).value());
     }
 
     /**

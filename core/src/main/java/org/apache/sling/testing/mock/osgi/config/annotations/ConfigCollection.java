@@ -21,7 +21,6 @@ package org.apache.sling.testing.mock.osgi.config.annotations;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
 
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -31,20 +30,20 @@ import java.util.stream.Stream;
 public interface ConfigCollection {
 
     /**
-     * Return an untyped stream of all the entries contained in this collection.
+     * Return an untyped stream of all the typed configs contained in this collection.
      *
-     * @return an untyped stream of entries
+     * @return an untyped stream of typed configs
      */
-    Stream<Entry<?>> stream();
+    Stream<TypedConfig<?>> stream();
 
     /**
      * Return a typed stream of only those entries in the collection that match the desired config type.
      *
      * @param configType the desired config type
      * @param <T>        the config type
-     * @return a typed stream of entries
+     * @return a typed stream of typed configs
      */
-    default <T> Stream<Entry<T>> stream(@NotNull Class<T> configType) {
+    default <T> Stream<TypedConfig<T>> stream(@NotNull Class<T> configType) {
         return stream().flatMap(entry -> entry.stream(configType));
     }
 
@@ -53,66 +52,10 @@ public interface ConfigCollection {
      *
      * @param configType the desired config type
      * @param <T>        the config type
-     * @return a typed stream of configs
+     * @return a typed stream of config values
      */
     default <T> Stream<T> configStream(@NotNull Class<T> configType) {
         return stream().flatMap(entry -> entry.configStream(configType));
     }
 
-    /**
-     * Represents a single config entry within the collection. It has its own config type, which may be an
-     * type or an interface.
-     *
-     * @param <T> the config type
-     */
-    interface Entry<T> {
-
-        /**
-         * The config type. This will only be an annotation type or an interface type.
-         *
-         * @return the config type
-         */
-        @NotNull
-        Class<T> getType();
-
-        /**
-         * The config object. This is the value that is expected to be passed to an
-         * {@link org.osgi.service.component.annotations.Activate}-annotated SCR component constructor.
-         *
-         * @return the config object
-         */
-        @NotNull
-        T getConfig();
-
-        /**
-         * Returns a 0- or 1-element entry stream (containing only this entry) depending on whether this entry's
-         * {@link #getType()} matches the provided {@code otherType}. This is a convenience method for use in
-         * {@link Stream#flatMap(Function)} expressions on the containing {@link ConfigCollection#stream()}.
-         *
-         * @param otherType the other type to filter by
-         * @param <U>       the other type
-         * @return a 0- or 1-element entry stream (containing only this entry)
-         */
-        @SuppressWarnings("unchecked")
-        default <U> Stream<Entry<U>> stream(@NotNull Class<U> otherType) {
-            if (otherType.equals(getType())) {
-                return Stream.of((Entry<U>) this);
-            } else {
-                return Stream.empty();
-            }
-        }
-
-        /**
-         * Returns a 0- or 1-element config stream (containing only this entry's config) depending on whether this
-         * entry's {@link #getType()} matches the provided {@code otherType}. This is a convenience method for use in
-         * {@link Stream#flatMap(Function)} expressions on the containing {@link ConfigCollection#stream()}.
-         *
-         * @param otherType the other type to filter by
-         * @param <U>       the other type
-         * @return a 0- or 1-element config stream (containing only this entry's config)
-         */
-        default <U> Stream<U> configStream(@NotNull Class<U> otherType) {
-            return stream(otherType).map(Entry::getConfig);
-        }
-    }
 }
