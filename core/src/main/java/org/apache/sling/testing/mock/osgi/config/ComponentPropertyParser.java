@@ -47,10 +47,12 @@ import java.util.stream.Stream;
  */
 public final class ComponentPropertyParser {
     private static final Logger log = LoggerFactory.getLogger(ComponentPropertyParser.class);
+    private static final String ATTR_VALUE = "value";
     private static final Pattern IDENTIFIERTOPROPERTY = Pattern
             .compile("(__)|(_)|(\\$_\\$)|(\\$\\$)|(\\$)");
     private static final Pattern PROPERTY_PATTERN = Pattern.compile(
             "\\s*(?<key>[^=\\s:]+)\\s*(?::\\s*(?<type>Boolean|Byte|Character|Short|Integer|Long|Float|Double|String)\\s*)?=(?<value>.*)");
+    private static final String PROPERTY_PATTERN_CAPTURE_GROUP_VALUE = "value";
 
     private static final Set<Class<?>> BOXES = Stream.of(
                     Boolean.class, Byte.class, Character.class, Short.class,
@@ -59,6 +61,23 @@ public final class ComponentPropertyParser {
 
     private ComponentPropertyParser() {
         // prevent instantiation
+    }
+
+    static String unescape(@NotNull final String escapeSequence) {
+        switch (escapeSequence) {
+            case "__":
+                return "_";
+            case "_":
+                return ".";
+            case "$_$":
+                return "-";
+            case "$$":
+                return "\\$";
+            case "$":
+                return "";
+            default:
+                throw new IllegalArgumentException("Unsupported escape sequence " + escapeSequence);
+        }
     }
 
     static String identifierToPropertyName(@NotNull String name, @Nullable String prefix) {
@@ -70,24 +89,7 @@ public final class ComponentPropertyParser {
         }
         StringBuffer b = new StringBuffer();
         do {
-            switch (m.group()) {
-                case "__": // __ to _
-                    m.appendReplacement(b, "_");
-                    break;
-                case "_": // _ to .
-                    m.appendReplacement(b, ".");
-                    break;
-                case "$_$": // $_$ to -
-                    m.appendReplacement(b, "-");
-                    break;
-                case "$$": // $$ to $
-                    m.appendReplacement(b, "\\$");
-                    break;
-                case "$": // $ removed
-                    m.appendReplacement(b, "");
-                    break;
-                // default: // not possible with "(__)|(_)|(\$_\$)|(\$\$)|(\$)"
-            }
+            m.appendReplacement(b, unescape(m.group()));
         } while (m.find());
         m.appendTail(b);
         final String propName = b.toString();
@@ -126,7 +128,7 @@ public final class ComponentPropertyParser {
         final boolean isSingleElementAnnotation = Annotations.isSingleElementAnnotation(annotationType);
         Map<String, Object> defaults = new HashMap<>();
         for (Method method : Stream.of(annotationType.getMethods())
-                .filter(method -> !isSingleElementAnnotation || "value".equals(method.getName()))
+                .filter(method -> !isSingleElementAnnotation || ATTR_VALUE.equals(method.getName()))
                 .toArray(Method[]::new)) {
             final Object value = method.getDefaultValue();
             if (value != null) {
@@ -142,7 +144,7 @@ public final class ComponentPropertyParser {
 
                 // determine property name to set the default value for
                 final String propertyName;
-                if (isSingleElementAnnotation && "value".equals(method.getName())) {
+                if (isSingleElementAnnotation && ATTR_VALUE.equals(method.getName())) {
                     propertyName = singleElementAnnotationKey(annotationType.getSimpleName(), prefix);
                 } else {
                     propertyName = identifierToPropertyName(method.getName(), prefix);
@@ -194,7 +196,7 @@ public final class ComponentPropertyParser {
                     if (type != null) {
                         propertyType.put(key, type);
                     }
-                    String value = m.group("value");
+                    String value = m.group(PROPERTY_PATTERN_CAPTURE_GROUP_VALUE);
                     getValues.apply(key).add(value);
                 } else {
                     log.warn("Malformed property '{}' on component: {}", p, configType.getName());

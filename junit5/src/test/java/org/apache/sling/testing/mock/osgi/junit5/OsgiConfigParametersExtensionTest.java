@@ -23,7 +23,10 @@ import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfigs;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
@@ -33,6 +36,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -511,5 +515,30 @@ class OsgiConfigParametersExtensionTest {
         assertEquals(22.0, defaultWithValue.floatValue());
         assertEquals(Double.MIN_VALUE, defaultDefaults.doubleValue());
         assertEquals(222.0D, defaultWithValue.doubleValue());
+    }
+
+    public static class ConcreteParameter {
+
+    }
+
+    public static class ConcreteParameterExtension implements ParameterResolver {
+        @Override
+        public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+            return ConcreteParameter.class.isAssignableFrom(parameterContext.getParameter().getType());
+        }
+
+        @Override
+        public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+            return new ConcreteParameter();
+        }
+    }
+
+    @DynamicConfig(value = ServiceRanking.class, property = "service.ranking:Integer=1")
+    @ExtendWith(ConcreteParameterExtension.class)
+    @Test
+    void supportedAndUnsupportedParameter(ConcreteParameter unsupported, ServiceRanking serviceRanking) {
+        // this should execute and not throw
+        assertNotNull(unsupported);
+        assertEquals(1, serviceRanking.value());
     }
 }

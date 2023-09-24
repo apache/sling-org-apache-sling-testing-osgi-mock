@@ -36,7 +36,12 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class ConfigPropertyParserTest {
+public class ComponentPropertyParserTest {
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnescapeUnsupported() {
+        ComponentPropertyParser.unescape("unsupported");
+    }
 
     @Test
     public void testIdentifierToPropertyName() {
@@ -46,7 +51,8 @@ public class ConfigPropertyParserTest {
                 "prop$_$name", "prop-name",
                 "prop$$name", "prop$name",
                 "prop$name", "propname",
-                "propName", "propName"
+                "propName", "propName",
+                "two_period_name", "two.period.name"
         );
 
         String[] prefixes = new String[]{null, "", "prefix-"};
@@ -68,7 +74,8 @@ public class ConfigPropertyParserTest {
         Map<String, String> expectations = Map.of(
                 ServiceRanking.class.getSimpleName(), "service.ranking",
                 ServiceVendor.class.getSimpleName(), "service.vendor",
-                InnerAnnotation.class.getSimpleName(), "inner.annotation"
+                InnerAnnotation.class.getSimpleName(), "inner.annotation",
+                "$SomehowStartsWithDollar", "$somehow.starts.with.dollar"
         );
 
         String[] prefixes = new String[]{null, "", "prefix-"};
@@ -298,7 +305,7 @@ public class ConfigPropertyParserTest {
     }
 
     public @interface SingleElementClassArrayDefault {
-        Class<?>[] value() default {ConfigPropertyParserTest.class};
+        Class<?>[] value() default {ComponentPropertyParserTest.class};
     }
 
     @Test
@@ -311,7 +318,7 @@ public class ConfigPropertyParserTest {
                 SingleElementClassArray.class,
                 Collections.emptyMap(),
                 SingleElementClassArrayDefault.class,
-                Map.of("single.element.class.array.default", new String[]{ConfigPropertyParserTest.class.getName()})
+                Map.of("single.element.class.array.default", new String[]{ComponentPropertyParserTest.class.getName()})
         );
         assertGetAnnotationDefaultsExpectations(expectations);
     }
