@@ -147,11 +147,11 @@ public class ConfigAnnotationUtilTest {
         assertSame(AnAnnotation.class, ConfigAnnotationUtil.determineSupportedConfigType(AnAnnotation[].class).orElseThrow());
     }
 
-    @interface ParameterType1 {
+    public @interface ParameterType1 {
         String value();
     }
 
-    @interface ParameterType2 {
+    public @interface ParameterType2 {
         String value();
     }
 

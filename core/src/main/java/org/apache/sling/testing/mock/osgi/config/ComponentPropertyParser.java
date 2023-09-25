@@ -197,10 +197,11 @@ public final class ComponentPropertyParser {
             if (m.matches()) {
                 String key = m.group("key");
                 String type = m.group("type");
-                if (type != null && propertyType.containsKey(key) && !type.equals(propertyType.get(key))) {
-                    log.warn("Inconsistent types for property '{}' on component: {}", p, configType.getName());
-                }
                 if (type != null) {
+                    if (propertyType.containsKey(key) && !type.equals(propertyType.get(key))) {
+                        log.warn("Inconsistent types for property '{}' on component: {}. {} != {}",
+                                p, configType.getName(), type, propertyType.get(key));
+                    }
                     propertyType.put(key, type);
                 }
                 String value = m.group(PROPERTY_PATTERN_CAPTURE_GROUP_VALUE);

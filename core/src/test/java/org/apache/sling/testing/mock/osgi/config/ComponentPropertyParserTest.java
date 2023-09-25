@@ -78,7 +78,9 @@ public class ComponentPropertyParserTest {
                 ServiceRanking.class.getSimpleName(), "service.ranking",
                 ServiceVendor.class.getSimpleName(), "service.vendor",
                 InnerAnnotation.class.getSimpleName(), "inner.annotation",
-                "$SomehowStartsWithDollar", "$somehow.starts.with.dollar"
+                "$SomehowStartsWithDollar", "$somehow.starts.with.dollar",
+                "simpler", "simpler",
+                "endsWith$", ""
         );
 
         String[] prefixes = new String[]{null, "", "prefix-"};
