@@ -55,6 +55,8 @@ public class ConfigAnnotationUtilTest {
     @DynamicConfigs({
             @DynamicConfig(ServiceRanking.class),
             @DynamicConfig(ServiceVendor.class),
+            @DynamicConfig(DynamicConfig.class),
+            @DynamicConfig(DynamicConfigs.class)
     })
     public static class Configured {
         // not used
@@ -63,7 +65,9 @@ public class ConfigAnnotationUtilTest {
     @Test
     public void findAnnotationsFromAnnotatedElement() {
         List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(Configured.class,
-                        Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class))
+                        Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
+                                // include our reserved annotations in the set to confirm that they are always excluded
+                                DynamicConfig.class, DynamicConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());

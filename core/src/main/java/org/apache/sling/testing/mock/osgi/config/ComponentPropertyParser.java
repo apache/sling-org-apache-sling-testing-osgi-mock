@@ -104,7 +104,8 @@ public final class ComponentPropertyParser {
             if (Character.isUpperCase(c)) {
                 sb.setCharAt(i, Character.toLowerCase(c));
                 if (lastLowerCase) {
-                    sb.insert(i++, '.');
+                    sb.insert(i, '.');
+                    i++;
                 }
                 lastLowerCase = false;
             } else {
@@ -137,73 +138,80 @@ public final class ComponentPropertyParser {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> parse(@NotNull Class<?> configType, @NotNull String[] properties) {
+    static Map<String, Object> getTypedProperties(Map<String, String> propertyType, Map<String, List<String>> map) {
         final Map<String, Object> returnProps = new HashMap<>();
-        if (properties.length > 0) {
-            Map<String, String> propertyType = new HashMap<>();
-            final Map<String, List<String>> map = new HashMap<>();
-            final Function<String, List<String>> getValues =
-                    (key) -> map.computeIfAbsent(key, (k) -> new LinkedList<>());
-            for (String p : properties) {
-                Matcher m = PROPERTY_PATTERN.matcher(p);
-                if (m.matches()) {
-                    String key = m.group("key");
-                    String type = m.group("type");
-                    if (type != null && propertyType.containsKey(key) && !type.equals(propertyType.get(key))) {
-                        log.warn("Inconsistent types for property '{}' on component: {}", p, configType.getName());
-                    }
-                    if (type != null) {
-                        propertyType.put(key, type);
-                    }
-                    String value = m.group(PROPERTY_PATTERN_CAPTURE_GROUP_VALUE);
-                    getValues.apply(key).add(value);
-                } else {
-                    log.warn("Malformed property '{}' on component: {}", p, configType.getName());
-                }
-            }
-
-            for (String name : map.keySet()) {
-                switch (propertyType.getOrDefault(name, "String")) {
-                    case "Boolean":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(Boolean::parseBoolean).toArray(Boolean[]::new));
-                        break;
-                    case "Byte":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(Byte::parseByte).toArray(Byte[]::new));
-                        break;
-                    case "Character":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(str -> str.charAt(0)).toArray(Character[]::new));
-                        break;
-                    case "Short":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(Short::parseShort).toArray(Short[]::new));
-                        break;
-                    case "Integer":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(Integer::parseInt).toArray(Integer[]::new));
-                        break;
-                    case "Long":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(Long::parseLong).toArray(Long[]::new));
-                        break;
-                    case "Float":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(Float::parseFloat).toArray(Float[]::new));
-                        break;
-                    case "Double":
-                        returnProps.put(name, map.get(name).stream()
-                                .map(Double::parseDouble).toArray(Double[]::new));
-                        break;
-                    case "String":
-                    default:
-                        returnProps.put(name, map.get(name).toArray(new String[0]));
-                        break;
-                }
+        for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+            final String name = entry.getKey();
+            final List<String> values = entry.getValue();
+            switch (propertyType.getOrDefault(name, "String")) {
+                case "Boolean":
+                    returnProps.put(name, values.stream()
+                            .map(Boolean::parseBoolean).toArray(Boolean[]::new));
+                    break;
+                case "Byte":
+                    returnProps.put(name, values.stream()
+                            .map(Byte::parseByte).toArray(Byte[]::new));
+                    break;
+                case "Character":
+                    returnProps.put(name, values.stream()
+                            .map(str -> str.charAt(0)).toArray(Character[]::new));
+                    break;
+                case "Short":
+                    returnProps.put(name, values.stream()
+                            .map(Short::parseShort).toArray(Short[]::new));
+                    break;
+                case "Integer":
+                    returnProps.put(name, values.stream()
+                            .map(Integer::parseInt).toArray(Integer[]::new));
+                    break;
+                case "Long":
+                    returnProps.put(name, values.stream()
+                            .map(Long::parseLong).toArray(Long[]::new));
+                    break;
+                case "Float":
+                    returnProps.put(name, values.stream()
+                            .map(Float::parseFloat).toArray(Float[]::new));
+                    break;
+                case "Double":
+                    returnProps.put(name, values.stream()
+                            .map(Double::parseDouble).toArray(Double[]::new));
+                    break;
+                case "String":
+                default:
+                    returnProps.put(name, values.toArray(new String[0]));
+                    break;
             }
         }
+        return returnProps;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> parse(@NotNull Class<?> configType, @NotNull String[] properties) {
+        final Map<String, String> propertyType = new HashMap<>();
+        final Map<String, List<String>> map = new HashMap<>();
+        final Function<String, List<String>> getValues =
+                key -> map.computeIfAbsent(key, ignored -> new LinkedList<>());
+
+        for (String p : properties) {
+            Matcher m = PROPERTY_PATTERN.matcher(p);
+            if (m.matches()) {
+                String key = m.group("key");
+                String type = m.group("type");
+                if (type != null && propertyType.containsKey(key) && !type.equals(propertyType.get(key))) {
+                    log.warn("Inconsistent types for property '{}' on component: {}", p, configType.getName());
+                }
+                if (type != null) {
+                    propertyType.put(key, type);
+                }
+                String value = m.group(PROPERTY_PATTERN_CAPTURE_GROUP_VALUE);
+                getValues.apply(key).add(value);
+            } else {
+                log.warn("Malformed property '{}' on component: {}", p, configType.getName());
+            }
+        }
+
+        final Map<String, Object> returnProps = getTypedProperties(propertyType, map);
+
         if (configType.isAnnotation()) {
             getAnnotationDefaults((Class<? extends Annotation>) configType, returnProps);
         }

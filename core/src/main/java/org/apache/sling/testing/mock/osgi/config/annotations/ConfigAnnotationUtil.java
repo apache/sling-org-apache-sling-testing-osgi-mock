@@ -98,9 +98,16 @@ public final class ConfigAnnotationUtil {
      * @return an annotation stream predicate
      */
     private static Predicate<Annotation> annotationPredicate(@NotNull Set<Class<?>> configTypes) {
-        return annotation -> configTypes.contains(annotation.annotationType())
-                || DynamicConfig.class.isAssignableFrom(annotation.annotationType())
-                && configTypes.contains(((DynamicConfig) annotation).value());
+        return annotation -> {
+            if (DynamicConfig.class.isAssignableFrom(annotation.annotationType())) {
+                final Class<?> configType = ((DynamicConfig) annotation).value();
+                return !DynamicConfig.class.isAssignableFrom(configType)
+                        && !DynamicConfigs.class.isAssignableFrom(configType)
+                        && configTypes.contains(configType);
+            } else {
+                return configTypes.contains(annotation.annotationType());
+            }
+        };
     }
 
     /**
