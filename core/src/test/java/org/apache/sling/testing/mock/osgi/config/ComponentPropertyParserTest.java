@@ -32,9 +32,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ComponentPropertyParserTest {
 
@@ -201,6 +204,10 @@ public class ComponentPropertyParserTest {
         DynamicConfigs annotationValue() default @DynamicConfigs;
 
         String xyzValue() default "xyzValue";
+    }
+
+    public interface AnInterface {
+
     }
 
     public @interface PropertyEscaped {
@@ -387,5 +394,34 @@ public class ComponentPropertyParserTest {
                         "float.value:Float=11.0",
                         "double.value:Double=111.0"
                 }));
+    }
+
+    @Test
+    public void testIsSupportedPropertyMapValueType() {
+        Stream.of(
+                        boolean.class, boolean[].class, Boolean.class, Boolean[].class,
+                        byte.class, byte[].class, Byte.class, Byte[].class,
+                        char.class, char[].class, Character.class, Character[].class,
+                        short.class, short[].class, Short.class, Short[].class,
+                        int.class, int[].class, Integer.class, Integer[].class,
+                        long.class, long[].class, Long.class, Long[].class,
+                        float.class, float[].class, Float.class, Float[].class,
+                        double.class, double[].class, Double.class, Double[].class)
+                .forEach(type -> assertTrue(ComponentPropertyParser.isSupportedPropertyMapValueType(type)));
+
+        Stream.of(Class.class, Class[].class)
+                .forEach(type -> assertFalse(ComponentPropertyParser.isSupportedPropertyMapValueType(type)));
+    }
+
+    public @interface NotSingleElementAnnotation {
+        String anotherProperty() default "another one";
+        String value() default "expected";
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSingleElementAnnotationPropertyDefaultsProvider() throws Exception {
+        SingleElementPropertyDefaultsProvider defaultsProvider =
+                new SingleElementPropertyDefaultsProvider(NotSingleElementAnnotation.class, null);
+        defaultsProvider.getPropertyName(NotSingleElementAnnotation.class.getMethod("anotherProperty"));
     }
 }

@@ -23,11 +23,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.felix.scr.impl.inject.Annotations;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,7 +44,6 @@ import java.util.stream.Stream;
  */
 public final class ComponentPropertyParser {
     private static final Logger log = LoggerFactory.getLogger(ComponentPropertyParser.class);
-    private static final String ATTR_VALUE = "value";
     private static final Pattern IDENTIFIERTOPROPERTY = Pattern
             .compile("(__)|(_)|(\\$_\\$)|(\\$\\$)|(\\$)");
     private static final Pattern PROPERTY_PATTERN = Pattern.compile(
@@ -122,59 +118,23 @@ public final class ComponentPropertyParser {
         }
     }
 
+    static boolean isSupportedPropertyMapValueType(Class<?> attributeType) {
+        if (attributeType.isArray()) {
+            return isSupportedPropertyMapValueType(attributeType.getComponentType());
+        }
+        return attributeType.isPrimitive() || BOXES.contains(attributeType) || attributeType.equals(String.class);
+    }
+
     static void getAnnotationDefaults(@NotNull final Class<? extends Annotation> annotationType,
                                       @NotNull final Map<String, Object> values) {
-        final String prefix = Annotations.getPrefix(annotationType);
-        final boolean isSingleElementAnnotation = Annotations.isSingleElementAnnotation(annotationType);
-        Map<String, Object> defaults = new HashMap<>();
-        for (Method method : Stream.of(annotationType.getMethods())
-                .filter(method -> !isSingleElementAnnotation || ATTR_VALUE.equals(method.getName()))
-                .toArray(Method[]::new)) {
-            final Object value = method.getDefaultValue();
-            if (value != null) {
-                final Class<?> valueType = value.getClass();
-                final Class<?> singleType = valueType.isArray() ? valueType.getComponentType() : valueType;
-                if (Annotation.class.isAssignableFrom(singleType)) {
-                    // check type, exit method with warning if annotation
-                    // or annotation array
-                    log.warn("Nested annotation type found in member {}, {}",
-                            annotationType.getName(), singleType.getName());
-                    return;
-                }
 
-                // determine property name to set the default value for
-                final String propertyName;
-                if (isSingleElementAnnotation && ATTR_VALUE.equals(method.getName())) {
-                    propertyName = singleElementAnnotationKey(annotationType.getSimpleName(), prefix);
-                } else {
-                    propertyName = identifierToPropertyName(method.getName(), prefix);
-                }
+        final AbstractPropertyDefaultsProvider defaultsProvider =
+                AbstractPropertyDefaultsProvider.getInstance(annotationType);
 
-                if (values.containsKey(propertyName)) {
-                    // skip this default value if the property is already set
-                    continue;
-                }
-                if (singleType.isPrimitive() || BOXES.contains(singleType) || singleType.equals(String.class)) {
-                    if (valueType.isArray()) {
-                        defaults.put(propertyName, value);
-                    } else {
-                        Object array = Array.newInstance(singleType, 1);
-                        Array.set(array, 0, value);
-                        defaults.put(propertyName, array);
-                    }
-                } else if (singleType.equals(Class.class)) {
-                    // Class.class is the same as Class<Class<?>>
-                    // this must be transformed to a String representing the FQDN
-                    if (valueType.isArray()) {
-                        defaults.put(propertyName,
-                                Stream.of((Class<?>[]) value).map(Class::getName).toArray(String[]::new));
-                    } else {
-                        defaults.put(propertyName, new String[]{((Class<?>) value).getName()});
-                    }
-                }
-            }
+        Map<String, Object> defaults = defaultsProvider.getDefaults(values);
+        if (!defaults.isEmpty()) {
+            values.putAll(defaults);
         }
-        values.putAll(defaults);
     }
 
     @SuppressWarnings("unchecked")
