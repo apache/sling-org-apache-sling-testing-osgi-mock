@@ -50,13 +50,18 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
+    public @interface NotSelected {
+        String property() default "default";
+    }
+
     @DynamicConfig(ServiceRanking.class)
     @RuntimeRetained(property = "expected")
     @DynamicConfigs({
             @DynamicConfig(ServiceRanking.class),
             @DynamicConfig(ServiceVendor.class),
             @DynamicConfig(DynamicConfig.class),
-            @DynamicConfig(DynamicConfigs.class)
+            @DynamicConfig(DynamicConfigs.class),
+            @DynamicConfig(NotSelected.class)
     })
     public static class Configured {
         // not used
@@ -89,7 +94,9 @@ public class ConfigAnnotationUtilTest {
     public void findAnnotationsFromCollection() {
         List<Annotation> allAnnotations = Arrays.asList(Configured.class.getAnnotations());
         List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(allAnnotations,
-                        Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class))
+                        Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
+                                // include our reserved annotations in the set to confirm that they are always excluded
+                                DynamicConfig.class, DynamicConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
