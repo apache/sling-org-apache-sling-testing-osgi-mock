@@ -16,8 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/**
- * OSGi context implementation for unit tests.
- */
 @org.osgi.annotation.versioning.Version("1.0.0")
 package org.apache.sling.testing.mock.osgi.config;
