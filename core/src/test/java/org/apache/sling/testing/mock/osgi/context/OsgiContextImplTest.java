@@ -44,6 +44,7 @@ import java.util.Set;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
@@ -378,6 +379,44 @@ public class OsgiContextImplTest {
         UpdateConfig updateConfig = NoUpdatesConfiguration.class.getAnnotation(UpdateConfig.class);
         context.updateConfiguration(updateConfig);
         assertNull(configAdmin.getConfiguration("").getProperties());
+    }
+
+    @UpdateConfig(value = "ranking.is.21", property = "service.ranking:Integer=21")
+    @UpdateConfig(value = "ranking.is.42", property = "service.ranking:Integer=42")
+    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=10")
+    public static class AppliesMultipleConfigs {
+
+    }
+
+    @Test
+    public void testApplyConfigToTypeMultiplePids() {
+        ConfigAnnotationUtil.findUpdateConfigAnnotations(AppliesMultipleConfigs.class)
+                .forEachOrdered(context::updateConfiguration);
+        ApplyConfig annotation = AppliesMultipleConfigs.class.getAnnotation(ApplyConfig.class);
+        assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation)).value());
+        assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "")).value());
+        assertEquals(21, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.21")).value());
+        assertEquals(42, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.42")).value());
+        assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "new-pid")).value());
+    }
+
+    @UpdateConfig(value = "ranking.is.21", property = "service.ranking:Integer=21")
+    @UpdateConfig(value = "ranking.is.42", property = "service.ranking:Integer=42")
+    @ApplyConfig(value = ServiceRanking.class, pid = "ranking.is.21",
+            property = "service.ranking:Integer=10")
+    public static class AppliesMultipleConfigsWithOwnDefault {
+
+    }
+
+    @Test
+    public void testApplyConfigToTypeMultiplePidsWithOwnDefault() {
+        ConfigAnnotationUtil.findUpdateConfigAnnotations(AppliesMultipleConfigsWithOwnDefault.class)
+                .forEachOrdered(context::updateConfiguration);
+        ApplyConfig annotation = AppliesMultipleConfigsWithOwnDefault.class.getAnnotation(ApplyConfig.class);
+        assertEquals(21, ((ServiceRanking) context.applyConfigToType(annotation)).value());
+        assertEquals(21, ((ServiceRanking) context.applyConfigToType(annotation, "")).value());
+        assertEquals(42, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.42")).value());
+        assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "new-pid")).value());
     }
 
     @Test(expected = RuntimeException.class)

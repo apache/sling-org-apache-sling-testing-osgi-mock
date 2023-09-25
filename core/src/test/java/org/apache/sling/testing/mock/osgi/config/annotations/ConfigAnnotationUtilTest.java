@@ -77,7 +77,7 @@ public class ConfigAnnotationUtilTest {
         List<Annotation> annotations = ConfigAnnotationUtil.findApplicableConfigAnnotations(Configured.class,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                ApplyConfig.class, ApplyConfigs.class))
+                                ApplyConfig.class, ApplyConfigs.class, UpdateConfig.class, UpdateConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
@@ -101,7 +101,7 @@ public class ConfigAnnotationUtilTest {
         List<Annotation> annotations = ConfigAnnotationUtil.findApplicableConfigAnnotations(allAnnotations,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                ApplyConfig.class, ApplyConfigs.class))
+                                ApplyConfig.class, ApplyConfigs.class, UpdateConfig.class, UpdateConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
