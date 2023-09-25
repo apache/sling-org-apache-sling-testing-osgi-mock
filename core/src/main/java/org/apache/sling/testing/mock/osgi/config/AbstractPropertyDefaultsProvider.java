@@ -54,8 +54,6 @@ abstract class AbstractPropertyDefaultsProvider {
         }
     }
 
-    abstract Class<? extends Annotation> annotationType();
-
     abstract Method[] getMethods();
 
     abstract String getPropertyName(@NotNull Method method);
@@ -84,11 +82,9 @@ abstract class AbstractPropertyDefaultsProvider {
                 defaults.put(propertyName, new String[]{((Class<?>) value).getName()});
             }
         } else {
-            // every other type of nested member invalid, return false to indicate to caller that all default values
-            // for this annotation should be discarded.
-            if (log.isWarnEnabled()) {
-                log.warn("illegal member type {} for annotation type {}", singleType, annotationType());
-            }
+            // every other type of nested member invalid, return false to indicate to caller that
+            // all default values for this annotation should be discarded.
+            log.warn("illegal member type {} for annotation type", singleType);
             return false;
         }
         return true;

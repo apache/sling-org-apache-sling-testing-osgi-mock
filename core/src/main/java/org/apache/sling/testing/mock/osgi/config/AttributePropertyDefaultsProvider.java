@@ -35,11 +35,6 @@ final class AttributePropertyDefaultsProvider extends AbstractPropertyDefaultsPr
     }
 
     @Override
-    public Class<? extends Annotation> annotationType() {
-        return annotationType;
-    }
-
-    @Override
     public Method[] getMethods() {
         return annotationType.getMethods();
     }
