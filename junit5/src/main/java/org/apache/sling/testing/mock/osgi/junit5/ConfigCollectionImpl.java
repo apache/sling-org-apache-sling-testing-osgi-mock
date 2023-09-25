@@ -24,6 +24,7 @@ import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 
@@ -41,20 +42,23 @@ final class ConfigCollectionImpl implements ConfigCollection {
     private final ExtensionContext extensionContext;
     private final OsgiContext osgiContext;
     private final Set<Class<?>> configTypes;
+    private final String applyPid;
 
     ConfigCollectionImpl(@NotNull ParameterContext parameterContext,
                          @NotNull ExtensionContext extensionContext,
                          @NotNull OsgiContext osgiContext,
-                         @NotNull Set<Class<?>> configTypes) {
+                         @NotNull Set<Class<?>> configTypes,
+                         @Nullable String applyPid) {
         this.parameterContext = parameterContext;
         this.extensionContext = extensionContext;
         this.osgiContext = osgiContext;
         this.configTypes = Set.copyOf(configTypes);
+        this.applyPid = applyPid;
     }
 
     @Override
     public Stream<TypedConfig<?>> stream() {
-        return streamAnnotations().map(osgiContext::newTypedConfig);
+        return streamAnnotations().map(annotation -> osgiContext.newTypedConfig(annotation, applyPid));
     }
 
     Stream<Annotation> streamAnnotations() {
@@ -63,7 +67,7 @@ final class ConfigCollectionImpl implements ConfigCollection {
                         .flatMap(element -> ConfigAnnotationUtil.findAnnotations(element, configTypes)),
                 extensionContext.getParent().stream()
                         .flatMap(parentContext -> ConfigCollectionImpl
-                                .collect(parameterContext, parentContext, osgiContext, configTypes)
+                                .collect(parameterContext, parentContext, osgiContext, configTypes, applyPid)
                                 .streamAnnotations()));
     }
 
@@ -71,6 +75,14 @@ final class ConfigCollectionImpl implements ConfigCollection {
                                         @NotNull ExtensionContext extensionContext,
                                         @NotNull OsgiContext osgiContext,
                                         @NotNull Set<Class<?>> configTypes) {
-        return new ConfigCollectionImpl(parameterContext, extensionContext, osgiContext, configTypes);
+        return collect(parameterContext, extensionContext, osgiContext, configTypes, "");
+    }
+
+    static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
+                                        @NotNull ExtensionContext extensionContext,
+                                        @NotNull OsgiContext osgiContext,
+                                        @NotNull Set<Class<?>> configTypes,
+                                        @Nullable String applyPid) {
+        return new ConfigCollectionImpl(parameterContext, extensionContext, osgiContext, configTypes, applyPid);
     }
 }

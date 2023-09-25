@@ -18,10 +18,13 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
@@ -37,6 +40,8 @@ import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -256,12 +261,49 @@ public class OsgiContextImpl {
      * @param annotation the {@link DynamicConfig}
      * @return a concrete instance of the type specified by the provided {@link DynamicConfig#value()}
      */
-    public final Object reifyDynamicConfig(@NotNull final DynamicConfig annotation) {
+    public final Object applyConfigToType(@NotNull final DynamicConfig annotation) {
+        return applyConfigToType(annotation, null);
+    }
+
+    /**
+     * Return a concrete instance of the OSGi config / Component Property Type represented by the given
+     * {@link DynamicConfig} annotation discovered via reflection.
+     * @param annotation the {@link DynamicConfig}
+     * @param applyPid if not empty, override any specified {@link DynamicConfig#applyPid()}.
+     * @return a concrete instance of the type specified by the provided {@link DynamicConfig#value()}
+     */
+    public final Object applyConfigToType(@NotNull final DynamicConfig annotation,
+                                          @Nullable final String applyPid) {
         if (!annotation.value().isAnnotation() && !annotation.value().isInterface()) {
             throw new IllegalArgumentException("illegal value for DynamicConfig " + annotation.value());
         }
-        Map<String, Object> props = ComponentPropertyParser.parse(annotation.value(), annotation.property());
-        return Annotations.toObject(annotation.value(), props, bundleContext().getBundle(), false);
+        final Map<String, Object> merged = new HashMap<>(
+                ComponentPropertyParser.parse(annotation.value(), annotation.property()));
+        Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
+                .or(() -> Optional.of(annotation.applyPid()).filter(pid -> !pid.isEmpty()))
+                .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
+        return Annotations.toObject(annotation.value(), merged, bundleContext().getBundle(), false);
+    }
+
+    /**
+     * Internal utility method to merge properties from the specified configuration into the provided map.
+     * @param pid the configuration pid
+     * @param configurationAdmin a config admin service
+     * @param mergedProperties a *mutable* map
+     * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin#getConfiguration(String)}
+     * @throws UnsupportedOperationException if an immutable map is passed
+     */
+    static void mergePropertiesFromConfigPid(@NotNull Map<String, Object> mergedProperties,
+                                             @NotNull String pid,
+                                             @Nullable ConfigurationAdmin configurationAdmin) {
+        if (configurationAdmin != null) {
+            try {
+                Configuration configuration = configurationAdmin.getConfiguration(pid);
+                Optional.ofNullable(MapUtil.toMap(configuration.getProperties())).ifPresent(mergedProperties::putAll);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to read config for pid " + pid, e);
+            }
+        }
     }
 
     /**
@@ -270,11 +312,22 @@ public class OsgiContextImpl {
      * @return a typed config
      */
     public final TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation) {
+        return newTypedConfig(annotation, null);
+    }
+
+    /**
+     * Construct a collection typed config for the provided annotation.
+     * @param annotation a component property type annotation or {@link DynamicConfig} annotation
+     * @param applyPid optional non-empty configuration pid to apply if annotation is a {@link DynamicConfig}
+     * @return a typed config
+     */
+    public final TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation,
+                                               @Nullable final String applyPid) {
         if (annotation instanceof DynamicConfig) {
             DynamicConfig osgiConfig = (DynamicConfig) annotation;
             Class<?> mappingType = osgiConfig.value();
             return AnnotationTypedConfig.newInstance(mappingType,
-                    mappingType.cast(this.reifyDynamicConfig(osgiConfig)),
+                    mappingType.cast(this.applyConfigToType(osgiConfig, applyPid)),
                     annotation);
         } else {
             return AnnotationTypedConfig.newInstance(annotation.annotationType(), annotation, annotation);

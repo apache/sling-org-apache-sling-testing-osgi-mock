@@ -18,20 +18,36 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.CollectConfigTypes;
+import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DynamicConfig(value = ServiceVendor.class, property = "Apache Software Foundation")
-@ExtendWith(OsgiConfigParametersExtension.class)
+@DynamicConfig(value = ServiceVendor.class, property = "service.vendor=Apache Software Foundation")
+@ExtendWith({OsgiConfigParametersExtension.class, OsgiContextExtension.class})
 class ConfigCollectionImplTest {
+
+    public OsgiContext context = new OsgiContextBuilder().afterSetUp(context -> {
+        ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
+        assertNotNull(configAdmin);
+        Configuration configuration = configAdmin.getConfiguration("common-config");
+        configuration.update(MapUtil.toDictionary(Map.of(
+                "service.ranking", 42,
+                "service.vendor", "Acme Software Foundation")));
+    }).build();
 
     @SuppressWarnings("unchecked")
     @DynamicConfig(ServiceRanking.class)
@@ -40,5 +56,25 @@ class ConfigCollectionImplTest {
                             ConfigCollection configs) {
         assertTrue(configs.stream().map(TypedConfig::getType).anyMatch(ServiceRanking.class::isAssignableFrom));
         assertTrue(configs.stream().map(TypedConfig::getType).noneMatch(DynamicConfig.class::isAssignableFrom));
+    }
+
+    @DynamicConfig(value = ServiceRanking.class, property = "service.ranking:Integer=10")
+    @Test
+    void collectWithApplyPid(
+            @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class})
+            ConfigCollection unappliedConfigs,
+            @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class}, applyPid = "common-config")
+            ConfigCollection appliedConfigs) {
+        assertEquals(2, unappliedConfigs.stream().count());
+        assertEquals(10,
+                unappliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
+        assertEquals("Apache Software Foundation",
+                unappliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
+
+        assertEquals(2, appliedConfigs.stream().count());
+        assertEquals(42,
+                appliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
+        assertEquals("Acme Software Foundation",
+                appliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
     }
 }

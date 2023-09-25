@@ -18,22 +18,37 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
+import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Map;
 
-@DynamicConfig(ServiceRanking.class)
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+@DynamicConfig(value = ServiceRanking.class, property = "service.ranking:Integer=10")
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigCollectorTest {
 
     @Rule
-    public OsgiContext osgiContext = new OsgiContextBuilder().build();
+    public OsgiContext osgiContext = new OsgiContextBuilder().afterSetUp(context -> {
+        ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
+        assertNotNull(configAdmin);
+        Configuration configuration = configAdmin.getConfiguration("common-config");
+        configuration.update(MapUtil.toDictionary(Map.of(
+                "service.ranking", 42,
+                "service.vendor", "Apache")));
+    }).build();
 
     @Rule
     public ConfigCollector configCollector = new ConfigCollector(osgiContext,
@@ -42,10 +57,20 @@ public class ConfigCollectorTest {
     @Rule
     public ConfigCollector justRankings = new ConfigCollector(osgiContext, ServiceRanking.class);
 
+    @Rule
+    public ConfigCollector appliedConfigs = new ConfigCollector(osgiContext, "common-config",
+            ServiceRanking.class, ServiceVendor.class);
+
     @DynamicConfig(ServiceVendor.class)
     @Test
     public void testEvaluate() {
-        assertEquals(2, configCollector.stream().count());
         assertEquals(1, justRankings.stream().count());
+        assertEquals(2, configCollector.stream().count());
+        assertEquals(10, configCollector.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
+        assertNull(configCollector.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
+
+        assertEquals(2, appliedConfigs.stream().count());
+        assertEquals(42, appliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
+        assertEquals("Apache", appliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
     }
 }

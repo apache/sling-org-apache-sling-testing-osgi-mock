@@ -45,6 +45,14 @@ public @interface DynamicConfig {
     Class<?> value();
 
     /**
+     * Optionally specify a configuration pid to load, any defined properties of which will override annotation defaults
+     * and values specified by {@link #property()}.
+     *
+     * @return a configuration pid, or an empty string
+     */
+    String applyPid() default "";
+
+    /**
      * Treat like {@link Component#property()}.
      *
      * @return osgi config properties

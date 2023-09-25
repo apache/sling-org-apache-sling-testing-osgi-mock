@@ -23,14 +23,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
 import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
@@ -46,6 +53,8 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -246,7 +255,7 @@ public class OsgiContextImplTest {
     @Test
     public void testReifyDynamicConfig() {
         DynamicConfig configAnnotation = Configured.class.getAnnotation(DynamicConfig.class);
-        Object reified = context.reifyDynamicConfig(configAnnotation);
+        Object reified = context.applyConfigToType(configAnnotation);
         assertTrue(reified instanceof ServiceRanking);
         ServiceRanking serviceRanking = (ServiceRanking) reified;
         assertEquals(42, serviceRanking.value());
@@ -260,7 +269,108 @@ public class OsgiContextImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void testReifyDynamicConfigThrows() {
         DynamicConfig configAnnotation = IllegallyConfigured.class.getAnnotation(DynamicConfig.class);
-        context.reifyDynamicConfig(configAnnotation);
+        context.applyConfigToType(configAnnotation);
+    }
+
+    public @interface ConfigurableFromPid {
+        String string_property() default "a default value";
+    }
+
+    @DynamicConfig(value = ConfigurableFromPid.class,
+            applyPid = "existing-pid",
+            property = {
+                    "string.property=a Component.property() value"
+            })
+    public static class ConfiguredWithPid {
+
+    }
+
+    @Test
+    public void testReifyDynamicConfigWithApplyPid() throws Exception {
+        final ConfigurationAdmin configurationAdmin = context.getService(ConfigurationAdmin.class);
+        assertNotNull(configurationAdmin);
+        final Configuration config = configurationAdmin.getConfiguration("existing-pid");
+        final DynamicConfig configAnnotation = ConfiguredWithPid.class.getAnnotation(DynamicConfig.class);
+        final DynamicConfig rankingAnnotation = Configured.class.getAnnotation(DynamicConfig.class);
+        assertEquals("a Component.property() value",
+                ((ConfigurableFromPid) context.applyConfigToType(configAnnotation)).string_property());
+        assertEquals(42,
+                ((ServiceRanking) context.applyConfigToType(rankingAnnotation)).value());
+        assertEquals("a Component.property() value",
+                ((ConfigurableFromPid) context.applyConfigToType(configAnnotation, "existing-pid")).string_property());
+        assertEquals(42,
+                ((ServiceRanking) context.applyConfigToType(rankingAnnotation, "existing-pid")).value());
+
+        config.update(MapUtil.toDictionary(Map.of(
+                "string.property", "a configured value",
+                "service.ranking", 99)));
+
+        assertEquals("a configured value",
+                ((ConfigurableFromPid) context.applyConfigToType(configAnnotation)).string_property());
+        assertEquals(42,
+                ((ServiceRanking) context.applyConfigToType(rankingAnnotation)).value());
+        assertEquals("a configured value",
+                ((ConfigurableFromPid) context.applyConfigToType(configAnnotation, "existing-pid")).string_property());
+        assertEquals(99,
+                ((ServiceRanking) context.applyConfigToType(rankingAnnotation, "existing-pid")).value());
+
+        assertEquals("a Component.property() value",
+                ((ConfigurableFromPid) context.applyConfigToType(configAnnotation, "new-pid")).string_property());
+        assertEquals(42,
+                ((ServiceRanking) context.applyConfigToType(rankingAnnotation, "new-pid")).value());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testMergePropertiesFromConfigurationPidThrows() throws IOException {
+        ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
+        doThrow(IOException.class).when(mocked).getConfiguration(anyString());
+        Map<String, Object> props = new HashMap<>();
+        OsgiContextImpl.mergePropertiesFromConfigPid(props, "new-pid", mocked);
+    }
+
+    @Test
+    public void testMergePropertiesFromNewConfiguration() throws IOException {
+        ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
+        Configuration mockedConfig = mock(Configuration.class);
+        doReturn(mockedConfig).when(mocked).getConfiguration(eq("new-pid"));
+        Map<String, Object> props = new HashMap<>();
+        OsgiContextImpl.mergePropertiesFromConfigPid(props, "new-pid", mocked);
+        assertTrue(props.isEmpty());
+    }
+
+    @Test
+    public void testMergePropertiesFromNullConfigurationAdmin() throws IOException {
+        Map<String, Object> props = new HashMap<>();
+        OsgiContextImpl.mergePropertiesFromConfigPid(props, "new-pid", null);
+        assertTrue(props.isEmpty());
+    }
+
+    @Test
+    public void testMergePropertiesFromExistingConfiguration() throws IOException {
+        Configuration mockedConfig = mock(Configuration.class);
+        Map<String, Object> existingProps = Map.of(
+                "prop.string", "a string",
+                "prop.integer", 42);
+        doAnswer(call -> MapUtil.toDictionary(Map.copyOf(existingProps))).when(mockedConfig).getProperties();
+
+        ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
+        doReturn(mockedConfig).when(mocked).getConfiguration(eq("existing-pid"));
+
+        Map<String, Object> props = new HashMap<>();
+        OsgiContextImpl.mergePropertiesFromConfigPid(props, "existing-pid", mocked);
+        assertEquals(Map.of(
+                "prop.string", "a string",
+                "prop.integer", 42), props);
+
+        Map<String, Object> overrideProps = new HashMap<>(Map.of(
+                "prop.string", "a different string",
+                "prop.boolean", true));
+
+        OsgiContextImpl.mergePropertiesFromConfigPid(overrideProps, "existing-pid", mocked);
+        assertEquals(Map.of(
+                "prop.string", "a string",
+                "prop.boolean", true,
+                "prop.integer", 42), overrideProps);
     }
 
     public interface AnInterface {
@@ -275,7 +385,7 @@ public class OsgiContextImplTest {
     @Test
     public void testReifyDynamicConfigInterface() {
         DynamicConfig configAnnotation = ConfiguredWithInterface.class.getAnnotation(DynamicConfig.class);
-        Object reified = context.reifyDynamicConfig(configAnnotation);
+        Object reified = context.applyConfigToType(configAnnotation);
         assertTrue(reified instanceof AnInterface);
         AnInterface serviceRanking = (AnInterface) reified;
         assertEquals(42, serviceRanking.service_ranking());
@@ -293,4 +403,5 @@ public class OsgiContextImplTest {
         ServiceRanking serviceRanking2 = (ServiceRanking) typedConfigFromResult.getConfig();
         assertEquals(42, serviceRanking2.value());
     }
+
 }

@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.testing.mock.osgi.config.annotations;
+package org.apache.sling.testing.mock.osgi.junit5;
+
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -37,4 +40,13 @@ public @interface CollectConfigTypes {
      * @return the config types to collect
      */
     Class<?>[] value();
+
+    /**
+     * Optionally specify a configuration pid to apply to any collected {@link DynamicConfig} annotations.
+     * A non-empty value will override any non-empty {@link DynamicConfig#applyPid()} attributes specified by those
+     * collected annotations.
+     *
+     * @return a configuration pid, or an empty string
+     */
+    String applyPid() default "";
 }

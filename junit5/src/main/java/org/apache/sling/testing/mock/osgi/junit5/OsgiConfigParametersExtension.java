@@ -19,7 +19,6 @@
 package org.apache.sling.testing.mock.osgi.junit5;
 
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
-import org.apache.sling.testing.mock.osgi.config.annotations.CollectConfigTypes;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,6 +30,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -101,9 +101,10 @@ public class OsgiConfigParametersExtension implements ParameterResolver {
         if (ConfigCollection.class.isAssignableFrom(parameterContext.getParameter().getType())) {
             CollectConfigTypes configTypes = parameterContext.findAnnotation(CollectConfigTypes.class)
                     .orElse(null);
+            String applyPid = Optional.ofNullable(configTypes).map(CollectConfigTypes::applyPid).orElse("");
             return ConfigCollectionImpl.collect(parameterContext, extensionContext,
                     getOsgiContext(extensionContext),
-                    checkConfigTypes(configTypes));
+                    checkConfigTypes(configTypes), applyPid);
         }
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());
