@@ -32,6 +32,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * Base property defaults provider class.
+ */
 @ProviderType
 abstract class AbstractPropertyDefaultsProvider {
     private static final Logger log = LoggerFactory.getLogger(AbstractPropertyDefaultsProvider.class);
@@ -83,7 +86,9 @@ abstract class AbstractPropertyDefaultsProvider {
         } else {
             // every other type of nested member invalid, return false to indicate to caller that all default values
             // for this annotation should be discarded.
-            log.warn("illegal member type " + singleType + " for annotation type " + annotationType());
+            if (log.isWarnEnabled()) {
+                log.warn("illegal member type {} for annotation type {}", singleType, annotationType());
+            }
             return false;
         }
         return true;

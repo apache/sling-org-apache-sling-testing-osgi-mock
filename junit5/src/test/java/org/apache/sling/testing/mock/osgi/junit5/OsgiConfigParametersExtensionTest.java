@@ -478,6 +478,7 @@ class OsgiConfigParametersExtensionTest {
             "doubleValue:Double=222.0"
     })
     @Test
+    @SuppressWarnings("java:S5961")
     void primitiveProperties(PrimitiveProperties defaults,
                              PrimitiveProperties withValue,
                              PrimitivePropertiesDefaults defaultDefaults,

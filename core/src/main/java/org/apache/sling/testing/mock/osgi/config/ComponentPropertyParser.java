@@ -94,6 +94,7 @@ public final class ComponentPropertyParser {
                 .orElse(propName);
     }
 
+    @SuppressWarnings("java:S127")
     static String singleElementAnnotationKey(@NotNull final String simpleName,
                                              @Nullable final String prefix) {
         int dollar = simpleName.lastIndexOf('$');
@@ -105,7 +106,7 @@ public final class ComponentPropertyParser {
                 sb.setCharAt(i, Character.toLowerCase(c));
                 if (lastLowerCase) {
                     sb.insert(i, '.');
-                    i++;
+                    i++; // increment the index because we inserted a character
                 }
                 lastLowerCase = false;
             } else {
