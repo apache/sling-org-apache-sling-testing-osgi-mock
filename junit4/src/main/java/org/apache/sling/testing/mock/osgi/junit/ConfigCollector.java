@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 public class ConfigCollector implements TestRule, ConfigCollection {
     private final OsgiContext osgiContext;
     private final Set<Class<?>> configTypes;
-    private final ThreadLocal<Optional<Context>> context = ThreadLocal.withInitial(Optional::empty);
+    private Context context = null;
 
     /**
      * Create a new instance around the provided {@link OsgiContext} and one or more allowed desired config type
@@ -57,14 +57,12 @@ public class ConfigCollector implements TestRule, ConfigCollection {
                            @NotNull final Class<?> configType,
                            @NotNull final Class<?>... configTypes) {
         this.osgiContext = osgiContext;
-        this.configTypes = Stream.concat(
-                Stream.of(configType),
-                Arrays.stream(configTypes)).collect(Collectors.toSet());
+        this.configTypes = Stream.concat(Stream.of(configType), Arrays.stream(configTypes)).collect(Collectors.toSet());
     }
 
     @Override
     public Stream<TypedConfig<?>> stream() {
-        return context.get().stream().flatMap(Context::stream);
+        return Optional.ofNullable(context).stream().flatMap(Context::stream);
     }
 
     @Override
@@ -72,11 +70,11 @@ public class ConfigCollector implements TestRule, ConfigCollection {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                context.set(Optional.of(new Context(description)));
+                context = new Context(description);
                 try {
                     base.evaluate();
                 } finally {
-                    context.remove();
+                    context = null;
                 }
             }
         };
