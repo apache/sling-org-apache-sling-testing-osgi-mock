@@ -18,7 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,8 +67,8 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
             throw new IllegalArgumentException("config " + config + " must be instance of type " +
                     type + " from annotation " + annotation);
         }
-        if (annotation instanceof DynamicConfig) {
-            if (!((DynamicConfig) annotation).value().isAssignableFrom(type)) {
+        if (annotation instanceof ApplyConfig) {
+            if (!((ApplyConfig) annotation).value().isAssignableFrom(type)) {
                 throw new IllegalArgumentException("type " + type +
                         " must match config type from annotation " + annotation);
             }

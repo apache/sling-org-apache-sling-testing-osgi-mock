@@ -39,7 +39,7 @@ import java.util.Set;
 
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
-import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
@@ -247,28 +247,28 @@ public class OsgiContextImplTest {
         tracker.close();
     }
 
-    @DynamicConfig(value = ServiceRanking.class, property = "service.ranking:Integer=42")
+    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=42")
     public static class Configured {
 
     }
 
     @Test
-    public void testReifyDynamicConfig() {
-        DynamicConfig configAnnotation = Configured.class.getAnnotation(DynamicConfig.class);
+    public void testApplyConfigToType() {
+        ApplyConfig configAnnotation = Configured.class.getAnnotation(ApplyConfig.class);
         Object reified = context.applyConfigToType(configAnnotation);
         assertTrue(reified instanceof ServiceRanking);
         ServiceRanking serviceRanking = (ServiceRanking) reified;
         assertEquals(42, serviceRanking.value());
     }
 
-    @DynamicConfig(value = String.class, property = "service.ranking:Integer=42")
+    @ApplyConfig(value = String.class, property = "service.ranking:Integer=42")
     public static class IllegallyConfigured {
 
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testReifyDynamicConfigThrows() {
-        DynamicConfig configAnnotation = IllegallyConfigured.class.getAnnotation(DynamicConfig.class);
+    public void testApplyConfigToTypeThrows() {
+        ApplyConfig configAnnotation = IllegallyConfigured.class.getAnnotation(ApplyConfig.class);
         context.applyConfigToType(configAnnotation);
     }
 
@@ -276,8 +276,8 @@ public class OsgiContextImplTest {
         String string_property() default "a default value";
     }
 
-    @DynamicConfig(value = ConfigurableFromPid.class,
-            applyPid = "existing-pid",
+    @ApplyConfig(value = ConfigurableFromPid.class,
+            pid = "existing-pid",
             property = {
                     "string.property=a Component.property() value"
             })
@@ -286,12 +286,12 @@ public class OsgiContextImplTest {
     }
 
     @Test
-    public void testReifyDynamicConfigWithApplyPid() throws Exception {
+    public void testApplyConfigToTypeWithApplyPid() throws Exception {
         final ConfigurationAdmin configurationAdmin = context.getService(ConfigurationAdmin.class);
         assertNotNull(configurationAdmin);
         final Configuration config = configurationAdmin.getConfiguration("existing-pid");
-        final DynamicConfig configAnnotation = ConfiguredWithPid.class.getAnnotation(DynamicConfig.class);
-        final DynamicConfig rankingAnnotation = Configured.class.getAnnotation(DynamicConfig.class);
+        final ApplyConfig configAnnotation = ConfiguredWithPid.class.getAnnotation(ApplyConfig.class);
+        final ApplyConfig rankingAnnotation = Configured.class.getAnnotation(ApplyConfig.class);
         assertEquals("a Component.property() value",
                 ((ConfigurableFromPid) context.applyConfigToType(configAnnotation)).string_property());
         assertEquals(42,
@@ -377,14 +377,14 @@ public class OsgiContextImplTest {
         int service_ranking();
     }
 
-    @DynamicConfig(value = AnInterface.class, property = "service.ranking:Integer=42")
+    @ApplyConfig(value = AnInterface.class, property = "service.ranking:Integer=42")
     public static class ConfiguredWithInterface {
 
     }
 
     @Test
-    public void testReifyDynamicConfigInterface() {
-        DynamicConfig configAnnotation = ConfiguredWithInterface.class.getAnnotation(DynamicConfig.class);
+    public void testApplyConfigToInterface() {
+        ApplyConfig configAnnotation = ConfiguredWithInterface.class.getAnnotation(ApplyConfig.class);
         Object reified = context.applyConfigToType(configAnnotation);
         assertTrue(reified instanceof AnInterface);
         AnInterface serviceRanking = (AnInterface) reified;
@@ -393,7 +393,7 @@ public class OsgiContextImplTest {
 
     @Test
     public void testNewTypedConfig() {
-        DynamicConfig configAnnotation = Configured.class.getAnnotation(DynamicConfig.class);
+        ApplyConfig configAnnotation = Configured.class.getAnnotation(ApplyConfig.class);
         TypedConfig<?> typedConfig = context.newTypedConfig(configAnnotation);
         assertTrue(typedConfig.getConfig() instanceof ServiceRanking);
         ServiceRanking serviceRanking = (ServiceRanking) typedConfig.getConfig();

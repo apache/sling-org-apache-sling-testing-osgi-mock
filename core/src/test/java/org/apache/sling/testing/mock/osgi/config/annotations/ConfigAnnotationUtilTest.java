@@ -54,14 +54,14 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
-    @DynamicConfig(ServiceRanking.class)
+    @ApplyConfig(ServiceRanking.class)
     @RuntimeRetained(property = "expected")
-    @DynamicConfigs({
-            @DynamicConfig(ServiceRanking.class),
-            @DynamicConfig(ServiceVendor.class),
-            @DynamicConfig(DynamicConfig.class),
-            @DynamicConfig(DynamicConfigs.class),
-            @DynamicConfig(NotSelected.class)
+    @ApplyConfigs({
+            @ApplyConfig(ServiceRanking.class),
+            @ApplyConfig(ServiceVendor.class),
+            @ApplyConfig(ApplyConfig.class),
+            @ApplyConfig(ApplyConfigs.class),
+            @ApplyConfig(NotSelected.class)
     })
     public static class Configured {
         // not used
@@ -72,22 +72,22 @@ public class ConfigAnnotationUtilTest {
         List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(Configured.class,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                DynamicConfig.class, DynamicConfigs.class))
+                                ApplyConfig.class, ApplyConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
 
-        assertTrue(annotations.get(0) instanceof DynamicConfig);
-        assertSame(ServiceRanking.class, ((DynamicConfig) annotations.get(0)).value());
+        assertTrue(annotations.get(0) instanceof ApplyConfig);
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).value());
 
         assertTrue(annotations.get(1) instanceof RuntimeRetained);
         assertEquals("expected", ((RuntimeRetained) annotations.get(1)).property());
 
-        assertTrue(annotations.get(2) instanceof DynamicConfig);
-        assertSame(ServiceRanking.class, ((DynamicConfig) annotations.get(2)).value());
+        assertTrue(annotations.get(2) instanceof ApplyConfig);
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).value());
 
-        assertTrue(annotations.get(3) instanceof DynamicConfig);
-        assertSame(ServiceVendor.class, ((DynamicConfig) annotations.get(3)).value());
+        assertTrue(annotations.get(3) instanceof ApplyConfig);
+        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).value());
     }
 
     @Test
@@ -96,22 +96,22 @@ public class ConfigAnnotationUtilTest {
         List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(allAnnotations,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                DynamicConfig.class, DynamicConfigs.class))
+                                ApplyConfig.class, ApplyConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
 
-        assertTrue(annotations.get(0) instanceof DynamicConfig);
-        assertSame(ServiceRanking.class, ((DynamicConfig) annotations.get(0)).value());
+        assertTrue(annotations.get(0) instanceof ApplyConfig);
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).value());
 
         assertTrue(annotations.get(1) instanceof RuntimeRetained);
         assertEquals("expected", ((RuntimeRetained) annotations.get(1)).property());
 
-        assertTrue(annotations.get(2) instanceof DynamicConfig);
-        assertSame(ServiceRanking.class, ((DynamicConfig) annotations.get(2)).value());
+        assertTrue(annotations.get(2) instanceof ApplyConfig);
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).value());
 
-        assertTrue(annotations.get(3) instanceof DynamicConfig);
-        assertSame(ServiceVendor.class, ((DynamicConfig) annotations.get(3)).value());
+        assertTrue(annotations.get(3) instanceof ApplyConfig);
+        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).value());
     }
 
     enum AnEnum {

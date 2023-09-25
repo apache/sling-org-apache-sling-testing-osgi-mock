@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
+import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.jetbrains.annotations.NotNull;
@@ -43,7 +44,7 @@ import java.util.stream.Collectors;
  * <p>
  * For this to work for your annotation type, you must specify
  * {@code @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)} on the type, or use
- * {@link org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig} to declare that your config type is
+ * {@link ApplyConfig} to declare that your config type is
  * supported as a test parameter, as well as to specify a list of config properties to map to the type's attributes.
  */
 public class OsgiConfigParametersExtension implements ParameterResolver {

@@ -18,7 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.junit.After;
@@ -30,11 +30,11 @@ import org.osgi.service.component.propertytypes.ServiceVendor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
-@DynamicConfig(ServiceRanking.class)
+@ApplyConfig(ServiceRanking.class)
 public class AnnotationTypedConfigTest {
     private TestOsgiContext context;
 
-    @DynamicConfig(ServiceVendor.class)
+    @ApplyConfig(ServiceVendor.class)
     static class TestOsgiContext extends OsgiContextImpl {
 
         void setUpContext() {
@@ -59,7 +59,7 @@ public class AnnotationTypedConfigTest {
 
     @Test
     public void testNewInstance() {
-        final DynamicConfig annotation = getClass().getAnnotation(DynamicConfig.class);
+        final ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
         final ServiceRanking config = (ServiceRanking) context.applyConfigToType(annotation);
         final TypedConfig<ServiceRanking> typedConfig = AnnotationTypedConfig.newInstance(ServiceRanking.class,
                 config, annotation);
@@ -70,7 +70,7 @@ public class AnnotationTypedConfigTest {
 
     @Test
     public void testNewInstanceUsingConfigAsAnnotation() {
-        final DynamicConfig annotation = getClass().getAnnotation(DynamicConfig.class);
+        final ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
         final ServiceRanking config = (ServiceRanking) context.applyConfigToType(annotation);
         final TypedConfig<ServiceRanking> typedConfig = AnnotationTypedConfig.newInstance(ServiceRanking.class,
                 config, config);
@@ -81,24 +81,24 @@ public class AnnotationTypedConfigTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testTypeCastMismatch() throws Exception {
-        DynamicConfig annotation = getClass().getAnnotation(DynamicConfig.class);
+        ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
         final ServiceRanking config = (ServiceRanking) context.applyConfigToType(annotation);
         AnnotationTypedConfig.newInstance(ServiceVendor.class, config, annotation);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTypeAnnotationMismatch() throws Exception {
-        DynamicConfig annotation = getClass().getAnnotation(DynamicConfig.class);
+        ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
         final ServiceRanking config = (ServiceRanking) context.applyConfigToType(annotation);
-        DynamicConfig wrongAnnotation = TestOsgiContext.class.getAnnotation(DynamicConfig.class);
+        ApplyConfig wrongAnnotation = TestOsgiContext.class.getAnnotation(ApplyConfig.class);
         AnnotationTypedConfig.newInstance(ServiceRanking.class, config, wrongAnnotation);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTypeAnnotationMismatchUsingConfigAsAnnotation() throws Exception {
-        DynamicConfig annotation = getClass().getAnnotation(DynamicConfig.class);
+        ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
         final ServiceRanking config = (ServiceRanking) context.applyConfigToType(annotation);
-        DynamicConfig wrongAnnotation = TestOsgiContext.class.getAnnotation(DynamicConfig.class);
+        ApplyConfig wrongAnnotation = TestOsgiContext.class.getAnnotation(ApplyConfig.class);
         final ServiceVendor wrongAnnotationConfig = (ServiceVendor) context.applyConfigToType(wrongAnnotation);
         AnnotationTypedConfig.newInstance(ServiceRanking.class, config, wrongAnnotationConfig);
     }

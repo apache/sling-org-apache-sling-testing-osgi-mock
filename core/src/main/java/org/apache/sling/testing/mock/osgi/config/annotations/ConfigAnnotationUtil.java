@@ -40,9 +40,9 @@ public final class ConfigAnnotationUtil {
     /**
      * Find candidate OSGi config annotations on the given {@link AnnotatedElement}, returning a stream of only those
      * matching one of the desired config types. An annotation matches a config type only if the annotation's own type
-     * is the same as the config type, or if the annotation is a {@link DynamicConfig} and its
-     * {@link DynamicConfig#value()} is the same as the config type. If the {@link AnnotatedElement} has a
-     * {@link DynamicConfigs} annotation, its nested {@link DynamicConfig} annotations will be considered as well.
+     * is the same as the config type, or if the annotation is a {@link ApplyConfig} and its
+     * {@link ApplyConfig#value()} is the same as the config type. If the {@link AnnotatedElement} has a
+     * {@link ApplyConfigs} annotation, its nested {@link ApplyConfig} annotations will be considered as well.
      *
      * @param element     the annotated element
      * @param configTypes the desired config types
@@ -58,9 +58,9 @@ public final class ConfigAnnotationUtil {
     /**
      * Find candidate OSGi config annotations in the given collection, returning a stream of only those
      * matching one of the desired config types. An annotation matches a config type only if the annotation's own type
-     * is the same as the config type, or if the annotation is a {@link DynamicConfig} and its
-     * {@link DynamicConfig#value()} is the same as the config type. If the collection has a
-     * {@link DynamicConfigs} annotation, its nested {@link DynamicConfig} annotations will be considered as well.
+     * is the same as the config type, or if the annotation is a {@link ApplyConfig} and its
+     * {@link ApplyConfig#value()} is the same as the config type. If the collection has a
+     * {@link ApplyConfigs} annotation, its nested {@link ApplyConfig} annotations will be considered as well.
      *
      * @param annotations a collection of annotations
      * @param configTypes the desired config types
@@ -75,15 +75,15 @@ public final class ConfigAnnotationUtil {
 
     /**
      * Utility function for use as a flatMap expression for {@link #findAnnotations(AnnotatedElement, Set)} and
-     * {@link #findAnnotations(Collection, Set)} that expands a {@link DynamicConfigs} annotation into a substream
-     * of {@link DynamicConfig} annotations.
+     * {@link #findAnnotations(Collection, Set)} that expands a {@link ApplyConfigs} annotation into a substream
+     * of {@link ApplyConfig} annotations.
      *
      * @param annotation input annotation
      * @return the flattened stream of annotations
      */
     private static Stream<Annotation> flattenAnnotation(@NotNull Annotation annotation) {
-        if (DynamicConfigs.class.isAssignableFrom(annotation.annotationType())) {
-            return Stream.of(((DynamicConfigs) annotation).value());
+        if (ApplyConfigs.class.isAssignableFrom(annotation.annotationType())) {
+            return Stream.of(((ApplyConfigs) annotation).value());
         } else {
             return Stream.of(annotation);
         }
@@ -99,10 +99,10 @@ public final class ConfigAnnotationUtil {
      */
     private static Predicate<Annotation> annotationPredicate(@NotNull Set<Class<?>> configTypes) {
         return annotation -> {
-            if (DynamicConfig.class.isAssignableFrom(annotation.annotationType())) {
-                final Class<?> configType = ((DynamicConfig) annotation).value();
-                return !DynamicConfig.class.isAssignableFrom(configType)
-                        && !DynamicConfigs.class.isAssignableFrom(configType)
+            if (ApplyConfig.class.isAssignableFrom(annotation.annotationType())) {
+                final Class<?> configType = ((ApplyConfig) annotation).value();
+                return !ApplyConfig.class.isAssignableFrom(configType)
+                        && !ApplyConfigs.class.isAssignableFrom(configType)
                         && configTypes.contains(configType);
             } else {
                 return configTypes.contains(annotation.annotationType());

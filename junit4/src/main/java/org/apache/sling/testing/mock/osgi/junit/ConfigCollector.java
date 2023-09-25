@@ -20,7 +20,7 @@ package org.apache.sling.testing.mock.osgi.junit;
 
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 import org.junit.rules.TestRule;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 /**
  * A {@link org.junit.rules.TestRule} that collects runtime-retained component property type annotations and
- * {@link org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig} annotations from the current test method
+ * {@link ApplyConfig} annotations from the current test method
  * and test class.
  */
 public class ConfigCollector implements TestRule, ConfigCollection {
@@ -49,8 +49,8 @@ public class ConfigCollector implements TestRule, ConfigCollection {
 
     /**
      * Create a new instance around the provided {@link OsgiContext} and one or more allowed desired config type
-     * classes. Specify a non-empty applyPid value to override the {@link DynamicConfig#applyPid()} attributes of
-     * any collected {@link DynamicConfig} annotations.
+     * classes. Specify a non-empty applyPid value to override the {@link ApplyConfig#pid()} attributes of
+     * any collected {@link ApplyConfig} annotations.
      *
      * @param osgiContext a osgi context
      * @param configType  one desired config type
@@ -64,8 +64,8 @@ public class ConfigCollector implements TestRule, ConfigCollection {
 
     /**
      * Create a new instance around the provided {@link OsgiContext} and one or more allowed desired config type
-     * classes. Specify a non-empty applyPid value to override the {@link DynamicConfig#applyPid()} attributes of
-     * any collected {@link DynamicConfig} annotations.
+     * classes. Specify a non-empty applyPid value to override the {@link ApplyConfig#pid()} attributes of
+     * any collected {@link ApplyConfig} annotations.
      *
      * @param osgiContext a osgi context
      * @param applyPid    specify a non-empty configuration pid

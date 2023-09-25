@@ -22,17 +22,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * {@link java.lang.annotation.Repeatable} container annotation for {@link DynamicConfig}. This annotation is used
- * either implicitly or explicitly to specify multiple {@link DynamicConfig} annotations on a single
+ * {@link java.lang.annotation.Repeatable} container annotation for {@link ApplyConfig}. This annotation is used
+ * either implicitly or explicitly to specify multiple {@link ApplyConfig} annotations on a single
  * {@link java.lang.reflect.AnnotatedElement}.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DynamicConfigs {
+public @interface ApplyConfigs {
 
     /**
-     * Return an array of nested {@link DynamicConfig} annotations.
+     * Return an array of nested {@link ApplyConfig} annotations.
      *
      * @return the array of config mappings
      */
-    DynamicConfig[] value() default {};
+    ApplyConfig[] value() default {};
 }

@@ -33,9 +33,9 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-component.property.types">Component Property Types</a>
  */
-@Repeatable(DynamicConfigs.class)
+@Repeatable(ApplyConfigs.class)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DynamicConfig {
+public @interface ApplyConfig {
 
     /**
      * Required type to construct. This can be an annotation or an interface.
@@ -50,12 +50,12 @@ public @interface DynamicConfig {
      *
      * @return a configuration pid, or an empty string
      */
-    String applyPid() default "";
+    String pid() default "";
 
     /**
      * Treat like {@link Component#property()}.
      *
-     * @return osgi config properties
+     * @return osgi component properties
      */
     String[] property() default {};
 }

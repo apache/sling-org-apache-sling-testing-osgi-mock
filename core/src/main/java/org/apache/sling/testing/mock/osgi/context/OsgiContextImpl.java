@@ -32,7 +32,7 @@ import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
 import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.DynamicConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -257,30 +257,30 @@ public class OsgiContextImpl {
 
     /**
      * Return a concrete instance of the OSGi config / Component Property Type represented by the given
-     * {@link DynamicConfig} annotation discovered via reflection.
-     * @param annotation the {@link DynamicConfig}
-     * @return a concrete instance of the type specified by the provided {@link DynamicConfig#value()}
+     * {@link ApplyConfig} annotation discovered via reflection.
+     * @param annotation the {@link ApplyConfig}
+     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#value()}
      */
-    public final Object applyConfigToType(@NotNull final DynamicConfig annotation) {
+    public final Object applyConfigToType(@NotNull final ApplyConfig annotation) {
         return applyConfigToType(annotation, null);
     }
 
     /**
      * Return a concrete instance of the OSGi config / Component Property Type represented by the given
-     * {@link DynamicConfig} annotation discovered via reflection.
-     * @param annotation the {@link DynamicConfig}
-     * @param applyPid if not empty, override any specified {@link DynamicConfig#applyPid()}.
-     * @return a concrete instance of the type specified by the provided {@link DynamicConfig#value()}
+     * {@link ApplyConfig} annotation discovered via reflection.
+     * @param annotation the {@link ApplyConfig}
+     * @param applyPid if not empty, override any specified {@link ApplyConfig#pid()}.
+     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#value()}
      */
-    public final Object applyConfigToType(@NotNull final DynamicConfig annotation,
+    public final Object applyConfigToType(@NotNull final ApplyConfig annotation,
                                           @Nullable final String applyPid) {
         if (!annotation.value().isAnnotation() && !annotation.value().isInterface()) {
-            throw new IllegalArgumentException("illegal value for DynamicConfig " + annotation.value());
+            throw new IllegalArgumentException("illegal value for ApplyConfig " + annotation.value());
         }
         final Map<String, Object> merged = new HashMap<>(
                 ComponentPropertyParser.parse(annotation.value(), annotation.property()));
         Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
-                .or(() -> Optional.of(annotation.applyPid()).filter(pid -> !pid.isEmpty()))
+                .or(() -> Optional.of(annotation.pid()).filter(pid -> !pid.isEmpty()))
                 .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
         return Annotations.toObject(annotation.value(), merged, bundleContext().getBundle(), false);
     }
@@ -308,7 +308,7 @@ public class OsgiContextImpl {
 
     /**
      * Construct a collection typed config for the provided annotation.
-     * @param annotation a component property type annotation or {@link DynamicConfig} annotation
+     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
      * @return a typed config
      */
     public final TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation) {
@@ -317,14 +317,14 @@ public class OsgiContextImpl {
 
     /**
      * Construct a collection typed config for the provided annotation.
-     * @param annotation a component property type annotation or {@link DynamicConfig} annotation
-     * @param applyPid optional non-empty configuration pid to apply if annotation is a {@link DynamicConfig}
+     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
+     * @param applyPid optional non-empty configuration pid to apply if annotation is a {@link ApplyConfig}
      * @return a typed config
      */
     public final TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation,
                                                @Nullable final String applyPid) {
-        if (annotation instanceof DynamicConfig) {
-            DynamicConfig osgiConfig = (DynamicConfig) annotation;
+        if (annotation instanceof ApplyConfig) {
+            ApplyConfig osgiConfig = (ApplyConfig) annotation;
             Class<?> mappingType = osgiConfig.value();
             return AnnotationTypedConfig.newInstance(mappingType,
                     mappingType.cast(this.applyConfigToType(osgiConfig, applyPid)),
