@@ -50,6 +50,11 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface RuntimeRetainedNotIncluded {
+        String property() default "default";
+    }
+
     public @interface NotSelected {
         String property() default "default";
     }
@@ -57,6 +62,7 @@ public class ConfigAnnotationUtilTest {
     @UpdateConfig("first")
     @ApplyConfig(ServiceRanking.class)
     @RuntimeRetained(property = "expected")
+    @RuntimeRetainedNotIncluded
     @UpdateConfigs({
             @UpdateConfig("second"),
             @UpdateConfig("third")
