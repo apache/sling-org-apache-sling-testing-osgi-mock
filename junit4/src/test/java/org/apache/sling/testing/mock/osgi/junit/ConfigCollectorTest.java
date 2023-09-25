@@ -18,36 +18,28 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
-import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+@UpdateConfig(value = "common-config", property = {
+        "service.ranking:Integer=42",
+        "service.vendor=Acme Software Foundation"
+})
 @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=10")
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigCollectorTest {
 
     @Rule
-    public OsgiContext osgiContext = new OsgiContextBuilder().afterSetUp(context -> {
-        ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
-        assertNotNull(configAdmin);
-        Configuration configuration = configAdmin.getConfiguration("common-config");
-        configuration.update(MapUtil.toDictionary(Map.of(
-                "service.ranking", 42,
-                "service.vendor", "Apache")));
-    }).build();
+    public OsgiContext osgiContext = new OsgiContextBuilder().build();
 
     @Rule
     public ConfigCollector configCollector = new ConfigCollector(osgiContext,
@@ -70,6 +62,7 @@ public class ConfigCollectorTest {
 
         assertEquals(2, appliedConfigs.stream().count());
         assertEquals(42, appliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
-        assertEquals("Apache", appliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
+        assertEquals("Acme Software Foundation",
+                appliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
     }
 }

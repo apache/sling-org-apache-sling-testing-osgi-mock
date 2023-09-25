@@ -54,8 +54,13 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
+    @UpdateConfig("first")
     @ApplyConfig(ServiceRanking.class)
     @RuntimeRetained(property = "expected")
+    @UpdateConfigs({
+            @UpdateConfig("second"),
+            @UpdateConfig("third")
+    })
     @ApplyConfigs({
             @ApplyConfig(ServiceRanking.class),
             @ApplyConfig(ServiceVendor.class),
@@ -69,7 +74,7 @@ public class ConfigAnnotationUtilTest {
 
     @Test
     public void findAnnotationsFromAnnotatedElement() {
-        List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(Configured.class,
+        List<Annotation> annotations = ConfigAnnotationUtil.findApplicableConfigAnnotations(Configured.class,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
                                 ApplyConfig.class, ApplyConfigs.class))
@@ -93,7 +98,7 @@ public class ConfigAnnotationUtilTest {
     @Test
     public void findAnnotationsFromCollection() {
         List<Annotation> allAnnotations = Arrays.asList(Configured.class.getAnnotations());
-        List<Annotation> annotations = ConfigAnnotationUtil.findAnnotations(allAnnotations,
+        List<Annotation> annotations = ConfigAnnotationUtil.findApplicableConfigAnnotations(allAnnotations,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
                                 ApplyConfig.class, ApplyConfigs.class))
@@ -112,6 +117,31 @@ public class ConfigAnnotationUtilTest {
 
         assertTrue(annotations.get(3) instanceof ApplyConfig);
         assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).value());
+    }
+
+    @Test
+    public void findUpdateConfigsFromAnnotatedElement() {
+        List<UpdateConfig> annotations = ConfigAnnotationUtil.findUpdateConfigAnnotations(Configured.class)
+                .collect(Collectors.toList());
+
+        assertEquals(3, annotations.size());
+
+        assertEquals("first", annotations.get(0).value());
+        assertEquals("second", annotations.get(1).value());
+        assertEquals("third", annotations.get(2).value());
+    }
+
+    @Test
+    public void findUpdateConfigsFromCollection() {
+        List<Annotation> allAnnotations = Arrays.asList(Configured.class.getAnnotations());
+        List<UpdateConfig> annotations = ConfigAnnotationUtil.findUpdateConfigAnnotations(allAnnotations)
+                .collect(Collectors.toList());
+
+        assertEquals(3, annotations.size());
+
+        assertEquals("first", annotations.get(0).value());
+        assertEquals("second", annotations.get(1).value());
+        assertEquals("third", annotations.get(2).value());
     }
 
     enum AnEnum {

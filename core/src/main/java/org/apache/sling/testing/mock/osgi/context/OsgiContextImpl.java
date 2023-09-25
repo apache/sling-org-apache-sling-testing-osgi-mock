@@ -34,6 +34,7 @@ import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
 import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ConsumerType;
@@ -252,6 +253,37 @@ public class OsgiContextImpl {
             }
         } catch (InvalidSyntaxException ex) {
             throw new RuntimeException("Invalid filter syntax: " + filter, ex);
+        }
+    }
+
+    /**
+     * Updates a {@link Configuration} from the provided annotation.
+     * @param annotation an {@link UpdateConfig} annotation
+     */
+    public final void updateConfiguration(@NotNull final UpdateConfig annotation) {
+        if (!annotation.value().isEmpty()) {
+            final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
+            updatePropertiesForConfigPid(updated, annotation.value(), this.getService(ConfigurationAdmin.class));
+        }
+    }
+
+    /**
+     * Internal utility method to update a configuration with properties from the provided map.
+     * @param pid the configuration pid
+     * @param configurationAdmin a config admin service
+     * @param updatedProperties a map of properties to update the configuration
+     * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin}
+     */
+    static void updatePropertiesForConfigPid(@NotNull Map<String, Object> updatedProperties,
+                                             @NotNull String pid,
+                                             @Nullable ConfigurationAdmin configurationAdmin) {
+        if (configurationAdmin != null) {
+            try {
+                Configuration configuration = configurationAdmin.getConfiguration(pid);
+                configuration.update(MapUtil.toDictionary(updatedProperties));
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to read/write config for pid " + pid, e);
+            }
         }
     }
 

@@ -18,36 +18,25 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.MapUtil;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@UpdateConfig(value = "common-config", property = {
+        "service.ranking:Integer=42",
+        "service.vendor=Acme Software Foundation"
+})
 @ApplyConfig(value = ServiceVendor.class, property = "service.vendor=Apache Software Foundation")
-@ExtendWith({OsgiConfigParametersExtension.class, OsgiContextExtension.class})
+@ExtendWith(OsgiConfigParametersExtension.class)
 class ConfigCollectionImplTest {
-
-    public OsgiContext context = new OsgiContextBuilder().afterSetUp(context -> {
-        ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
-        assertNotNull(configAdmin);
-        Configuration configuration = configAdmin.getConfiguration("common-config");
-        configuration.update(MapUtil.toDictionary(Map.of(
-                "service.ranking", 42,
-                "service.vendor", "Acme Software Foundation")));
-    }).build();
 
     @SuppressWarnings("unchecked")
     @ApplyConfig(ServiceRanking.class)

@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -29,9 +30,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -41,6 +45,7 @@ import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
@@ -318,6 +323,61 @@ public class OsgiContextImplTest {
                 ((ConfigurableFromPid) context.applyConfigToType(configAnnotation, "new-pid")).string_property());
         assertEquals(42,
                 ((ServiceRanking) context.applyConfigToType(rankingAnnotation, "new-pid")).value());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testUpdatePropertiesForConfigPidThrows() throws IOException {
+        ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
+        doThrow(IOException.class).when(mocked).getConfiguration(anyString());
+        Map<String, Object> props = new HashMap<>();
+        OsgiContextImpl.updatePropertiesForConfigPid(props, "new-pid", mocked);
+    }
+
+    @Test
+    public void testUpdatePropertiesForNewConfiguration() throws IOException {
+        ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
+        Configuration mockedConfig = mock(Configuration.class);
+        doReturn(mockedConfig).when(mocked).getConfiguration(eq("new-pid"));
+        Map<String, Object> props = Map.of("new.property", "value");
+        final Dictionary<String, Object> asDict = MapUtil.toDictionary(props);
+        OsgiContextImpl.updatePropertiesForConfigPid(props, "new-pid", mocked);
+        verify(mockedConfig, times(1)).update(eq(asDict));
+    }
+
+    @Test
+    public void testUpdatePropertiesForNullConfigurationAdmin() throws IOException {
+        Map<String, Object> props = new HashMap<>();
+        // no throws
+        OsgiContextImpl.updatePropertiesForConfigPid(props, "new-pid", null);
+    }
+
+    @UpdateConfig(value = "a pid", property = "service.ranking:Integer=42")
+    public static class UpdatesConfiguration {
+
+    }
+
+    @Test
+    public void testUpdateConfiguration() throws IOException {
+        final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
+        assertNull(configAdmin.getConfiguration("a pid").getProperties());
+        UpdateConfig updateConfig = UpdatesConfiguration.class.getAnnotation(UpdateConfig.class);
+        context.updateConfiguration(updateConfig);
+        assertArrayEquals(new Integer[] { 42 },
+                (Integer[]) configAdmin.getConfiguration("a pid").getProperties().get("service.ranking"));
+    }
+
+    @UpdateConfig(value = "", property = "service.ranking:Integer=42")
+    public static class NoUpdatesConfiguration {
+
+    }
+
+    @Test
+    public void testUpdateConfigurationEmptyPid() throws IOException {
+        final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
+        assertNull(configAdmin.getConfiguration("").getProperties());
+        UpdateConfig updateConfig = NoUpdatesConfiguration.class.getAnnotation(UpdateConfig.class);
+        context.updateConfiguration(updateConfig);
+        assertNull(configAdmin.getConfiguration("").getProperties());
     }
 
     @Test(expected = RuntimeException.class)

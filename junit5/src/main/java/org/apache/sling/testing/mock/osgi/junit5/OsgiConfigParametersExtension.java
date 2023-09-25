@@ -21,8 +21,10 @@ package org.apache.sling.testing.mock.osgi.junit5;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -34,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Provides a lightweight alternative to {@link OsgiContext#registerInjectActivateService(Class, Map)} which relies on
@@ -47,7 +50,7 @@ import java.util.stream.Collectors;
  * {@link ApplyConfig} to declare that your config type is
  * supported as a test parameter, as well as to specify a list of config properties to map to the type's attributes.
  */
-public class OsgiConfigParametersExtension implements ParameterResolver {
+public class OsgiConfigParametersExtension implements ParameterResolver, BeforeEachCallback {
 
     /**
      * Gets or creates the {@link OsgiContext} for the provided extension context.
@@ -69,7 +72,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver {
                 .map(paramType -> ConfigCollectionImpl.collect(parameterContext, extensionContext,
                                 getOsgiContext(extensionContext),
                                 Collections.singleton(paramType))
-                        .streamAnnotations().findAny().isPresent())
+                        .streamApplyConfigAnnotations().findAny().isPresent())
                 .orElse(false);
     }
 
@@ -94,6 +97,20 @@ public class OsgiConfigParametersExtension implements ParameterResolver {
             throw new ParameterResolutionException("failed to resolve parameter value of type " + parameterType + " (value " + resolvedValue + ")");
         }
         return resolvedValue;
+    }
+
+    static Stream<UpdateConfig> streamUpdateConfigAnnotations(ExtensionContext extensionContext) {
+        return Stream.concat(
+                extensionContext.getParent().stream()
+                        .flatMap(OsgiConfigParametersExtension::streamUpdateConfigAnnotations),
+                extensionContext.getElement().stream()
+                        .flatMap(ConfigAnnotationUtil::findUpdateConfigAnnotations));
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext extensionContext) throws Exception {
+        streamUpdateConfigAnnotations(extensionContext)
+                .forEachOrdered(getOsgiContext(extensionContext)::updateConfiguration);
     }
 
     @Override

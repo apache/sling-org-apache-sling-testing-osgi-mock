@@ -33,6 +33,9 @@ import java.util.stream.Stream;
  * Common functions for resolving OSGi config test parameters.
  */
 public final class ConfigAnnotationUtil {
+    private static final Set<Class<? extends Annotation>> EXCLUDE_FEATURE_ANNOTATIONS = Set.of(
+            ApplyConfigs.class, ApplyConfig.class, UpdateConfigs.class, UpdateConfig.class);
+
     private ConfigAnnotationUtil() {
         // prevent instantiation
     }
@@ -48,11 +51,11 @@ public final class ConfigAnnotationUtil {
      * @param configTypes the desired config types
      * @return a stream of annotations
      */
-    public static Stream<Annotation> findAnnotations(@NotNull AnnotatedElement element,
-                                                     @NotNull Set<Class<?>> configTypes) {
+    public static Stream<Annotation> findApplicableConfigAnnotations(@NotNull AnnotatedElement element,
+                                                                     @NotNull Set<Class<?>> configTypes) {
         return Stream.of(element.getAnnotations())
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
-                .filter(ConfigAnnotationUtil.annotationPredicate(configTypes));
+                .filter(ConfigAnnotationUtil.applyConfigAnnotationPredicate(configTypes));
     }
 
     /**
@@ -66,17 +69,45 @@ public final class ConfigAnnotationUtil {
      * @param configTypes the desired config types
      * @return a stream of annotations
      */
-    public static Stream<Annotation> findAnnotations(@NotNull Collection<Annotation> annotations,
-                                                     @NotNull Set<Class<?>> configTypes) {
+    public static Stream<Annotation> findApplicableConfigAnnotations(@NotNull Collection<Annotation> annotations,
+                                                                     @NotNull Set<Class<?>> configTypes) {
         return annotations.stream()
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
-                .filter(ConfigAnnotationUtil.annotationPredicate(configTypes));
+                .filter(ConfigAnnotationUtil.applyConfigAnnotationPredicate(configTypes));
     }
 
     /**
-     * Utility function for use as a flatMap expression for {@link #findAnnotations(AnnotatedElement, Set)} and
-     * {@link #findAnnotations(Collection, Set)} that expands a {@link ApplyConfigs} annotation into a substream
-     * of {@link ApplyConfig} annotations.
+     * Find {@link UpdateConfig} annotations on the given {@link AnnotatedElement}. If the {@link AnnotatedElement} has
+     * an {@link UpdateConfigs} annotation, its nested {@link UpdateConfig} annotations will be included as well.
+     *
+     * @param element the annotated element
+     * @return a stream of annotations
+     */
+    public static Stream<UpdateConfig> findUpdateConfigAnnotations(@NotNull AnnotatedElement element) {
+        return Stream.of(element.getAnnotations())
+                .flatMap(ConfigAnnotationUtil::flattenAnnotation)
+                .filter(annotation -> UpdateConfig.class.isAssignableFrom(annotation.annotationType()))
+                .map(UpdateConfig.class::cast);
+    }
+
+    /**
+     * Find {@link UpdateConfig} annotations in the given collection. If the collection has
+     * an {@link UpdateConfigs} annotation, its nested {@link UpdateConfig} annotations will be included as well.
+     *
+     * @param annotations a collection of annotations
+     * @return a stream of annotations
+     */
+    public static Stream<UpdateConfig> findUpdateConfigAnnotations(@NotNull Collection<Annotation> annotations) {
+        return annotations.stream()
+                .flatMap(ConfigAnnotationUtil::flattenAnnotation)
+                .filter(annotation -> UpdateConfig.class.isAssignableFrom(annotation.annotationType()))
+                .map(UpdateConfig.class::cast);
+    }
+
+    /**
+     * Utility function for use as a flatMap expression for annotation streams that expands an {@link ApplyConfigs}
+     * annotation into a substream of {@link ApplyConfig} annotations, and an {@link UpdateConfigs} annotation into
+     * a substream of {@link UpdateConfig} annotations.
      *
      * @param annotation input annotation
      * @return the flattened stream of annotations
@@ -84,6 +115,8 @@ public final class ConfigAnnotationUtil {
     private static Stream<Annotation> flattenAnnotation(@NotNull Annotation annotation) {
         if (ApplyConfigs.class.isAssignableFrom(annotation.annotationType())) {
             return Stream.of(((ApplyConfigs) annotation).value());
+        } else if (UpdateConfigs.class.isAssignableFrom(annotation.annotationType())) {
+            return Stream.of(((UpdateConfigs) annotation).value());
         } else {
             return Stream.of(annotation);
         }
@@ -91,21 +124,24 @@ public final class ConfigAnnotationUtil {
 
     /**
      * Utility function that returns a predicate for use as a filter expression for
-     * {@link #findAnnotations(AnnotatedElement, Set)} and {@link #findAnnotations(Collection, Set)} that
-     * reduces the input stream of annotations based on provided set of allowed config types.
+     * {@link #findApplicableConfigAnnotations(AnnotatedElement, Set)} and
+     * {@link #findApplicableConfigAnnotations(Collection, Set)} that reduces the input stream of annotations based on
+     * provided set of allowed config types.
      *
      * @param configTypes the allowed config types
      * @return an annotation stream predicate
      */
-    private static Predicate<Annotation> annotationPredicate(@NotNull Set<Class<?>> configTypes) {
+    private static Predicate<Annotation> applyConfigAnnotationPredicate(@NotNull Set<Class<?>> configTypes) {
         return annotation -> {
             if (ApplyConfig.class.isAssignableFrom(annotation.annotationType())) {
                 final Class<?> configType = ((ApplyConfig) annotation).value();
-                return !ApplyConfig.class.isAssignableFrom(configType)
-                        && !ApplyConfigs.class.isAssignableFrom(configType)
-                        && configTypes.contains(configType);
+                return configTypes.contains(configType)
+                        && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded ->
+                        excluded.isAssignableFrom(configType));
             } else {
-                return configTypes.contains(annotation.annotationType());
+                return configTypes.contains(annotation.annotationType())
+                        && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded ->
+                        excluded.isAssignableFrom(annotation.annotationType()));
             }
         };
     }

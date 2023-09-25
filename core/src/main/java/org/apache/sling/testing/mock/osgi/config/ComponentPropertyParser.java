@@ -186,8 +186,7 @@ public final class ComponentPropertyParser {
         return returnProps;
     }
 
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> parse(@NotNull Class<?> configType, @NotNull String[] properties) {
+    public static Map<String, Object> parse(@NotNull String[] properties) {
         final Map<String, String> propertyType = new HashMap<>();
         final Map<String, List<String>> map = new HashMap<>();
         final Function<String, List<String>> getValues =
@@ -204,11 +203,16 @@ public final class ComponentPropertyParser {
                 String value = m.group(PROPERTY_PATTERN_CAPTURE_GROUP_VALUE);
                 getValues.apply(key).add(value);
             } else {
-                log.warn("Malformed property '{}' on component: {}", p, configType.getName());
+                log.warn("Malformed property '{}'", p);
             }
         }
 
-        final Map<String, Object> returnProps = getTypedProperties(propertyType, map);
+        return getTypedProperties(propertyType, map);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> parse(@NotNull Class<?> configType, @NotNull String[] properties) {
+        final Map<String, Object> returnProps = parse(properties);
 
         if (configType.isAnnotation()) {
             getAnnotationDefaults((Class<? extends Annotation>) configType, returnProps);

@@ -22,6 +22,7 @@ import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUti
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.jetbrains.annotations.NotNull;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -106,9 +107,13 @@ public class ConfigCollector implements TestRule, ConfigCollection {
         private final List<TypedConfig<?>> entries;
 
         public Context(@NotNull final Description description) {
-            final List<Annotation> annotations = new ArrayList<>(description.getAnnotations());
-            annotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
-            entries = ConfigAnnotationUtil.findAnnotations(annotations, ConfigCollector.this.configTypes)
+            final List<Annotation> updateAnnotations = new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
+            updateAnnotations.addAll(description.getAnnotations());
+            ConfigAnnotationUtil.findUpdateConfigAnnotations(updateAnnotations)
+                    .forEachOrdered(osgiContext::updateConfiguration);
+            final List<Annotation> applyAnnotations = new ArrayList<>(description.getAnnotations());
+            applyAnnotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
+            entries = ConfigAnnotationUtil.findApplicableConfigAnnotations(applyAnnotations, ConfigCollector.this.configTypes)
                     .map(annotation -> osgiContext.newTypedConfig(annotation, applyPid))
                     .collect(Collectors.toList());
         }
