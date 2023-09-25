@@ -44,7 +44,7 @@ public final class ConfigAnnotationUtil {
      * Find candidate OSGi config annotations on the given {@link AnnotatedElement}, returning a stream of only those
      * matching one of the desired config types. An annotation matches a config type only if the annotation's own type
      * is the same as the config type, or if the annotation is a {@link ApplyConfig} and its
-     * {@link ApplyConfig#value()} is the same as the config type. If the {@link AnnotatedElement} has a
+     * {@link ApplyConfig#type()} is the same as the config type. If the {@link AnnotatedElement} has a
      * {@link ApplyConfigs} annotation, its nested {@link ApplyConfig} annotations will be considered as well.
      *
      * @param element     the annotated element
@@ -62,7 +62,7 @@ public final class ConfigAnnotationUtil {
      * Find candidate OSGi config annotations in the given collection, returning a stream of only those
      * matching one of the desired config types. An annotation matches a config type only if the annotation's own type
      * is the same as the config type, or if the annotation is a {@link ApplyConfig} and its
-     * {@link ApplyConfig#value()} is the same as the config type. If the collection has a
+     * {@link ApplyConfig#type()} is the same as the config type. If the collection has a
      * {@link ApplyConfigs} annotation, its nested {@link ApplyConfig} annotations will be considered as well.
      *
      * @param annotations a collection of annotations
@@ -134,7 +134,7 @@ public final class ConfigAnnotationUtil {
     private static Predicate<Annotation> applyConfigAnnotationPredicate(@NotNull Set<Class<?>> configTypes) {
         return annotation -> {
             if (ApplyConfig.class.isAssignableFrom(annotation.annotationType())) {
-                final Class<?> configType = ((ApplyConfig) annotation).value();
+                final Class<?> configType = ((ApplyConfig) annotation).type();
                 return configTypes.contains(configType)
                         && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded ->
                         excluded.isAssignableFrom(configType));

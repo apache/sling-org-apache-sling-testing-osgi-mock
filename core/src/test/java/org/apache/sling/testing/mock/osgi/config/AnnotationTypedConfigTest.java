@@ -31,11 +31,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 
-@ApplyConfig(ServiceRanking.class)
+@ApplyConfig(type = ServiceRanking.class)
 public class AnnotationTypedConfigTest {
     private TestOsgiContext context;
 
-    @ApplyConfig(ServiceVendor.class)
+    @ApplyConfig(type = ServiceVendor.class)
     static class TestOsgiContext extends OsgiContextImpl {
 
         void setUpContext() {

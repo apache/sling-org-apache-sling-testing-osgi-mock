@@ -59,20 +59,20 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
-    @UpdateConfig("first")
-    @ApplyConfig(ServiceRanking.class)
+    @UpdateConfig(pid = "first")
+    @ApplyConfig(type = ServiceRanking.class)
     @RuntimeRetained(property = "expected")
     @RuntimeRetainedNotIncluded
     @UpdateConfigs({
-            @UpdateConfig("second"),
-            @UpdateConfig("third")
+            @UpdateConfig(pid = "second"),
+            @UpdateConfig(pid = "third")
     })
     @ApplyConfigs({
-            @ApplyConfig(ServiceRanking.class),
-            @ApplyConfig(ServiceVendor.class),
-            @ApplyConfig(ApplyConfig.class),
-            @ApplyConfig(ApplyConfigs.class),
-            @ApplyConfig(NotSelected.class)
+            @ApplyConfig(type = ServiceRanking.class),
+            @ApplyConfig(type = ServiceVendor.class),
+            @ApplyConfig(type = ApplyConfig.class),
+            @ApplyConfig(type = ApplyConfigs.class),
+            @ApplyConfig(type = NotSelected.class)
     })
     public static class Configured {
         // not used
@@ -89,16 +89,16 @@ public class ConfigAnnotationUtilTest {
         assertEquals(4, annotations.size());
 
         assertTrue(annotations.get(0) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).value());
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).type());
 
         assertTrue(annotations.get(1) instanceof RuntimeRetained);
         assertEquals("expected", ((RuntimeRetained) annotations.get(1)).property());
 
         assertTrue(annotations.get(2) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).value());
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).type());
 
         assertTrue(annotations.get(3) instanceof ApplyConfig);
-        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).value());
+        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).type());
     }
 
     @Test
@@ -113,16 +113,16 @@ public class ConfigAnnotationUtilTest {
         assertEquals(4, annotations.size());
 
         assertTrue(annotations.get(0) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).value());
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).type());
 
         assertTrue(annotations.get(1) instanceof RuntimeRetained);
         assertEquals("expected", ((RuntimeRetained) annotations.get(1)).property());
 
         assertTrue(annotations.get(2) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).value());
+        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).type());
 
         assertTrue(annotations.get(3) instanceof ApplyConfig);
-        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).value());
+        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).type());
     }
 
     @Test
@@ -132,9 +132,9 @@ public class ConfigAnnotationUtilTest {
 
         assertEquals(3, annotations.size());
 
-        assertEquals("first", annotations.get(0).value());
-        assertEquals("second", annotations.get(1).value());
-        assertEquals("third", annotations.get(2).value());
+        assertEquals("first", annotations.get(0).pid());
+        assertEquals("second", annotations.get(1).pid());
+        assertEquals("third", annotations.get(2).pid());
     }
 
     @Test
@@ -145,9 +145,9 @@ public class ConfigAnnotationUtilTest {
 
         assertEquals(3, annotations.size());
 
-        assertEquals("first", annotations.get(0).value());
-        assertEquals("second", annotations.get(1).value());
-        assertEquals("third", annotations.get(2).value());
+        assertEquals("first", annotations.get(0).pid());
+        assertEquals("second", annotations.get(1).pid());
+        assertEquals("third", annotations.get(2).pid());
     }
 
     enum AnEnum {

@@ -253,7 +253,7 @@ public class OsgiContextImplTest {
         tracker.close();
     }
 
-    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=42")
+    @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=42")
     public static class Configured {
 
     }
@@ -267,7 +267,7 @@ public class OsgiContextImplTest {
         assertEquals(42, serviceRanking.value());
     }
 
-    @ApplyConfig(value = String.class, property = "service.ranking:Integer=42")
+    @ApplyConfig(type = String.class, property = "service.ranking:Integer=42")
     public static class IllegallyConfigured {
 
     }
@@ -282,7 +282,7 @@ public class OsgiContextImplTest {
         String string_property() default "a default value";
     }
 
-    @ApplyConfig(value = ConfigurableFromPid.class,
+    @ApplyConfig(type = ConfigurableFromPid.class,
             pid = "existing-pid",
             property = {
                     "string.property=a Component.property() value"
@@ -352,7 +352,7 @@ public class OsgiContextImplTest {
         OsgiContextImpl.updatePropertiesForConfigPid(props, "new-pid", null);
     }
 
-    @UpdateConfig(value = "a pid", property = "service.ranking:Integer=42")
+    @UpdateConfig(pid = "a pid", property = "service.ranking:Integer=42")
     public static class UpdatesConfiguration {
 
     }
@@ -367,7 +367,7 @@ public class OsgiContextImplTest {
                 (Integer[]) configAdmin.getConfiguration("a pid").getProperties().get("service.ranking"));
     }
 
-    @UpdateConfig(value = "", property = "service.ranking:Integer=42")
+    @UpdateConfig(pid = "", property = "service.ranking:Integer=42")
     public static class NoUpdatesConfiguration {
 
     }
@@ -381,9 +381,9 @@ public class OsgiContextImplTest {
         assertNull(configAdmin.getConfiguration("").getProperties());
     }
 
-    @UpdateConfig(value = "ranking.is.21", property = "service.ranking:Integer=21")
-    @UpdateConfig(value = "ranking.is.42", property = "service.ranking:Integer=42")
-    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=10")
+    @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
+    @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=10")
     public static class AppliesMultipleConfigs {
 
     }
@@ -400,9 +400,9 @@ public class OsgiContextImplTest {
         assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "new-pid")).value());
     }
 
-    @UpdateConfig(value = "ranking.is.21", property = "service.ranking:Integer=21")
-    @UpdateConfig(value = "ranking.is.42", property = "service.ranking:Integer=42")
-    @ApplyConfig(value = ServiceRanking.class, pid = "ranking.is.21",
+    @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
+    @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @ApplyConfig(type = ServiceRanking.class, pid = "ranking.is.21",
             property = "service.ranking:Integer=10")
     public static class AppliesMultipleConfigsWithOwnDefault {
 
@@ -476,7 +476,7 @@ public class OsgiContextImplTest {
         int service_ranking();
     }
 
-    @ApplyConfig(value = AnInterface.class, property = "service.ranking:Integer=42")
+    @ApplyConfig(type = AnInterface.class, property = "service.ranking:Integer=42")
     public static class ConfiguredWithInterface {
 
     }

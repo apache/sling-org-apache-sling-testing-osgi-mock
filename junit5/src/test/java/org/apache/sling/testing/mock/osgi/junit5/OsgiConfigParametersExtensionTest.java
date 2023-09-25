@@ -45,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OsgiConfigParametersExtensionTest {
 
     @Test
-    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=1")
-    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=2")
-    @ApplyConfig(value = ServiceVendor.class, property = "service.vendor=Acme")
-    @ApplyConfig(value = ServiceVendor.class, property = "service.vendor=Blowfly")
+    @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=1")
+    @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=2")
+    @ApplyConfig(type = ServiceVendor.class, property = "service.vendor=Acme")
+    @ApplyConfig(type = ServiceVendor.class, property = "service.vendor=Blowfly")
     void arrayParams(ServiceRanking[] allRankings,
                      ServiceRanking serviceRanking1,
                      ServiceRanking serviceRanking2,
@@ -107,8 +107,8 @@ class OsgiConfigParametersExtensionTest {
         String propName() default "propName default";
     }
 
-    @ApplyConfig(PropertyEscaped.class)
-    @ApplyConfig(value = PropertyEscaped.class, property = {
+    @ApplyConfig(type = PropertyEscaped.class)
+    @ApplyConfig(type = PropertyEscaped.class, property = {
             "ignored",
             "prop_name=prop__name value",
             "prop.name=prop_name value",
@@ -155,8 +155,8 @@ class OsgiConfigParametersExtensionTest {
         String propName() default "propName default";
     }
 
-    @ApplyConfig(PrefixedPropertyEscaped.class)
-    @ApplyConfig(value = PrefixedPropertyEscaped.class, property = {
+    @ApplyConfig(type = PrefixedPropertyEscaped.class)
+    @ApplyConfig(type = PrefixedPropertyEscaped.class, property = {
             "prefix-prop_name=prop__name value",
             "prefix-prop.name=prop_name value",
             "prefix-prop-name=prop$_$name value",
@@ -201,7 +201,7 @@ class OsgiConfigParametersExtensionTest {
         String xyzValue() default "xyzValue";
     }
 
-    @ApplyConfig(NestedAnnotationWithDefaults.class)
+    @ApplyConfig(type = NestedAnnotationWithDefaults.class)
     @Test
     void nestedAnnotation(NestedAnnotationWithDefaults defaults) {
         // defaults should not be set for types with nested annotations
@@ -228,20 +228,20 @@ class OsgiConfigParametersExtensionTest {
         String[] value() default {"arrayDefaultDefaults"};
     }
 
-    @ApplyConfig(SingleElementString.class)
-    @ApplyConfig(value = SingleElementString.class,
+    @ApplyConfig(type = SingleElementString.class)
+    @ApplyConfig(type = SingleElementString.class,
             property = "single.element.string=withValue")
-    @ApplyConfig(SingleElementStringDefault.class)
-    @ApplyConfig(value = SingleElementStringDefault.class,
+    @ApplyConfig(type = SingleElementStringDefault.class)
+    @ApplyConfig(type = SingleElementStringDefault.class,
             property = "single.element.string.default=defaultWithValue")
-    @ApplyConfig(SingleElementStringArray.class)
-    @ApplyConfig(value = SingleElementStringArray.class,
+    @ApplyConfig(type = SingleElementStringArray.class)
+    @ApplyConfig(type = SingleElementStringArray.class,
             property = {
                     "single.element.string.array=first arrayWithValue",
                     "single.element.string.array=second arrayWithValue"
             })
-    @ApplyConfig(SingleElementStringArrayDefault.class)
-    @ApplyConfig(value = SingleElementStringArrayDefault.class,
+    @ApplyConfig(type = SingleElementStringArrayDefault.class)
+    @ApplyConfig(type = SingleElementStringArrayDefault.class,
             property = {
                     "single.element.string.array.default=first arrayDefaultWithValue",
                     "single.element.string.array.default=second arrayDefaultWithValue"
@@ -286,20 +286,20 @@ class OsgiConfigParametersExtensionTest {
         int[] value() default {-20};
     }
 
-    @ApplyConfig(SingleElementInteger.class)
-    @ApplyConfig(value = SingleElementInteger.class,
+    @ApplyConfig(type = SingleElementInteger.class)
+    @ApplyConfig(type = SingleElementInteger.class,
             property = "single.element.integer=1")
-    @ApplyConfig(SingleElementIntegerDefault.class)
-    @ApplyConfig(value = SingleElementIntegerDefault.class,
+    @ApplyConfig(type = SingleElementIntegerDefault.class)
+    @ApplyConfig(type = SingleElementIntegerDefault.class,
             property = "single.element.integer.default=2")
-    @ApplyConfig(SingleElementIntegerArray.class)
-    @ApplyConfig(value = SingleElementIntegerArray.class,
+    @ApplyConfig(type = SingleElementIntegerArray.class)
+    @ApplyConfig(type = SingleElementIntegerArray.class,
             property = {
                     "single.element.integer.array=10",
                     "single.element.integer.array=11"
             })
-    @ApplyConfig(SingleElementIntegerArrayDefault.class)
-    @ApplyConfig(value = SingleElementIntegerArrayDefault.class,
+    @ApplyConfig(type = SingleElementIntegerArrayDefault.class)
+    @ApplyConfig(type = SingleElementIntegerArrayDefault.class,
             property = {
                     "single.element.integer.array.default=21",
                     "single.element.integer.array.default=22"
@@ -343,20 +343,20 @@ class OsgiConfigParametersExtensionTest {
         Class<?>[] value() default {OsgiConfigParametersExtensionTest.class};
     }
 
-    @ApplyConfig(SingleElementClass.class)
-    @ApplyConfig(value = SingleElementClass.class,
+    @ApplyConfig(type = SingleElementClass.class)
+    @ApplyConfig(type = SingleElementClass.class,
             property = "single.element.class=java.lang.Class")
-    @ApplyConfig(SingleElementClassDefault.class)
-    @ApplyConfig(value = SingleElementClassDefault.class,
+    @ApplyConfig(type = SingleElementClassDefault.class)
+    @ApplyConfig(type = SingleElementClassDefault.class,
             property = "single.element.class.default=java.lang.String")
-    @ApplyConfig(SingleElementClassArray.class)
-    @ApplyConfig(value = SingleElementClassArray.class,
+    @ApplyConfig(type = SingleElementClassArray.class)
+    @ApplyConfig(type = SingleElementClassArray.class,
             property = {
                     "single.element.class.array=java.lang.Integer",
                     "single.element.class.array=java.lang.Float"
             })
-    @ApplyConfig(SingleElementClassArrayDefault.class)
-    @ApplyConfig(value = SingleElementClassArrayDefault.class,
+    @ApplyConfig(type = SingleElementClassArrayDefault.class)
+    @ApplyConfig(type = SingleElementClassArrayDefault.class,
             property = {
                     "single.element.class.array.default=java.lang.Long",
                     "single.element.class.array.default=java.lang.Double"
@@ -391,8 +391,8 @@ class OsgiConfigParametersExtensionTest {
         String value();
     }
 
-    @ApplyConfig(PrefixedSingleElementAnnotation.class)
-    @ApplyConfig(value = PrefixedSingleElementAnnotation.class, property = {
+    @ApplyConfig(type = PrefixedSingleElementAnnotation.class)
+    @ApplyConfig(type = PrefixedSingleElementAnnotation.class, property = {
             "prefix-prefixed.single.element.annotation=crazy, right?"
     })
     @Test
@@ -408,8 +408,8 @@ class OsgiConfigParametersExtensionTest {
         String value() default "expect me";
     }
 
-    @ApplyConfig(PrefixedSingleElementAnnotationWithDefault.class)
-    @ApplyConfig(value = PrefixedSingleElementAnnotationWithDefault.class, property = {
+    @ApplyConfig(type = PrefixedSingleElementAnnotationWithDefault.class)
+    @ApplyConfig(type = PrefixedSingleElementAnnotationWithDefault.class, property = {
             "prefix-prefixed.single.element.annotation.with.default=crazy, right?"
     })
     @Test
@@ -455,8 +455,8 @@ class OsgiConfigParametersExtensionTest {
         double doubleValue() default Double.MIN_VALUE;
     }
 
-    @ApplyConfig(PrimitiveProperties.class)
-    @ApplyConfig(value = PrimitiveProperties.class, property = {
+    @ApplyConfig(type = PrimitiveProperties.class)
+    @ApplyConfig(type = PrimitiveProperties.class, property = {
             "boolValue=true",
             "byteValue=10",
             "charValue=1",
@@ -466,8 +466,8 @@ class OsgiConfigParametersExtensionTest {
             "floatValue=11.0",
             "doubleValue=111.0"
     })
-    @ApplyConfig(PrimitivePropertiesDefaults.class)
-    @ApplyConfig(value = PrimitivePropertiesDefaults.class, property = {
+    @ApplyConfig(type = PrimitivePropertiesDefaults.class)
+    @ApplyConfig(type = PrimitivePropertiesDefaults.class, property = {
             "boolValue:Boolean=false",
             "byteValue:Byte=20",
             "charValue:Character=2",
@@ -534,7 +534,7 @@ class OsgiConfigParametersExtensionTest {
         }
     }
 
-    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=1")
+    @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=1")
     @ExtendWith(ConcreteParameterExtension.class)
     @Test
     void supportedAndUnsupportedParameter(ConcreteParameter unsupported, ServiceRanking serviceRanking) {

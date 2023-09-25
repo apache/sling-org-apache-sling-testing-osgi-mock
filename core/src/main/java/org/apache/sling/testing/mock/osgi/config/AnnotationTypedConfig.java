@@ -68,7 +68,7 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
                     type + " from annotation " + annotation);
         }
         if (annotation instanceof ApplyConfig) {
-            if (!((ApplyConfig) annotation).value().isAssignableFrom(type)) {
+            if (!((ApplyConfig) annotation).type().isAssignableFrom(type)) {
                 throw new IllegalArgumentException("type " + type +
                         " must match config type from annotation " + annotation);
             }

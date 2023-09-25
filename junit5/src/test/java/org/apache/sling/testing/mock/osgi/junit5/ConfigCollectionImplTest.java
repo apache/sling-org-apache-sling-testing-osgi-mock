@@ -30,16 +30,16 @@ import org.osgi.service.component.propertytypes.ServiceVendor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@UpdateConfig(value = "common-config", property = {
+@UpdateConfig(pid = "common-config", property = {
         "service.ranking:Integer=42",
         "service.vendor=Acme Software Foundation"
 })
-@ApplyConfig(value = ServiceVendor.class, property = "service.vendor=Apache Software Foundation")
+@ApplyConfig(type = ServiceVendor.class, property = "service.vendor=Apache Software Foundation")
 @ExtendWith(OsgiConfigParametersExtension.class)
 class ConfigCollectionImplTest {
 
     @SuppressWarnings("unchecked")
-    @ApplyConfig(ServiceRanking.class)
+    @ApplyConfig(type = ServiceRanking.class)
     @Test
     void collectConfigTypes(@CollectConfigTypes(ServiceRanking.class)
                             ConfigCollection configs) {
@@ -47,7 +47,7 @@ class ConfigCollectionImplTest {
         assertTrue(configs.stream().map(TypedConfig::getType).noneMatch(ApplyConfig.class::isAssignableFrom));
     }
 
-    @ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=10")
+    @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=10")
     @Test
     void collectWithApplyPid(
             @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class})

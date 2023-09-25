@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Define this annotation on a test class or method to use the {@link org.osgi.service.cm.ConfigurationAdmin} service
- * to update the persisted properties for the configuration whose pid matches the {@link #value()} attribute.
+ * to update the persisted properties for the configuration whose pid matches the {@link #pid()} attribute.
  * Updates should be applied top-down for each test context scope, from with the outermost (class-level) to the
  * innermost (method-level).
  */
@@ -39,7 +39,7 @@ public @interface UpdateConfig {
      *
      * @return a configuration pid
      */
-    String value();
+    String pid();
 
     /**
      * Parsed like {@link Component#property()}.

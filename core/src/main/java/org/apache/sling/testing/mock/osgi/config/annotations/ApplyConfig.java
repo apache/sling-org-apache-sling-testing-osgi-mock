@@ -42,7 +42,7 @@ public @interface ApplyConfig {
      *
      * @return the type to construct
      */
-    Class<?> value();
+    Class<?> type();
 
     /**
      * Optionally specify a configuration pid to load, any defined properties of which will override annotation defaults

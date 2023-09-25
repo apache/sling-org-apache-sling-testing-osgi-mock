@@ -30,11 +30,11 @@ import org.osgi.service.component.propertytypes.ServiceVendor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-@UpdateConfig(value = "common-config", property = {
+@UpdateConfig(pid = "common-config", property = {
         "service.ranking:Integer=42",
         "service.vendor=Acme Software Foundation"
 })
-@ApplyConfig(value = ServiceRanking.class, property = "service.ranking:Integer=10")
+@ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=10")
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigCollectorTest {
 
@@ -52,7 +52,7 @@ public class ConfigCollectorTest {
     public ConfigCollector appliedConfigs = new ConfigCollector(osgiContext, "common-config",
             ServiceRanking.class, ServiceVendor.class);
 
-    @ApplyConfig(ServiceVendor.class)
+    @ApplyConfig(type = ServiceVendor.class)
     @Test
     public void testEvaluate() {
         assertEquals(1, justRankings.stream().count());

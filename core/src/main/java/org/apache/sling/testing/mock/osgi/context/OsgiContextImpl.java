@@ -261,9 +261,9 @@ public class OsgiContextImpl {
      * @param annotation an {@link UpdateConfig} annotation
      */
     public final void updateConfiguration(@NotNull final UpdateConfig annotation) {
-        if (!annotation.value().isEmpty()) {
+        if (!annotation.pid().isEmpty()) {
             final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
-            updatePropertiesForConfigPid(updated, annotation.value(), this.getService(ConfigurationAdmin.class));
+            updatePropertiesForConfigPid(updated, annotation.pid(), this.getService(ConfigurationAdmin.class));
         }
     }
 
@@ -291,7 +291,7 @@ public class OsgiContextImpl {
      * Return a concrete instance of the OSGi config / Component Property Type represented by the given
      * {@link ApplyConfig} annotation discovered via reflection.
      * @param annotation the {@link ApplyConfig}
-     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#value()}
+     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
      */
     public final Object applyConfigToType(@NotNull final ApplyConfig annotation) {
         return applyConfigToType(annotation, null);
@@ -302,19 +302,19 @@ public class OsgiContextImpl {
      * {@link ApplyConfig} annotation discovered via reflection.
      * @param annotation the {@link ApplyConfig}
      * @param applyPid if not empty, override any specified {@link ApplyConfig#pid()}.
-     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#value()}
+     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
      */
     public final Object applyConfigToType(@NotNull final ApplyConfig annotation,
                                           @Nullable final String applyPid) {
-        if (!annotation.value().isAnnotation() && !annotation.value().isInterface()) {
-            throw new IllegalArgumentException("illegal value for ApplyConfig " + annotation.value());
+        if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
+            throw new IllegalArgumentException("illegal value for ApplyConfig " + annotation.type());
         }
         final Map<String, Object> merged = new HashMap<>(
-                ComponentPropertyParser.parse(annotation.value(), annotation.property()));
+                ComponentPropertyParser.parse(annotation.type(), annotation.property()));
         Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
                 .or(() -> Optional.of(annotation.pid()).filter(pid -> !pid.isEmpty()))
                 .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
-        return Annotations.toObject(annotation.value(), merged, bundleContext().getBundle(), false);
+        return Annotations.toObject(annotation.type(), merged, bundleContext().getBundle(), false);
     }
 
     /**
@@ -357,7 +357,7 @@ public class OsgiContextImpl {
                                                @Nullable final String applyPid) {
         if (annotation instanceof ApplyConfig) {
             ApplyConfig osgiConfig = (ApplyConfig) annotation;
-            Class<?> mappingType = osgiConfig.value();
+            Class<?> mappingType = osgiConfig.type();
             return AnnotationTypedConfig.newInstance(mappingType,
                     mappingType.cast(this.applyConfigToType(osgiConfig, applyPid)),
                     annotation);
