@@ -417,6 +417,7 @@ public class ComponentPropertyParserTest {
 
     public @interface NotSingleElementAnnotation {
         String anotherProperty() default "another one";
+
         String value() default "expected";
     }
 
@@ -425,5 +426,40 @@ public class ComponentPropertyParserTest {
         SingleElementPropertyDefaultsProvider defaultsProvider =
                 new SingleElementPropertyDefaultsProvider(NotSingleElementAnnotation.class, null);
         defaultsProvider.getPropertyName(NotSingleElementAnnotation.class.getMethod("anotherProperty"));
+    }
+
+    public enum YesOrNo {
+        YES, NO
+    }
+
+    public @interface SingleElementEnum {
+        YesOrNo value();
+    }
+
+    public @interface SingleElementEnumDefault {
+        YesOrNo value() default YesOrNo.NO;
+    }
+
+    public @interface SingleElementEnumArray {
+        YesOrNo[] value();
+    }
+
+    public @interface SingleElementEnumArrayDefault {
+        YesOrNo[] value() default {YesOrNo.YES};
+    }
+
+    @Test
+    public void testGetAnnotationDefaultsSingleElementEnum() {
+        Map<Class<? extends Annotation>, Map<String, Object>> expectations = Map.of(
+                SingleElementEnum.class,
+                Collections.emptyMap(),
+                SingleElementEnumDefault.class,
+                Map.of("single.element.enum.default", new String[]{"NO"}),
+                SingleElementEnumArray.class,
+                Collections.emptyMap(),
+                SingleElementEnumArrayDefault.class,
+                Map.of("single.element.enum.array.default", new String[]{"YES"})
+        );
+        assertGetAnnotationDefaultsExpectations(expectations);
     }
 }

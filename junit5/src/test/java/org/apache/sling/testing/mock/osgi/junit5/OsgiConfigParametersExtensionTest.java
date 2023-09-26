@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfigs;
 import org.junit.jupiter.api.Test;
@@ -332,7 +331,7 @@ class OsgiConfigParametersExtensionTest {
     }
 
     public @interface SingleElementClassDefault {
-        Class<?> value() default ComponentPropertyParser.class;
+        Class<?> value() default String.class;
     }
 
     public @interface SingleElementClassArray {
@@ -373,7 +372,7 @@ class OsgiConfigParametersExtensionTest {
         assertNull(defaults.value());
         assertEquals(Class.class, withValue.value());
 
-        assertEquals(ComponentPropertyParser.class, defaultDefaults.value());
+        assertEquals(String.class, defaultDefaults.value());
         assertEquals(String.class, defaultWithValue.value());
 
         assertArrayEquals(new Class<?>[0], arrayDefaults.value());
@@ -382,6 +381,68 @@ class OsgiConfigParametersExtensionTest {
         assertArrayEquals(new Class<?>[]{OsgiConfigParametersExtensionTest.class},
                 arrayDefaultDefaults.value());
         assertArrayEquals(new Class<?>[]{Long.class, Double.class},
+                arrayDefaultWithValue.value());
+    }
+
+    public enum YesOrNo {
+        YES, NO
+    }
+
+    public @interface SingleElementEnum {
+        YesOrNo value();
+    }
+
+    public @interface SingleElementEnumDefault {
+        YesOrNo value() default YesOrNo.NO;
+    }
+
+    public @interface SingleElementEnumArray {
+        YesOrNo[] value();
+    }
+
+    public @interface SingleElementEnumArrayDefault {
+        YesOrNo[] value() default {YesOrNo.YES};
+    }
+
+    @ApplyConfig(type = SingleElementEnum.class)
+    @ApplyConfig(type = SingleElementEnum.class,
+            property = "single.element.enum=NO")
+    @ApplyConfig(type = SingleElementEnumDefault.class)
+    @ApplyConfig(type = SingleElementEnumDefault.class,
+            property = "single.element.enum.default=YES")
+    @ApplyConfig(type = SingleElementEnumArray.class)
+    @ApplyConfig(type = SingleElementEnumArray.class,
+            property = {
+                    "single.element.enum.array=YES",
+                    "single.element.enum.array=NO"
+            })
+    @ApplyConfig(type = SingleElementEnumArrayDefault.class)
+    @ApplyConfig(type = SingleElementEnumArrayDefault.class,
+            property = {
+                    "single.element.enum.array.default=NO",
+                    "single.element.enum.array.default=YES"
+            })
+    @Test
+    void singleElementEnums(SingleElementEnum defaults,
+                            SingleElementEnum withValue,
+                            SingleElementEnumDefault defaultDefaults,
+                            SingleElementEnumDefault defaultWithValue,
+                            SingleElementEnumArray arrayDefaults,
+                            SingleElementEnumArray arrayWithValue,
+                            SingleElementEnumArrayDefault arrayDefaultDefaults,
+                            SingleElementEnumArrayDefault arrayDefaultWithValue) {
+        assertNull(defaults.value());
+        assertEquals(YesOrNo.NO, withValue.value());
+
+        assertEquals(YesOrNo.NO, defaultDefaults.value());
+        assertEquals(YesOrNo.YES, defaultWithValue.value());
+
+        assertArrayEquals(new YesOrNo[0], arrayDefaults.value());
+        assertArrayEquals(new YesOrNo[]{YesOrNo.YES, YesOrNo.NO}, arrayWithValue.value());
+
+        assertArrayEquals(new YesOrNo[]{YesOrNo.YES},
+                arrayDefaultDefaults.value());
+        assertArrayEquals(new YesOrNo[]{YesOrNo.NO, YesOrNo.YES},
                 arrayDefaultWithValue.value());
     }
 

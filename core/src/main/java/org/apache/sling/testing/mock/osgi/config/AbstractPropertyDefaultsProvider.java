@@ -81,6 +81,13 @@ abstract class AbstractPropertyDefaultsProvider {
             } else {
                 defaults.put(propertyName, new String[]{((Class<?>) value).getName()});
             }
+        } else if (singleType.isEnum()) {
+            if (valueType.isArray()) {
+                defaults.put(propertyName,
+                        Stream.of((Enum<?>[]) value).map(Enum::name).toArray(String[]::new));
+            } else {
+                defaults.put(propertyName, new String[]{((Enum<?>) value).name()});
+            }
         } else {
             // every other type of nested member invalid, return false to indicate to caller that
             // all default values for this annotation should be discarded.
