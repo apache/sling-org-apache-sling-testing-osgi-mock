@@ -282,7 +282,7 @@ public class OsgiContextImpl {
                 Configuration configuration = configurationAdmin.getConfiguration(pid);
                 configuration.update(MapUtil.toDictionary(updatedProperties));
             } catch (IOException e) {
-                throw new RuntimeException("Unable to read/write config for pid " + pid, e);
+                throw new IllegalStateException("Unable to read/write config for pid " + pid, e);
             }
         }
     }
@@ -333,7 +333,7 @@ public class OsgiContextImpl {
                 Configuration configuration = configurationAdmin.getConfiguration(pid);
                 Optional.ofNullable(MapUtil.toMap(configuration.getProperties())).ifPresent(mergedProperties::putAll);
             } catch (IOException e) {
-                throw new RuntimeException("Unable to read config for pid " + pid, e);
+                throw new IllegalStateException("Unable to read config for pid " + pid, e);
             }
         }
     }

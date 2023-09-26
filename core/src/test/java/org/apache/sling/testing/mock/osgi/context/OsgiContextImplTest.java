@@ -326,7 +326,7 @@ public class OsgiContextImplTest {
                 ((ServiceRanking) context.applyConfigToType(rankingAnnotation, "new-pid")).value());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalStateException.class)
     public void testUpdatePropertiesForConfigPidThrows() throws IOException {
         ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
         doThrow(IOException.class).when(mocked).getConfiguration(anyString());
@@ -338,18 +338,19 @@ public class OsgiContextImplTest {
     public void testUpdatePropertiesForNewConfiguration() throws IOException {
         ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
         Configuration mockedConfig = mock(Configuration.class);
-        doReturn(mockedConfig).when(mocked).getConfiguration(eq("new-pid"));
+        doReturn(mockedConfig).when(mocked).getConfiguration("new-pid");
         Map<String, Object> props = Map.of("new.property", "value");
         final Dictionary<String, Object> asDict = MapUtil.toDictionary(props);
         OsgiContextImpl.updatePropertiesForConfigPid(props, "new-pid", mocked);
-        verify(mockedConfig, times(1)).update(eq(asDict));
+        verify(mockedConfig, times(1)).update(asDict);
     }
 
     @Test
-    public void testUpdatePropertiesForNullConfigurationAdmin() throws IOException {
+    public void testUpdatePropertiesForNullConfigurationAdmin() {
         Map<String, Object> props = new HashMap<>();
         // no throws
         OsgiContextImpl.updatePropertiesForConfigPid(props, "new-pid", null);
+        assertTrue(props.isEmpty());
     }
 
     @UpdateConfig(pid = "a pid", property = "service.ranking:Integer=42")
@@ -419,7 +420,7 @@ public class OsgiContextImplTest {
         assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "new-pid")).value());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expected = IllegalStateException.class)
     public void testMergePropertiesFromConfigurationPidThrows() throws IOException {
         ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
         doThrow(IOException.class).when(mocked).getConfiguration(anyString());
@@ -431,7 +432,7 @@ public class OsgiContextImplTest {
     public void testMergePropertiesFromNewConfiguration() throws IOException {
         ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
         Configuration mockedConfig = mock(Configuration.class);
-        doReturn(mockedConfig).when(mocked).getConfiguration(eq("new-pid"));
+        doReturn(mockedConfig).when(mocked).getConfiguration("new-pid");
         Map<String, Object> props = new HashMap<>();
         OsgiContextImpl.mergePropertiesFromConfigPid(props, "new-pid", mocked);
         assertTrue(props.isEmpty());
@@ -453,7 +454,7 @@ public class OsgiContextImplTest {
         doAnswer(call -> MapUtil.toDictionary(Map.copyOf(existingProps))).when(mockedConfig).getProperties();
 
         ConfigurationAdmin mocked = mock(ConfigurationAdmin.class);
-        doReturn(mockedConfig).when(mocked).getConfiguration(eq("existing-pid"));
+        doReturn(mockedConfig).when(mocked).getConfiguration("existing-pid");
 
         Map<String, Object> props = new HashMap<>();
         OsgiContextImpl.mergePropertiesFromConfigPid(props, "existing-pid", mocked);
