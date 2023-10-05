@@ -23,6 +23,7 @@ import org.osgi.service.component.annotations.Component;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
 
 /**
  * Define this annotation on a test class or method to use the {@link org.osgi.service.cm.ConfigurationAdmin} service
@@ -35,11 +36,22 @@ import java.lang.annotation.RetentionPolicy;
 public @interface UpdateConfig {
 
     /**
-     * Specify a configuration pid to update with values specified by {@link #property()}.
+     * Specify a configuration pid to update with values specified by {@link #property()}. The default value is
+     * {@link Component#NAME}, which is a special string ("$") that can be used to specify the name of the
+     * {@link #component()} class as a configuration PID.
      *
      * @return a configuration pid
      */
-    String pid();
+    String pid() default Component.NAME;
+
+    /**
+     * When {@link #pid()} is set to the default value of {@link Component#NAME}, set this attribute to a class whose
+     * name should be used instead. This can be more convenient when using {@link UpdateConfig} in combination with
+     * {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl#registerInjectActivateService(Object, Map)}.
+     *
+     * @return the configurable component class
+     */
+    Class<?> component() default Object.class;
 
     /**
      * Parsed like {@link Component#property()}.

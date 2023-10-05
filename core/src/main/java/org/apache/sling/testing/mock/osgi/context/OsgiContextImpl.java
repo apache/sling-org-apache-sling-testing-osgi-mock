@@ -44,6 +44,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Defines OSGi context objects and helper methods.
@@ -257,14 +258,33 @@ public class OsgiContextImpl {
     }
 
     /**
+     * Construct a configuration pid for use with {@link ConfigurationAdmin#getConfiguration(String)}. If {@code pid} is
+     * empty, return {@link Optional#empty()}. If {@code pid} is equal to {@link Component#NAME} ("$"), return
+     * {@code component.getName()}.
+     *
+     * @param pid an explicit pid name, "$", or the empty string
+     * @param component a class whose name to use when pid is "$"
+     * @return a useful configuration pid or none
+     */
+    public final Optional<String> getConfigurationPid(@NotNull final String pid, @NotNull final Class<?> component) {
+        if (pid.isEmpty()) {
+            return Optional.empty();
+        } else if (Component.NAME.equals(pid)) {
+            return Optional.of(component.getName());
+        } else {
+            return Optional.of(pid);
+        }
+    }
+
+    /**
      * Updates a {@link Configuration} from the provided annotation.
      * @param annotation an {@link UpdateConfig} annotation
      */
     public final void updateConfiguration(@NotNull final UpdateConfig annotation) {
-        if (!annotation.pid().isEmpty()) {
+        getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
             final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
-            updatePropertiesForConfigPid(updated, annotation.pid(), this.getService(ConfigurationAdmin.class));
-        }
+            updatePropertiesForConfigPid(updated, pid, this.getService(ConfigurationAdmin.class));
+        });
     }
 
     /**
@@ -312,7 +332,7 @@ public class OsgiContextImpl {
         final Map<String, Object> merged = new HashMap<>(
                 ComponentPropertyParser.parse(annotation.type(), annotation.property()));
         Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
-                .or(() -> Optional.of(annotation.pid()).filter(pid -> !pid.isEmpty()))
+                .or(() -> getConfigurationPid(annotation.pid(), annotation.component()))
                 .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
         return Annotations.toObject(annotation.type(), merged, bundleContext().getBundle(), false);
     }

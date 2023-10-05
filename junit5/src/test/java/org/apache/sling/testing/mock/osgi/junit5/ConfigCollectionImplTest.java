@@ -52,7 +52,7 @@ class ConfigCollectionImplTest {
     void collectWithApplyPid(
             @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class})
             ConfigCollection unappliedConfigs,
-            @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class}, applyPid = "common-config")
+            @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class}, pid = "common-config")
             ConfigCollection appliedConfigs) {
         assertEquals(2, unappliedConfigs.stream().count());
         assertEquals(10,

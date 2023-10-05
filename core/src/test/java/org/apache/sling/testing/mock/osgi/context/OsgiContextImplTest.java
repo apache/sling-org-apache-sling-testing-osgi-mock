@@ -25,7 +25,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -61,6 +60,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -382,8 +382,26 @@ public class OsgiContextImplTest {
         assertNull(configAdmin.getConfiguration("").getProperties());
     }
 
+    @UpdateConfig(component = UpdatesConfigurationByComponentName.class,
+                property = "service.ranking:Integer=42")
+    public static class UpdatesConfigurationByComponentName {
+
+    }
+
+    @Test
+    public void testUpdateConfigurationByComponentName() throws IOException {
+        final String pid = UpdatesConfigurationByComponentName.class.getName();
+        final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
+        assertNull(configAdmin.getConfiguration(pid).getProperties());
+        UpdateConfig updateConfig = UpdatesConfigurationByComponentName.class.getAnnotation(UpdateConfig.class);
+        context.updateConfiguration(updateConfig);
+        assertArrayEquals(new Integer[] { 42 },
+                (Integer[]) configAdmin.getConfiguration(pid).getProperties().get("service.ranking"));
+    }
+
     @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
     @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @UpdateConfig(component = AppliesMultipleConfigs.class, property = "service.ranking:Integer=55")
     @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=10")
     public static class AppliesMultipleConfigs {
 
@@ -399,10 +417,12 @@ public class OsgiContextImplTest {
         assertEquals(21, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.21")).value());
         assertEquals(42, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.42")).value());
         assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "new-pid")).value());
+        assertEquals(55, ((ServiceRanking) context.applyConfigToType(annotation, AppliesMultipleConfigs.class.getName())).value());
     }
 
     @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
     @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @UpdateConfig(component = AppliesMultipleConfigsWithOwnDefault.class, property = "service.ranking:Integer=55")
     @ApplyConfig(type = ServiceRanking.class, pid = "ranking.is.21",
             property = "service.ranking:Integer=10")
     public static class AppliesMultipleConfigsWithOwnDefault {
@@ -418,6 +438,29 @@ public class OsgiContextImplTest {
         assertEquals(21, ((ServiceRanking) context.applyConfigToType(annotation, "")).value());
         assertEquals(42, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.42")).value());
         assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "new-pid")).value());
+        assertEquals(55, ((ServiceRanking) context.applyConfigToType(annotation, AppliesMultipleConfigsWithOwnDefault.class.getName())).value());
+    }
+
+    @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
+    @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @UpdateConfig(component = AppliesMultipleConfigsWithOwnDefaultComponent.class, property = "service.ranking:Integer=55")
+    @ApplyConfig(type = ServiceRanking.class, pid = Component.NAME, component = AppliesMultipleConfigsWithOwnDefaultComponent.class,
+            property = "service.ranking:Integer=10")
+    public static class AppliesMultipleConfigsWithOwnDefaultComponent {
+
+    }
+
+    @Test
+    public void testApplyConfigToTypeMultiplePidsWithOwnDefaultComponent() {
+        ConfigAnnotationUtil.findUpdateConfigAnnotations(AppliesMultipleConfigsWithOwnDefaultComponent.class)
+                .forEachOrdered(context::updateConfiguration);
+        ApplyConfig annotation = AppliesMultipleConfigsWithOwnDefaultComponent.class.getAnnotation(ApplyConfig.class);
+        assertEquals(55, ((ServiceRanking) context.applyConfigToType(annotation)).value());
+        assertEquals(55, ((ServiceRanking) context.applyConfigToType(annotation, "")).value());
+        assertEquals(21, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.21")).value());
+        assertEquals(42, ((ServiceRanking) context.applyConfigToType(annotation, "ranking.is.42")).value());
+        assertEquals(10, ((ServiceRanking) context.applyConfigToType(annotation, "new-pid")).value());
+        assertEquals(55, ((ServiceRanking) context.applyConfigToType(annotation, AppliesMultipleConfigsWithOwnDefaultComponent.class.getName())).value());
     }
 
     @Test(expected = IllegalStateException.class)

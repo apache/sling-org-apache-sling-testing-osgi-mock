@@ -46,11 +46,21 @@ public @interface ApplyConfig {
 
     /**
      * Optionally specify a configuration pid to load, any defined properties of which will override annotation defaults
-     * and values specified by {@link #property()}.
+     * and values specified by {@link #property()}. In order to specify the name of the {@link #component()} class as a
+     * configuration PID, set this value to {@link Component#NAME}. The default value is the empty string, which
+     * skips loading any configuration from ConfigurationAdmin.
      *
      * @return a configuration pid, or an empty string
      */
     String pid() default "";
+
+    /**
+     * When {@link #pid()} is set to {@link Component#NAME}, set this attribute to a class whose name should be used
+     * instead.
+     *
+     * @return the configurable component class
+     */
+    Class<?> component() default Object.class;
 
     /**
      * Treat like {@link Component#property()}.
