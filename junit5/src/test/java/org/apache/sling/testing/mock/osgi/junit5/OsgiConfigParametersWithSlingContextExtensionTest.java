@@ -68,6 +68,12 @@ class OsgiConfigParametersWithSlingContextExtensionTest {
     }
 
     @Test
+    @ApplyConfig(pid = PID_SETUP, type = ServiceRanking.class)
+    void testApplyConfig(ServiceRanking serviceRanking) {
+        assertEquals(55, serviceRanking.value());
+    }
+
+    @Test
     @UpdateConfig(component = Service3OsgiR6Impl.class, property = {
             "reference3DynamicFiltered.target=(prop1=def)",
             "service.ranking:Integer=42"
@@ -88,11 +94,5 @@ class OsgiConfigParametersWithSlingContextExtensionTest {
         assertEquals(Collections.emptySet(), Set.copyOf(service.getReferences3()));
 
         assertEquals(42, service.getConfig().get("service.ranking"));
-    }
-
-    @Test
-    @ApplyConfig(pid = PID_SETUP, type = ServiceRanking.class)
-    void testApplyConfig(ServiceRanking serviceRanking) {
-        assertEquals(55, serviceRanking.value());
     }
 }

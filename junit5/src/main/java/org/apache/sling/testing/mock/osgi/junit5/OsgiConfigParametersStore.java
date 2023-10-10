@@ -71,6 +71,7 @@ final class OsgiConfigParametersStore {
                 .flatMap(OsgiConfigParametersStore::getFieldFromTestClass);
     }
 
+    @SuppressWarnings("java:S3011")
     static Optional<Field> getFieldFromTestClass(@NotNull Class<?> instanceClass) {
         Field contextField = Arrays.stream(instanceClass.getDeclaredFields())
                 .filter(field -> OsgiContextImpl.class.isAssignableFrom(field.getType())).findFirst().orElse(null);

@@ -28,6 +28,7 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -37,9 +38,39 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class ComponentPropertyParserTest {
+
+    enum ValueCardinality {
+        ABSENT, ONE, MANY
+    }
+
+    @Test
+    public void testPutSingleOrMany() {
+        Map<List<String>, ValueCardinality> expectations = Map.of(
+                List.of(), ValueCardinality.ABSENT,
+                List.of("one"), ValueCardinality.ONE,
+                List.of("2"), ValueCardinality.ONE,
+                List.of("one", "2"), ValueCardinality.MANY
+        );
+        for (Map.Entry<List<String>, ValueCardinality> entry : expectations.entrySet()) {
+            Map<String, Object> properties = new HashMap<>();
+            ComponentPropertyParser.putSingleOrMany(properties, "test",
+                    entry.getKey(), Function.identity(), String[]::new);
+            switch (entry.getValue()) {
+                case ONE:
+                    assertEquals(entry.getKey().get(0), properties.get("test"));
+                    break;
+                case MANY:
+                    assertArrayEquals(entry.getKey().toArray(new String[0]), (String[]) properties.get("test"));
+                    break;
+                case ABSENT:
+                    assertNull(properties.get("test"));
+            }
+        }
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testUnescapeUnsupported() {
