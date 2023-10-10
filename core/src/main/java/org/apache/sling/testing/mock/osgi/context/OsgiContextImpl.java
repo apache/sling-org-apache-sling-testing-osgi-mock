@@ -19,7 +19,6 @@
 package org.apache.sling.testing.mock.osgi.context;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -31,9 +30,8 @@ import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
-import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +42,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.Component;
 
 /**
  * Defines OSGi context objects and helper methods.
@@ -258,30 +255,11 @@ public class OsgiContextImpl {
     }
 
     /**
-     * Construct a configuration pid for use with {@link ConfigurationAdmin#getConfiguration(String)}. If {@code pid} is
-     * empty, return {@link Optional#empty()}. If {@code pid} is equal to {@link Component#NAME} ("$"), return
-     * {@code component.getName()}.
-     *
-     * @param pid an explicit pid name, "$", or the empty string
-     * @param component a class whose name to use when pid is "$"
-     * @return a useful configuration pid or none
-     */
-    public final Optional<String> getConfigurationPid(@NotNull final String pid, @NotNull final Class<?> component) {
-        if (pid.isEmpty()) {
-            return Optional.empty();
-        } else if (Component.NAME.equals(pid)) {
-            return Optional.of(component.getName());
-        } else {
-            return Optional.of(pid);
-        }
-    }
-
-    /**
      * Updates a {@link Configuration} from the provided annotation.
      * @param annotation an {@link UpdateConfig} annotation
      */
     public final void updateConfiguration(@NotNull final UpdateConfig annotation) {
-        getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
+        ConfigAnnotationUtil.getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
             final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
             updatePropertiesForConfigPid(updated, pid, this.getService(ConfigurationAdmin.class));
         });
@@ -313,8 +291,8 @@ public class OsgiContextImpl {
      * @param annotation the {@link ApplyConfig}
      * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
      */
-    public final Object applyConfigToType(@NotNull final ApplyConfig annotation) {
-        return applyConfigToType(annotation, null);
+    public final Object constructComponentPropertyType(@NotNull final ApplyConfig annotation) {
+        return constructComponentPropertyType(annotation, null);
     }
 
     /**
@@ -324,15 +302,15 @@ public class OsgiContextImpl {
      * @param applyPid if not empty, override any specified {@link ApplyConfig#pid()}.
      * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
      */
-    public final Object applyConfigToType(@NotNull final ApplyConfig annotation,
-                                          @Nullable final String applyPid) {
+    public final Object constructComponentPropertyType(@NotNull final ApplyConfig annotation,
+                                                       @Nullable final String applyPid) {
         if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
             throw new IllegalArgumentException("illegal value for ApplyConfig " + annotation.type());
         }
         final Map<String, Object> merged = new HashMap<>(
                 ComponentPropertyParser.parse(annotation.type(), annotation.property()));
         Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
-                .or(() -> getConfigurationPid(annotation.pid(), annotation.component()))
+                .or(() -> ConfigAnnotationUtil.getConfigurationPid(annotation.pid(), annotation.component()))
                 .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
         return Annotations.toObject(annotation.type(), merged, bundleContext().getBundle(), false);
     }
@@ -358,31 +336,4 @@ public class OsgiContextImpl {
         }
     }
 
-    /**
-     * Construct a collection typed config for the provided annotation.
-     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
-     * @return a typed config
-     */
-    public final TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation) {
-        return newTypedConfig(annotation, null);
-    }
-
-    /**
-     * Construct a collection typed config for the provided annotation.
-     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
-     * @param applyPid optional non-empty configuration pid to apply if annotation is a {@link ApplyConfig}
-     * @return a typed config
-     */
-    public final TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation,
-                                               @Nullable final String applyPid) {
-        if (annotation instanceof ApplyConfig) {
-            ApplyConfig osgiConfig = (ApplyConfig) annotation;
-            Class<?> mappingType = osgiConfig.type();
-            return AnnotationTypedConfig.newInstance(mappingType,
-                    mappingType.cast(this.applyConfigToType(osgiConfig, applyPid)),
-                    annotation);
-        } else {
-            return AnnotationTypedConfig.newInstance(annotation.annotationType(), annotation, annotation);
-        }
-    }
 }

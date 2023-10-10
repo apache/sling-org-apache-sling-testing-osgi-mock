@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -146,44 +147,45 @@ public final class ComponentPropertyParser {
             final List<String> values = entry.getValue();
             switch (propertyType.getOrDefault(name, "String")) {
                 case "Boolean":
-                    returnProps.put(name, values.stream()
-                            .map(Boolean::parseBoolean).toArray(Boolean[]::new));
+                    putSingleOrMany(returnProps, name, values, Boolean::parseBoolean, Boolean[]::new);
                     break;
                 case "Byte":
-                    returnProps.put(name, values.stream()
-                            .map(Byte::parseByte).toArray(Byte[]::new));
+                    putSingleOrMany(returnProps, name, values, Byte::parseByte, Byte[]::new);
                     break;
                 case "Character":
-                    returnProps.put(name, values.stream()
-                            .map(str -> str.charAt(0)).toArray(Character[]::new));
+                    putSingleOrMany(returnProps, name, values, str -> str.charAt(0), Character[]::new);
                     break;
                 case "Short":
-                    returnProps.put(name, values.stream()
-                            .map(Short::parseShort).toArray(Short[]::new));
+                    putSingleOrMany(returnProps, name, values, Short::parseShort, Short[]::new);
                     break;
                 case "Integer":
-                    returnProps.put(name, values.stream()
-                            .map(Integer::parseInt).toArray(Integer[]::new));
+                    putSingleOrMany(returnProps, name, values, Integer::parseInt, Integer[]::new);
                     break;
                 case "Long":
-                    returnProps.put(name, values.stream()
-                            .map(Long::parseLong).toArray(Long[]::new));
+                    putSingleOrMany(returnProps, name, values, Long::parseLong, Long[]::new);
                     break;
                 case "Float":
-                    returnProps.put(name, values.stream()
-                            .map(Float::parseFloat).toArray(Float[]::new));
+                    putSingleOrMany(returnProps, name, values, Float::parseFloat, Float[]::new);
                     break;
                 case "Double":
-                    returnProps.put(name, values.stream()
-                            .map(Double::parseDouble).toArray(Double[]::new));
+                    putSingleOrMany(returnProps, name, values, Double::parseDouble, Double[]::new);
                     break;
                 case "String":
                 default:
-                    returnProps.put(name, values.toArray(new String[0]));
+                    putSingleOrMany(returnProps, name, values, Function.identity(), String[]::new);
                     break;
             }
         }
         return returnProps;
+    }
+
+    static <T> void putSingleOrMany(Map<String, Object> map, String key, List<String> values,
+                                    Function<? super String, ? extends T> mapper, IntFunction<T[]> generator) {
+        if (values.size() == 1) {
+            map.put(key, mapper.apply(values.get(0)));
+        } else if (values.size() > 1) {
+            map.put(key, values.stream().map(mapper).toArray(generator));
+        }
     }
 
     public static Map<String, Object> parse(@NotNull String[] properties) {

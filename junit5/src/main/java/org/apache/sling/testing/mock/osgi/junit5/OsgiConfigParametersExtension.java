@@ -22,6 +22,7 @@ import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -39,8 +40,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Provides a lightweight alternative to {@link OsgiContext#registerInjectActivateService(Class, Map)} which relies on
- * exported SCR xml files, for constructing configured instances of OSGi service components under test. This is not a
+ * Provides a lightweight alternative to {@link OsgiContextImpl#registerInjectActivateService(Class, Map)} which relies
+ * on exported SCR xml files, for constructing configured instances of OSGi service components under test. This is not a
  * replacement for fully testing OCD metatype annotations through the SCR machinery, but it is useful for unit
  * testing when the internal config annotations are accessible to the test class and all the constructor depedencies
  * would be mocked anyway.
@@ -53,13 +54,14 @@ import java.util.stream.Stream;
 public class OsgiConfigParametersExtension implements ParameterResolver, BeforeEachCallback {
 
     /**
-     * Gets or creates the {@link OsgiContext} for the provided extension context.
+     * Gets or creates the {@link OsgiContextImpl} for the provided extension context.
      *
      * @param extensionContext the extension context
-     * @return the {@link OsgiContext}
+     * @return the {@link OsgiContextImpl}
      */
-    private OsgiContext getOsgiContext(@NotNull ExtensionContext extensionContext) {
-        return OsgiContextStore.getOrCreateOsgiContext(extensionContext, extensionContext.getRequiredTestInstance());
+    private OsgiContextImpl getOsgiContextImpl(@NotNull ExtensionContext extensionContext) {
+        return OsgiConfigParametersStore.getOrCreateOsgiContext(extensionContext,
+                extensionContext.getRequiredTestInstance());
     }
 
     @Override
@@ -70,7 +72,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         return ConfigCollection.class.isAssignableFrom(parameterType)
                 || ConfigAnnotationUtil.determineSupportedConfigType(parameterType)
                 .map(paramType -> ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                                getOsgiContext(extensionContext),
+                                getOsgiContextImpl(extensionContext),
                                 Collections.singleton(paramType))
                         .streamApplyConfigAnnotations().findAny().isPresent())
                 .orElse(false);
@@ -110,7 +112,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
     @Override
     public void beforeEach(ExtensionContext extensionContext) throws Exception {
         streamUpdateConfigAnnotations(extensionContext)
-                .forEachOrdered(getOsgiContext(extensionContext)::updateConfiguration);
+                .forEachOrdered(getOsgiContextImpl(extensionContext)::updateConfiguration);
     }
 
     @Override
@@ -119,9 +121,9 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         if (ConfigCollection.class.isAssignableFrom(parameterContext.getParameter().getType())) {
             CollectConfigTypes configTypes = parameterContext.findAnnotation(CollectConfigTypes.class)
                     .orElse(null);
-            final OsgiContext osgiContext = getOsgiContext(extensionContext);
+            final OsgiContextImpl osgiContext = getOsgiContextImpl(extensionContext);
             String applyPid = Optional.ofNullable(configTypes)
-                    .flatMap(annotation -> osgiContext.getConfigurationPid(annotation.pid(), annotation.component()))
+                    .flatMap(annotation -> ConfigAnnotationUtil.getConfigurationPid(annotation.pid(), annotation.component()))
                     .orElse("");
             return ConfigCollectionImpl.collect(parameterContext, extensionContext,
                     osgiContext, checkConfigTypes(configTypes), applyPid);
@@ -129,7 +131,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());
         ConfigCollection configCollection = ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                getOsgiContext(extensionContext), Collections.singleton(parameterType));
+                getOsgiContextImpl(extensionContext), Collections.singleton(parameterType));
         if (isArray) {
             return ConfigAnnotationUtil.resolveParameterToArray(configCollection, parameterType);
         } else {

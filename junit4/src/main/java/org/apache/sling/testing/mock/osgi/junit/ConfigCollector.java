@@ -18,11 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
+import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -43,13 +44,13 @@ import java.util.stream.Stream;
  * and test class.
  */
 public class ConfigCollector implements TestRule, ConfigCollection {
-    private final OsgiContext osgiContext;
+    private final OsgiContextImpl osgiContext;
     private final Set<Class<?>> configTypes;
     private final String applyPid;
     private Context context = null;
 
     /**
-     * Create a new instance around the provided {@link OsgiContext} and one or more allowed desired config type
+     * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
      * classes. Specify a non-empty applyPid value to override the {@link ApplyConfig#pid()} attributes of
      * any collected {@link ApplyConfig} annotations.
      *
@@ -57,14 +58,14 @@ public class ConfigCollector implements TestRule, ConfigCollection {
      * @param configType  one desired config type
      * @param configTypes additional desired config types
      */
-    public ConfigCollector(@NotNull final OsgiContext osgiContext,
+    public ConfigCollector(@NotNull final OsgiContextImpl osgiContext,
                            @NotNull final Class<?> configType,
                            @NotNull final Class<?>... configTypes) {
         this(osgiContext, "", configType, configTypes);
     }
 
     /**
-     * Create a new instance around the provided {@link OsgiContext} and one or more allowed desired config type
+     * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
      * classes. Specify a non-empty applyPid value to override the {@link ApplyConfig#pid()} attributes of
      * any collected {@link ApplyConfig} annotations.
      *
@@ -73,7 +74,7 @@ public class ConfigCollector implements TestRule, ConfigCollection {
      * @param configType  one desired config type
      * @param configTypes additional desired config types
      */
-    public ConfigCollector(@NotNull final OsgiContext osgiContext,
+    public ConfigCollector(@NotNull final OsgiContextImpl osgiContext,
                            @NotNull final String applyPid,
                            @NotNull final Class<?> configType,
                            @NotNull final Class<?>... configTypes) {
@@ -114,7 +115,7 @@ public class ConfigCollector implements TestRule, ConfigCollection {
             final List<Annotation> applyAnnotations = new ArrayList<>(description.getAnnotations());
             applyAnnotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
             entries = ConfigAnnotationUtil.findApplicableConfigAnnotations(applyAnnotations, ConfigCollector.this.configTypes)
-                    .map(annotation -> osgiContext.newTypedConfig(annotation, applyPid))
+                    .map(annotation -> AnnotationTypedConfig.newTypedConfig(osgiContext, annotation, applyPid))
                     .collect(Collectors.toList());
         }
 

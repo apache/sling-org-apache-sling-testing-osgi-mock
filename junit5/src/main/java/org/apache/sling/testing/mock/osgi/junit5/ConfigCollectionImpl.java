@@ -19,9 +19,11 @@
 package org.apache.sling.testing.mock.osgi.junit5;
 
 
+import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -38,13 +40,13 @@ final class ConfigCollectionImpl implements ConfigCollection {
 
     private final ParameterContext parameterContext;
     private final ExtensionContext extensionContext;
-    private final OsgiContext osgiContext;
+    private final OsgiContextImpl osgiContext;
     private final Set<Class<?>> configTypes;
     private final String applyPid;
 
     ConfigCollectionImpl(@NotNull ParameterContext parameterContext,
                          @NotNull ExtensionContext extensionContext,
-                         @NotNull OsgiContext osgiContext,
+                         @NotNull OsgiContextImpl osgiContext,
                          @NotNull Set<Class<?>> configTypes,
                          @Nullable String applyPid) {
         this.parameterContext = parameterContext;
@@ -56,7 +58,7 @@ final class ConfigCollectionImpl implements ConfigCollection {
 
     @Override
     public Stream<TypedConfig<?>> stream() {
-        return streamApplyConfigAnnotations().map(annotation -> osgiContext.newTypedConfig(annotation, applyPid));
+        return streamApplyConfigAnnotations().map(annotation -> AnnotationTypedConfig.newTypedConfig(osgiContext, annotation, applyPid));
     }
 
     Stream<Annotation> streamApplyConfigAnnotations() {
@@ -71,14 +73,14 @@ final class ConfigCollectionImpl implements ConfigCollection {
 
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
                                         @NotNull ExtensionContext extensionContext,
-                                        @NotNull OsgiContext osgiContext,
+                                        @NotNull OsgiContextImpl osgiContext,
                                         @NotNull Set<Class<?>> configTypes) {
         return collect(parameterContext, extensionContext, osgiContext, configTypes, "");
     }
 
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
                                         @NotNull ExtensionContext extensionContext,
-                                        @NotNull OsgiContext osgiContext,
+                                        @NotNull OsgiContextImpl osgiContext,
                                         @NotNull Set<Class<?>> configTypes,
                                         @Nullable String applyPid) {
         return new ConfigCollectionImpl(parameterContext, extensionContext, osgiContext, configTypes, applyPid);

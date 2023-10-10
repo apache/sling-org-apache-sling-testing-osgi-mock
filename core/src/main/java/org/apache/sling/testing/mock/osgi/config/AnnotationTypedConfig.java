@@ -20,7 +20,9 @@ package org.apache.sling.testing.mock.osgi.config;
 
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 
@@ -76,5 +78,38 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
             throw new IllegalArgumentException("type " + type + " must match annotation type " + annotation);
         }
         return new AnnotationTypedConfig<>(type, type.cast(config));
+    }
+
+    /**
+     * Construct a collection typed config for the provided annotation.
+     *
+     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
+     * @return a typed config
+     */
+    public static TypedConfig<?> newTypedConfig(@NotNull OsgiContextImpl osgiContext,
+                                                @NotNull final Annotation annotation) {
+        return newTypedConfig(osgiContext, annotation, null);
+    }
+
+    /**
+     * Construct a collection typed config for the provided annotation.
+     *
+     * @param osgiContext the OsgiContext
+     * @param annotation  a component property type annotation or {@link ApplyConfig} annotation
+     * @param applyPid    optional non-empty configuration pid to apply if annotation is a {@link ApplyConfig}
+     * @return a typed config
+     */
+    public static TypedConfig<?> newTypedConfig(@NotNull OsgiContextImpl osgiContext,
+                                                @NotNull final Annotation annotation,
+                                                @Nullable final String applyPid) {
+        if (annotation instanceof ApplyConfig) {
+            ApplyConfig osgiConfig = (ApplyConfig) annotation;
+            Class<?> mappingType = osgiConfig.type();
+            return newInstance(mappingType,
+                    mappingType.cast(osgiContext.constructComponentPropertyType(osgiConfig, applyPid)),
+                    annotation);
+        } else {
+            return newInstance(annotation.annotationType(), annotation, annotation);
+        }
     }
 }
