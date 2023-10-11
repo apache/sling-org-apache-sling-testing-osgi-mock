@@ -19,11 +19,10 @@
 package org.apache.sling.testing.mock.osgi.junit5;
 
 
-import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -40,25 +39,25 @@ final class ConfigCollectionImpl implements ConfigCollection {
 
     private final ParameterContext parameterContext;
     private final ExtensionContext extensionContext;
-    private final OsgiContextImpl osgiContext;
+    private final ConfigTypeContext configTypeContext;
     private final Set<Class<?>> configTypes;
     private final String applyPid;
 
     ConfigCollectionImpl(@NotNull ParameterContext parameterContext,
                          @NotNull ExtensionContext extensionContext,
-                         @NotNull OsgiContextImpl osgiContext,
+                         @NotNull ConfigTypeContext configTypeContext,
                          @NotNull Set<Class<?>> configTypes,
                          @Nullable String applyPid) {
         this.parameterContext = parameterContext;
         this.extensionContext = extensionContext;
-        this.osgiContext = osgiContext;
+        this.configTypeContext = configTypeContext;
         this.configTypes = Set.copyOf(configTypes);
         this.applyPid = applyPid;
     }
 
     @Override
     public Stream<TypedConfig<?>> stream() {
-        return streamApplyConfigAnnotations().map(annotation -> AnnotationTypedConfig.newTypedConfig(osgiContext, annotation, applyPid));
+        return streamApplyConfigAnnotations().map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid));
     }
 
     Stream<Annotation> streamApplyConfigAnnotations() {
@@ -67,22 +66,22 @@ final class ConfigCollectionImpl implements ConfigCollection {
                         .flatMap(element -> ConfigAnnotationUtil.findApplicableConfigAnnotations(element, configTypes)),
                 extensionContext.getParent().stream()
                         .flatMap(parentContext -> ConfigCollectionImpl
-                                .collect(parameterContext, parentContext, osgiContext, configTypes, applyPid)
+                                .collect(parameterContext, parentContext, configTypeContext, configTypes, applyPid)
                                 .streamApplyConfigAnnotations()));
     }
 
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
                                         @NotNull ExtensionContext extensionContext,
-                                        @NotNull OsgiContextImpl osgiContext,
+                                        @NotNull ConfigTypeContext configTypeContext,
                                         @NotNull Set<Class<?>> configTypes) {
-        return collect(parameterContext, extensionContext, osgiContext, configTypes, "");
+        return collect(parameterContext, extensionContext, configTypeContext, configTypes, "");
     }
 
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
                                         @NotNull ExtensionContext extensionContext,
-                                        @NotNull OsgiContextImpl osgiContext,
+                                        @NotNull ConfigTypeContext configTypeContext,
                                         @NotNull Set<Class<?>> configTypes,
                                         @Nullable String applyPid) {
-        return new ConfigCollectionImpl(parameterContext, extensionContext, osgiContext, configTypes, applyPid);
+        return new ConfigCollectionImpl(parameterContext, extensionContext, configTypeContext, configTypes, applyPid);
     }
 }

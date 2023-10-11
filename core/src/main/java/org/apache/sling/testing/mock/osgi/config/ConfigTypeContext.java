@@ -3,6 +3,7 @@ package org.apache.sling.testing.mock.osgi.config;
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +13,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +23,7 @@ import java.util.Optional;
  * {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig} and
  * {@link org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig} annotations.
  */
-public class ConfigTypeContext {
+public final class ConfigTypeContext {
     private final OsgiContextImpl osgiContext;
 
     public ConfigTypeContext(OsgiContextImpl osgiContext) {
@@ -30,9 +32,10 @@ public class ConfigTypeContext {
 
     /**
      * Internal utility method to update a configuration with properties from the provided map.
-     * @param pid the configuration pid
+     *
+     * @param pid                the configuration pid
      * @param configurationAdmin a config admin service
-     * @param updatedProperties a map of properties to update the configuration
+     * @param updatedProperties  a map of properties to update the configuration
      * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin}
      */
     public static void updatePropertiesForConfigPid(@NotNull Map<String, Object> updatedProperties,
@@ -50,10 +53,11 @@ public class ConfigTypeContext {
 
     /**
      * Internal utility method to merge properties from the specified configuration into the provided map.
-     * @param pid the configuration pid
+     *
+     * @param pid                the configuration pid
      * @param configurationAdmin a config admin service
-     * @param mergedProperties a *mutable* map
-     * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin#getConfiguration(String)}
+     * @param mergedProperties   a *mutable* map
+     * @throws RuntimeException              if an IOException is thrown by {@link ConfigurationAdmin#getConfiguration(String)}
      * @throws UnsupportedOperationException if an immutable map is passed
      */
     public static void mergePropertiesFromConfigPid(@NotNull Map<String, Object> mergedProperties,
@@ -74,7 +78,7 @@ public class ConfigTypeContext {
      * If {@code pid} is empty, return {@link Optional#empty()}. If {@code pid} is equal to {@link Component#NAME} ("$"),
      * return {@code component.getName()}.
      *
-     * @param pid an explicit pid name, "$", or the empty string
+     * @param pid       an explicit pid name, "$", or the empty string
      * @param component a class whose name to use when pid is "$"
      * @return a useful configuration pid or none
      */
@@ -90,6 +94,7 @@ public class ConfigTypeContext {
 
     /**
      * Updates a {@link Configuration} from the provided annotation.
+     *
      * @param annotation an {@link UpdateConfig} annotation
      */
     public final void updateConfiguration(@NotNull final UpdateConfig annotation) {
@@ -102,6 +107,7 @@ public class ConfigTypeContext {
     /**
      * Return a concrete instance of the OSGi config / Component Property Type represented by the given
      * {@link ApplyConfig} annotation discovered via reflection.
+     *
      * @param annotation the {@link ApplyConfig}
      * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
      */
@@ -112,8 +118,9 @@ public class ConfigTypeContext {
     /**
      * Return a concrete instance of the OSGi config / Component Property Type represented by the given
      * {@link ApplyConfig} annotation discovered via reflection.
+     *
      * @param annotation the {@link ApplyConfig}
-     * @param applyPid if not empty, override any specified {@link ApplyConfig#pid()}.
+     * @param applyPid   if not empty, override any specified {@link ApplyConfig#pid()}.
      * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
      */
     public final Object constructComponentPropertyType(@NotNull final ApplyConfig annotation,
@@ -127,5 +134,35 @@ public class ConfigTypeContext {
                 .or(() -> getConfigurationPid(annotation.pid(), annotation.component()))
                 .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, osgiContext.getService(ConfigurationAdmin.class)));
         return Annotations.toObject(annotation.type(), merged, osgiContext.bundleContext().getBundle(), false);
+    }
+
+    /**
+     * Construct a collection typed config for the provided annotation.
+     *
+     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
+     * @return a typed config
+     */
+    public TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation) {
+        return newTypedConfig(annotation, null);
+    }
+
+    /**
+     * Construct a collection typed config for the provided annotation.
+     *
+     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
+     * @param applyPid   optional non-empty configuration pid to apply if annotation is a {@link ApplyConfig}
+     * @return a typed config
+     */
+    public TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation,
+                                         @Nullable final String applyPid) {
+        if (annotation instanceof ApplyConfig) {
+            ApplyConfig osgiConfig = (ApplyConfig) annotation;
+            Class<?> mappingType = osgiConfig.type();
+            return AnnotationTypedConfig.newInstance(mappingType,
+                    mappingType.cast(constructComponentPropertyType(osgiConfig, applyPid)),
+                    annotation);
+        } else {
+            return AnnotationTypedConfig.newInstance(annotation.annotationType(), annotation, annotation);
+        }
     }
 }

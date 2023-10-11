@@ -20,26 +20,17 @@ package org.apache.sling.testing.mock.osgi.context;
 
 import java.lang.reflect.Array;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
-import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -251,47 +242,6 @@ public class OsgiContextImpl {
         } catch (InvalidSyntaxException ex) {
             throw new RuntimeException("Invalid filter syntax: " + filter, ex);
         }
-    }
-
-    /**
-     * Updates a {@link Configuration} from the provided annotation.
-     * @param annotation an {@link UpdateConfig} annotation
-     */
-    public final void updateConfiguration(@NotNull final UpdateConfig annotation) {
-        ConfigTypeContext.getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
-            final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
-            ConfigTypeContext.updatePropertiesForConfigPid(updated, pid, this.getService(ConfigurationAdmin.class));
-        });
-    }
-
-    /**
-     * Return a concrete instance of the OSGi config / Component Property Type represented by the given
-     * {@link ApplyConfig} annotation discovered via reflection.
-     * @param annotation the {@link ApplyConfig}
-     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
-     */
-    public final Object constructComponentPropertyType(@NotNull final ApplyConfig annotation) {
-        return constructComponentPropertyType(annotation, null);
-    }
-
-    /**
-     * Return a concrete instance of the OSGi config / Component Property Type represented by the given
-     * {@link ApplyConfig} annotation discovered via reflection.
-     * @param annotation the {@link ApplyConfig}
-     * @param applyPid if not empty, override any specified {@link ApplyConfig#pid()}.
-     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
-     */
-    public final Object constructComponentPropertyType(@NotNull final ApplyConfig annotation,
-                                                       @Nullable final String applyPid) {
-        if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
-            throw new IllegalArgumentException("illegal value for ApplyConfig " + annotation.type());
-        }
-        final Map<String, Object> merged = new HashMap<>(
-                ComponentPropertyParser.parse(annotation.type(), annotation.property()));
-        Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
-                .or(() -> ConfigTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
-                .ifPresent(pid -> ConfigTypeContext.mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
-        return Annotations.toObject(annotation.type(), merged, bundleContext().getBundle(), false);
     }
 
 }

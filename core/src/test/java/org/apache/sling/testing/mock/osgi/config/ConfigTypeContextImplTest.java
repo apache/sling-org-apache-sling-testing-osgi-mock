@@ -19,43 +19,28 @@
 package org.apache.sling.testing.mock.osgi.config;
 
 import org.apache.sling.testing.mock.osgi.MapUtil;
-import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
-import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
-import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service8;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.propertytypes.ServiceRanking;
-import org.osgi.util.tracker.ServiceTracker;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -80,11 +65,13 @@ public class ConfigTypeContextImplTest {
     }
 
     private TestOsgiContext context;
+    private ConfigTypeContext configTypeContext;
 
     @Before
     public void setUp() throws Exception {
         this.context = new TestOsgiContext();
         this.context.setUpContext();
+        this.configTypeContext = new ConfigTypeContext(this.context);
     }
 
     @After
@@ -100,7 +87,7 @@ public class ConfigTypeContextImplTest {
     @Test
     public void testApplyConfigToType() {
         ApplyConfig configAnnotation = Configured.class.getAnnotation(ApplyConfig.class);
-        Object reified = context.constructComponentPropertyType(configAnnotation);
+        Object reified = configTypeContext.constructComponentPropertyType(configAnnotation);
         assertTrue(reified instanceof ServiceRanking);
         ServiceRanking serviceRanking = (ServiceRanking) reified;
         assertEquals(42, serviceRanking.value());
@@ -114,7 +101,7 @@ public class ConfigTypeContextImplTest {
     @Test(expected = IllegalArgumentException.class)
     public void testApplyConfigToTypeThrows() {
         ApplyConfig configAnnotation = IllegallyConfigured.class.getAnnotation(ApplyConfig.class);
-        context.constructComponentPropertyType(configAnnotation);
+        configTypeContext.constructComponentPropertyType(configAnnotation);
     }
 
     public @interface ConfigurableFromPid {
@@ -138,31 +125,31 @@ public class ConfigTypeContextImplTest {
         final ApplyConfig configAnnotation = ConfiguredWithPid.class.getAnnotation(ApplyConfig.class);
         final ApplyConfig rankingAnnotation = Configured.class.getAnnotation(ApplyConfig.class);
         assertEquals("a Component.property() value",
-                ((ConfigurableFromPid) context.constructComponentPropertyType(configAnnotation)).string_property());
+                ((ConfigurableFromPid) configTypeContext.constructComponentPropertyType(configAnnotation)).string_property());
         assertEquals(42,
-                ((ServiceRanking) context.constructComponentPropertyType(rankingAnnotation)).value());
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(rankingAnnotation)).value());
         assertEquals("a Component.property() value",
-                ((ConfigurableFromPid) context.constructComponentPropertyType(configAnnotation, "existing-pid")).string_property());
+                ((ConfigurableFromPid) configTypeContext.constructComponentPropertyType(configAnnotation, "existing-pid")).string_property());
         assertEquals(42,
-                ((ServiceRanking) context.constructComponentPropertyType(rankingAnnotation, "existing-pid")).value());
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(rankingAnnotation, "existing-pid")).value());
 
         config.update(MapUtil.toDictionary(Map.of(
                 "string.property", "a configured value",
                 "service.ranking", 99)));
 
         assertEquals("a configured value",
-                ((ConfigurableFromPid) context.constructComponentPropertyType(configAnnotation)).string_property());
+                ((ConfigurableFromPid) configTypeContext.constructComponentPropertyType(configAnnotation)).string_property());
         assertEquals(42,
-                ((ServiceRanking) context.constructComponentPropertyType(rankingAnnotation)).value());
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(rankingAnnotation)).value());
         assertEquals("a configured value",
-                ((ConfigurableFromPid) context.constructComponentPropertyType(configAnnotation, "existing-pid")).string_property());
+                ((ConfigurableFromPid) configTypeContext.constructComponentPropertyType(configAnnotation, "existing-pid")).string_property());
         assertEquals(99,
-                ((ServiceRanking) context.constructComponentPropertyType(rankingAnnotation, "existing-pid")).value());
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(rankingAnnotation, "existing-pid")).value());
 
         assertEquals("a Component.property() value",
-                ((ConfigurableFromPid) context.constructComponentPropertyType(configAnnotation, "new-pid")).string_property());
+                ((ConfigurableFromPid) configTypeContext.constructComponentPropertyType(configAnnotation, "new-pid")).string_property());
         assertEquals(42,
-                ((ServiceRanking) context.constructComponentPropertyType(rankingAnnotation, "new-pid")).value());
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(rankingAnnotation, "new-pid")).value());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -202,7 +189,7 @@ public class ConfigTypeContextImplTest {
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration("a pid").getProperties());
         UpdateConfig updateConfig = UpdatesConfiguration.class.getAnnotation(UpdateConfig.class);
-        context.updateConfiguration(updateConfig);
+        configTypeContext.updateConfiguration(updateConfig);
         assertEquals(42, configAdmin.getConfiguration("a pid").getProperties().get("service.ranking"));
     }
 
@@ -219,8 +206,8 @@ public class ConfigTypeContextImplTest {
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration("a pid").getProperties());
         UpdateConfig updateConfig = UpdatesConfigurationArray.class.getAnnotation(UpdateConfig.class);
-        context.updateConfiguration(updateConfig);
-        assertArrayEquals(new Integer[] { 42, 55 },
+        configTypeContext.updateConfiguration(updateConfig);
+        assertArrayEquals(new Integer[]{42, 55},
                 (Integer[]) configAdmin.getConfiguration("a pid").getProperties().get("service.ranking"));
     }
 
@@ -235,12 +222,12 @@ public class ConfigTypeContextImplTest {
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration("").getProperties());
         UpdateConfig updateConfig = NoUpdatesConfiguration.class.getAnnotation(UpdateConfig.class);
-        context.updateConfiguration(updateConfig);
+        configTypeContext.updateConfiguration(updateConfig);
         assertNull(configAdmin.getConfiguration("").getProperties());
     }
 
     @UpdateConfig(component = UpdatesConfigurationByComponentName.class,
-                property = "service.ranking:Integer=42")
+            property = "service.ranking:Integer=42")
     public static class UpdatesConfigurationByComponentName {
 
     }
@@ -251,7 +238,7 @@ public class ConfigTypeContextImplTest {
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration(pid).getProperties());
         UpdateConfig updateConfig = UpdatesConfigurationByComponentName.class.getAnnotation(UpdateConfig.class);
-        context.updateConfiguration(updateConfig);
+        configTypeContext.updateConfiguration(updateConfig);
         assertEquals(42, configAdmin.getConfiguration(pid).getProperties().get("service.ranking"));
     }
 
@@ -266,14 +253,21 @@ public class ConfigTypeContextImplTest {
     @Test
     public void testApplyConfigToTypeMultiplePids() {
         ConfigAnnotationUtil.findUpdateConfigAnnotations(AppliesMultipleConfigs.class)
-                .forEachOrdered(context::updateConfiguration);
+                .forEachOrdered(configTypeContext::updateConfiguration);
         ApplyConfig annotation = AppliesMultipleConfigs.class.getAnnotation(ApplyConfig.class);
-        assertEquals(10, ((ServiceRanking) context.constructComponentPropertyType(annotation)).value());
-        assertEquals(10, ((ServiceRanking) context.constructComponentPropertyType(annotation, "")).value());
-        assertEquals(21, ((ServiceRanking) context.constructComponentPropertyType(annotation, "ranking.is.21")).value());
-        assertEquals(42, ((ServiceRanking) context.constructComponentPropertyType(annotation, "ranking.is.42")).value());
-        assertEquals(10, ((ServiceRanking) context.constructComponentPropertyType(annotation, "new-pid")).value());
-        assertEquals(55, ((ServiceRanking) context.constructComponentPropertyType(annotation, AppliesMultipleConfigs.class.getName())).value());
+        assertEquals(10,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation)).value());
+        assertEquals(10,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "")).value());
+        assertEquals(21,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "ranking.is.21")).value());
+        assertEquals(42,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "ranking.is.42")).value());
+        assertEquals(10,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "new-pid")).value());
+        assertEquals(55,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation,
+                        AppliesMultipleConfigs.class.getName())).value());
     }
 
     @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
@@ -288,13 +282,19 @@ public class ConfigTypeContextImplTest {
     @Test
     public void testApplyConfigToTypeMultiplePidsWithOwnDefault() {
         ConfigAnnotationUtil.findUpdateConfigAnnotations(AppliesMultipleConfigsWithOwnDefault.class)
-                .forEachOrdered(context::updateConfiguration);
+                .forEachOrdered(configTypeContext::updateConfiguration);
         ApplyConfig annotation = AppliesMultipleConfigsWithOwnDefault.class.getAnnotation(ApplyConfig.class);
-        assertEquals(21, ((ServiceRanking) context.constructComponentPropertyType(annotation)).value());
-        assertEquals(21, ((ServiceRanking) context.constructComponentPropertyType(annotation, "")).value());
-        assertEquals(42, ((ServiceRanking) context.constructComponentPropertyType(annotation, "ranking.is.42")).value());
-        assertEquals(10, ((ServiceRanking) context.constructComponentPropertyType(annotation, "new-pid")).value());
-        assertEquals(55, ((ServiceRanking) context.constructComponentPropertyType(annotation, AppliesMultipleConfigsWithOwnDefault.class.getName())).value());
+        assertEquals(21,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation)).value());
+        assertEquals(21,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "")).value());
+        assertEquals(42,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "ranking.is.42")).value());
+        assertEquals(10,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "new-pid")).value());
+        assertEquals(55,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation,
+                        AppliesMultipleConfigsWithOwnDefault.class.getName())).value());
     }
 
     @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
@@ -309,14 +309,21 @@ public class ConfigTypeContextImplTest {
     @Test
     public void testApplyConfigToTypeMultiplePidsWithOwnDefaultComponent() {
         ConfigAnnotationUtil.findUpdateConfigAnnotations(AppliesMultipleConfigsWithOwnDefaultComponent.class)
-                .forEachOrdered(context::updateConfiguration);
+                .forEachOrdered(configTypeContext::updateConfiguration);
         ApplyConfig annotation = AppliesMultipleConfigsWithOwnDefaultComponent.class.getAnnotation(ApplyConfig.class);
-        assertEquals(55, ((ServiceRanking) context.constructComponentPropertyType(annotation)).value());
-        assertEquals(55, ((ServiceRanking) context.constructComponentPropertyType(annotation, "")).value());
-        assertEquals(21, ((ServiceRanking) context.constructComponentPropertyType(annotation, "ranking.is.21")).value());
-        assertEquals(42, ((ServiceRanking) context.constructComponentPropertyType(annotation, "ranking.is.42")).value());
-        assertEquals(10, ((ServiceRanking) context.constructComponentPropertyType(annotation, "new-pid")).value());
-        assertEquals(55, ((ServiceRanking) context.constructComponentPropertyType(annotation, AppliesMultipleConfigsWithOwnDefaultComponent.class.getName())).value());
+        assertEquals(55,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation)).value());
+        assertEquals(55,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "")).value());
+        assertEquals(21,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "ranking.is.21")).value());
+        assertEquals(42,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "ranking.is.42")).value());
+        assertEquals(10,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation, "new-pid")).value());
+        assertEquals(55,
+                ((ServiceRanking) configTypeContext.constructComponentPropertyType(annotation,
+                        AppliesMultipleConfigsWithOwnDefaultComponent.class.getName())).value());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -384,7 +391,7 @@ public class ConfigTypeContextImplTest {
     @Test
     public void testApplyConfigToInterface() {
         ApplyConfig configAnnotation = ConfiguredWithInterface.class.getAnnotation(ApplyConfig.class);
-        Object reified = context.constructComponentPropertyType(configAnnotation);
+        Object reified = configTypeContext.constructComponentPropertyType(configAnnotation);
         assertTrue(reified instanceof AnInterface);
         AnInterface serviceRanking = (AnInterface) reified;
         assertEquals(42, serviceRanking.service_ranking());
@@ -393,11 +400,11 @@ public class ConfigTypeContextImplTest {
     @Test
     public void testNewTypedConfig() {
         ApplyConfig configAnnotation = Configured.class.getAnnotation(ApplyConfig.class);
-        TypedConfig<?> typedConfig = AnnotationTypedConfig.newTypedConfig(context, configAnnotation);
+        TypedConfig<?> typedConfig = configTypeContext.newTypedConfig(configAnnotation);
         assertTrue(typedConfig.getConfig() instanceof ServiceRanking);
         ServiceRanking serviceRanking = (ServiceRanking) typedConfig.getConfig();
         assertEquals(42, serviceRanking.value());
-        TypedConfig<?> typedConfigFromResult = AnnotationTypedConfig.newTypedConfig(context, serviceRanking);
+        TypedConfig<?> typedConfigFromResult = configTypeContext.newTypedConfig(serviceRanking);
         assertTrue(typedConfigFromResult.getConfig() instanceof ServiceRanking);
         ServiceRanking serviceRanking2 = (ServiceRanking) typedConfigFromResult.getConfig();
         assertEquals(42, serviceRanking2.value());
