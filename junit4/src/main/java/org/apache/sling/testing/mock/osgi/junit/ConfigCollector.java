@@ -18,6 +18,16 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
+import org.jetbrains.annotations.NotNull;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,21 +37,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
-import org.jetbrains.annotations.NotNull;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
 /**
  * A {@link org.junit.rules.TestRule} that collects runtime-retained component property type annotations and
- * {@link ConfigType} annotations from the current test method
- * and test class.
+ * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations from the current test method and
+ * test class. This rule is also responsible for discovering {@link org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig}
+ * annotations and installing them into the provided {@link OsgiContextImpl}'s
+ * ConfigurationAdmin service.
  */
 public class ConfigCollector implements TestRule, ConfigCollection {
     private final ConfigTypeContext configTypeContext;
@@ -52,10 +53,10 @@ public class ConfigCollector implements TestRule, ConfigCollection {
     /**
      * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
      * classes. Specify a non-empty applyPid value to override the
-     * {@link ConfigType#pid()} attributes of any collected
-     * {@link ConfigType} annotations.
+     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#pid()} attributes of any collected
+     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations.
      *
-     * @param osgiContext a osgi context
+     * @param osgiContext an osgi context
      * @param configType  one desired config type
      * @param configTypes additional desired config types
      */
@@ -68,10 +69,10 @@ public class ConfigCollector implements TestRule, ConfigCollection {
     /**
      * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
      * classes. Specify a non-empty applyPid value to override the
-     * {@link ConfigType#pid()} attributes of
-     * any collected {@link ConfigType} annotations.
+     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#pid()} attributes of any collected
+     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations.
      *
-     * @param osgiContext a osgi context
+     * @param osgiContext an osgi context
      * @param applyPid    specify a non-empty configuration pid
      * @param configType  one desired config type
      * @param configTypes additional desired config types

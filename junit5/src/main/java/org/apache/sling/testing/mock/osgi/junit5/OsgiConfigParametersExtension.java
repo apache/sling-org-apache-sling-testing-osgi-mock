@@ -40,23 +40,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Provides a lightweight alternative to {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl#registerInjectActivateService(Class, Object...)}
- * which relies on exported SCR xml files, for constructing configured instances of OSGi service components under test. This is not a
- * replacement for fully testing OCD metatype annotations through the SCR machinery, but it is useful for unit
- * testing when the internal config annotations are accessible to the test class and all the constructor depedencies
- * would be mocked anyway.
- * <p>
- * For this to work for your annotation type, you must specify {@code @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)}
- * on the type, or use {@link ConfigType} to declare that your
- * config type is supported as a test parameter, as well as to specify a list of config properties to map to the type's attributes.
+ * An {@link org.junit.jupiter.api.extension.Extension} which uses JUnit5 context reflection to discover OSGi
+ * Config Type Annotations present on test methods and classes, and then injects them as test parameters. For this to
+ * work for your config type annotation, you must specify {@code @Retention(RetentionPolicy.RUNTIME)} on the desired
+ * config type annotation class, or use {@link ConfigType} to declare that your config type is supported as a test
+ * parameter. This extension is also responsible for discovering {@link UpdateConfig} annotations and installing them
+ * into the {@link OsgiContextImpl}'s ConfigurationAdmin service.
  */
 public class OsgiConfigParametersExtension implements ParameterResolver, BeforeEachCallback {
 
     /**
-     * Gets or creates the {@link OsgiContextImpl} for the provided extension context.
+     * Gets or creates the {@link ConfigTypeContext} for the provided extension context.
      *
      * @param extensionContext the extension context
-     * @return the {@link OsgiContextImpl}
+     * @return the {@link ConfigTypeContext}
      */
     private ConfigTypeContext getConfigTypeContext(@NotNull ExtensionContext extensionContext) {
         return new ConfigTypeContext(OsgiConfigParametersStore.getOrCreateOsgiContext(extensionContext,
