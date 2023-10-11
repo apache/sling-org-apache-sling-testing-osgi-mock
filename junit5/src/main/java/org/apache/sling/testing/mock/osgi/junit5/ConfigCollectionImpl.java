@@ -20,7 +20,7 @@ package org.apache.sling.testing.mock.osgi.junit5;
 
 
 import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
+import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;

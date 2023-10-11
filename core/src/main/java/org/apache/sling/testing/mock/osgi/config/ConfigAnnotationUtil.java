@@ -16,8 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.testing.mock.osgi.config.annotations;
+package org.apache.sling.testing.mock.osgi.config;
 
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfigs;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;

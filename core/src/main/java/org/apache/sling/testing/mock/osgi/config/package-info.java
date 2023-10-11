@@ -16,5 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/**
+ * OSGi Config Type Parameters core implementation.
+ */
 @org.osgi.annotation.versioning.Version("1.0.0")
 package org.apache.sling.testing.mock.osgi.config;

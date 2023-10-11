@@ -16,5 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+/**
+ * Annotations and interfaces intended to be referenced in end-user test classes for parameter and config resolution.
+ */
 @org.osgi.annotation.versioning.Version("1.0.0")
 package org.apache.sling.testing.mock.osgi.config.annotations;
