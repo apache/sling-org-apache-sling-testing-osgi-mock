@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -30,8 +29,8 @@ import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.MockEventAdmin;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser;
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -259,30 +258,10 @@ public class OsgiContextImpl {
      * @param annotation an {@link UpdateConfig} annotation
      */
     public final void updateConfiguration(@NotNull final UpdateConfig annotation) {
-        ConfigAnnotationUtil.getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
+        ConfigTypeContext.getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
             final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
-            updatePropertiesForConfigPid(updated, pid, this.getService(ConfigurationAdmin.class));
+            ConfigTypeContext.updatePropertiesForConfigPid(updated, pid, this.getService(ConfigurationAdmin.class));
         });
-    }
-
-    /**
-     * Internal utility method to update a configuration with properties from the provided map.
-     * @param pid the configuration pid
-     * @param configurationAdmin a config admin service
-     * @param updatedProperties a map of properties to update the configuration
-     * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin}
-     */
-    static void updatePropertiesForConfigPid(@NotNull Map<String, Object> updatedProperties,
-                                             @NotNull String pid,
-                                             @Nullable ConfigurationAdmin configurationAdmin) {
-        if (configurationAdmin != null) {
-            try {
-                Configuration configuration = configurationAdmin.getConfiguration(pid);
-                configuration.update(MapUtil.toDictionary(updatedProperties));
-            } catch (IOException e) {
-                throw new IllegalStateException("Unable to read/write config for pid " + pid, e);
-            }
-        }
     }
 
     /**
@@ -310,30 +289,9 @@ public class OsgiContextImpl {
         final Map<String, Object> merged = new HashMap<>(
                 ComponentPropertyParser.parse(annotation.type(), annotation.property()));
         Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
-                .or(() -> ConfigAnnotationUtil.getConfigurationPid(annotation.pid(), annotation.component()))
-                .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
+                .or(() -> ConfigTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
+                .ifPresent(pid -> ConfigTypeContext.mergePropertiesFromConfigPid(merged, pid, this.getService(ConfigurationAdmin.class)));
         return Annotations.toObject(annotation.type(), merged, bundleContext().getBundle(), false);
-    }
-
-    /**
-     * Internal utility method to merge properties from the specified configuration into the provided map.
-     * @param pid the configuration pid
-     * @param configurationAdmin a config admin service
-     * @param mergedProperties a *mutable* map
-     * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin#getConfiguration(String)}
-     * @throws UnsupportedOperationException if an immutable map is passed
-     */
-    static void mergePropertiesFromConfigPid(@NotNull Map<String, Object> mergedProperties,
-                                             @NotNull String pid,
-                                             @Nullable ConfigurationAdmin configurationAdmin) {
-        if (configurationAdmin != null) {
-            try {
-                Configuration configuration = configurationAdmin.getConfiguration(pid);
-                Optional.ofNullable(MapUtil.toMap(configuration.getProperties())).ifPresent(mergedProperties::putAll);
-            } catch (IOException e) {
-                throw new IllegalStateException("Unable to read config for pid " + pid, e);
-            }
-        }
     }
 
 }

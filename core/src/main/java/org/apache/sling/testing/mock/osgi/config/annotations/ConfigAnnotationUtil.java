@@ -18,6 +18,8 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
@@ -26,9 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import org.jetbrains.annotations.NotNull;
-import org.osgi.service.component.annotations.Component;
 
 /**
  * Common functions for resolving OSGi config test parameters.
@@ -212,22 +211,4 @@ public final class ConfigAnnotationUtil {
         return configCollection.configStream(parameterConfigType).skip(skip).findFirst();
     }
 
-    /**
-     * Construct a configuration pid for use with {@link ConfigurationAdmin#getConfiguration(String)}. If {@code pid} is
-     * empty, return {@link Optional#empty()}. If {@code pid} is equal to {@link Component#NAME} ("$"), return
-     * {@code component.getName()}.
-     *
-     * @param pid an explicit pid name, "$", or the empty string
-     * @param component a class whose name to use when pid is "$"
-     * @return a useful configuration pid or none
-     */
-    public static Optional<String> getConfigurationPid(@NotNull final String pid, @NotNull final Class<?> component) {
-        if (pid.isEmpty()) {
-            return Optional.empty();
-        } else if (Component.NAME.equals(pid)) {
-            return Optional.of(component.getName());
-        } else {
-            return Optional.of(pid);
-        }
-    }
 }

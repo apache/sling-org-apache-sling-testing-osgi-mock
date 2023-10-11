@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
@@ -121,7 +122,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
                     .orElse(null);
             final OsgiContextImpl osgiContext = getOsgiContextImpl(extensionContext);
             String applyPid = Optional.ofNullable(configTypes)
-                    .flatMap(annotation -> ConfigAnnotationUtil.getConfigurationPid(annotation.pid(), annotation.component()))
+                    .flatMap(annotation -> ConfigTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
                     .orElse("");
             return ConfigCollectionImpl.collect(parameterContext, extensionContext,
                     osgiContext, checkConfigTypes(configTypes), applyPid);
