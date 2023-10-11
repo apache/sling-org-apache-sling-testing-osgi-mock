@@ -32,9 +32,9 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see <a href="https://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-component.property.types">Component Property Types</a>
  */
-@Repeatable(ApplyConfigs.class)
+@Repeatable(ConfigTypes.class)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ApplyConfig {
+public @interface ConfigType {
 
     /**
      * Required type to construct. This can be an annotation or an interface.

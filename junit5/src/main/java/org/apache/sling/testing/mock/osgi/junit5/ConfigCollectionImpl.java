@@ -57,17 +57,17 @@ final class ConfigCollectionImpl implements ConfigCollection {
 
     @Override
     public Stream<TypedConfig<?>> stream() {
-        return streamApplyConfigAnnotations().map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid));
+        return streamConfigTypeAnnotations().map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid));
     }
 
-    Stream<Annotation> streamApplyConfigAnnotations() {
+    Stream<Annotation> streamConfigTypeAnnotations() {
         return Stream.concat(
                 extensionContext.getElement().stream()
-                        .flatMap(element -> ConfigAnnotationUtil.findApplicableConfigAnnotations(element, configTypes)),
+                        .flatMap(element -> ConfigAnnotationUtil.findConfigTypeAnnotations(element, configTypes)),
                 extensionContext.getParent().stream()
                         .flatMap(parentContext -> ConfigCollectionImpl
                                 .collect(parameterContext, parentContext, configTypeContext, configTypes, applyPid)
-                                .streamApplyConfigAnnotations()));
+                                .streamConfigTypeAnnotations()));
     }
 
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,

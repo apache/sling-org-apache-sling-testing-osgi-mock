@@ -18,11 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
+import org.osgi.service.component.annotations.Component;
+
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import org.osgi.service.component.annotations.Component;
 
 /**
  * Define this annotation on a test class or method to use the {@link org.osgi.service.cm.ConfigurationAdmin} service
@@ -46,7 +46,7 @@ public @interface UpdateConfig {
     /**
      * When {@link #pid()} is set to the default value of {@link Component#NAME}, set this attribute to a class whose
      * name should be used instead. This can be more convenient when using {@link UpdateConfig} in combination with
-     * {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl#registerInjectActivateService(Object, Map)}.
+     * {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl#registerInjectActivateService(Class)}.
      *
      * @return the configurable component class
      */

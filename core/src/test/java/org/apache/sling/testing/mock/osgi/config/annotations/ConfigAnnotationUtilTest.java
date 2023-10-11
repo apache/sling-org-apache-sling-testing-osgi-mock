@@ -60,19 +60,19 @@ public class ConfigAnnotationUtilTest {
     }
 
     @UpdateConfig(pid = "first")
-    @ApplyConfig(type = ServiceRanking.class)
+    @ConfigType(type = ServiceRanking.class)
     @RuntimeRetained(property = "expected")
     @RuntimeRetainedNotIncluded
     @UpdateConfigs({
             @UpdateConfig(pid = "second"),
             @UpdateConfig(pid = "third")
     })
-    @ApplyConfigs({
-            @ApplyConfig(type = ServiceRanking.class),
-            @ApplyConfig(type = ServiceVendor.class),
-            @ApplyConfig(type = ApplyConfig.class),
-            @ApplyConfig(type = ApplyConfigs.class),
-            @ApplyConfig(type = NotSelected.class)
+    @ConfigTypes({
+            @ConfigType(type = ServiceRanking.class),
+            @ConfigType(type = ServiceVendor.class),
+            @ConfigType(type = ConfigType.class),
+            @ConfigType(type = ConfigTypes.class),
+            @ConfigType(type = NotSelected.class)
     })
     public static class Configured {
         // not used
@@ -80,49 +80,49 @@ public class ConfigAnnotationUtilTest {
 
     @Test
     public void findAnnotationsFromAnnotatedElement() {
-        List<Annotation> annotations = ConfigAnnotationUtil.findApplicableConfigAnnotations(Configured.class,
+        List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(Configured.class,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                ApplyConfig.class, ApplyConfigs.class, UpdateConfig.class, UpdateConfigs.class))
+                                ConfigType.class, ConfigTypes.class, UpdateConfig.class, UpdateConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
 
-        assertTrue(annotations.get(0) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).type());
+        assertTrue(annotations.get(0) instanceof ConfigType);
+        assertSame(ServiceRanking.class, ((ConfigType) annotations.get(0)).type());
 
         assertTrue(annotations.get(1) instanceof RuntimeRetained);
         assertEquals("expected", ((RuntimeRetained) annotations.get(1)).property());
 
-        assertTrue(annotations.get(2) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).type());
+        assertTrue(annotations.get(2) instanceof ConfigType);
+        assertSame(ServiceRanking.class, ((ConfigType) annotations.get(2)).type());
 
-        assertTrue(annotations.get(3) instanceof ApplyConfig);
-        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).type());
+        assertTrue(annotations.get(3) instanceof ConfigType);
+        assertSame(ServiceVendor.class, ((ConfigType) annotations.get(3)).type());
     }
 
     @Test
     public void findAnnotationsFromCollection() {
         List<Annotation> allAnnotations = Arrays.asList(Configured.class.getAnnotations());
-        List<Annotation> annotations = ConfigAnnotationUtil.findApplicableConfigAnnotations(allAnnotations,
+        List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(allAnnotations,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                ApplyConfig.class, ApplyConfigs.class, UpdateConfig.class, UpdateConfigs.class))
+                                ConfigType.class, ConfigTypes.class, UpdateConfig.class, UpdateConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
 
-        assertTrue(annotations.get(0) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(0)).type());
+        assertTrue(annotations.get(0) instanceof ConfigType);
+        assertSame(ServiceRanking.class, ((ConfigType) annotations.get(0)).type());
 
         assertTrue(annotations.get(1) instanceof RuntimeRetained);
         assertEquals("expected", ((RuntimeRetained) annotations.get(1)).property());
 
-        assertTrue(annotations.get(2) instanceof ApplyConfig);
-        assertSame(ServiceRanking.class, ((ApplyConfig) annotations.get(2)).type());
+        assertTrue(annotations.get(2) instanceof ConfigType);
+        assertSame(ServiceRanking.class, ((ConfigType) annotations.get(2)).type());
 
-        assertTrue(annotations.get(3) instanceof ApplyConfig);
-        assertSame(ServiceVendor.class, ((ApplyConfig) annotations.get(3)).type());
+        assertTrue(annotations.get(3) instanceof ConfigType);
+        assertSame(ServiceVendor.class, ((ConfigType) annotations.get(3)).type());
     }
 
     @Test

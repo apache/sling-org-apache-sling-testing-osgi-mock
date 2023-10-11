@@ -24,30 +24,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
-import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
@@ -60,10 +48,6 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.util.tracker.ServiceTracker;
 
 @SuppressWarnings("null")

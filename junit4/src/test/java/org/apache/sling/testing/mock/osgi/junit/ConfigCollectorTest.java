@@ -18,7 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertNull;
         "service.ranking:Integer=42",
         "service.vendor=Acme Software Foundation"
 })
-@ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=10")
+@ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=10")
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigCollectorTest {
 
@@ -52,7 +52,7 @@ public class ConfigCollectorTest {
     public ConfigCollector appliedConfigs = new ConfigCollector(osgiContext, "common-config",
             ServiceRanking.class, ServiceVendor.class);
 
-    @ApplyConfig(type = ServiceVendor.class)
+    @ConfigType(type = ServiceVendor.class)
     @Test
     public void testEvaluate() {
         assertEquals(1, justRankings.stream().count());

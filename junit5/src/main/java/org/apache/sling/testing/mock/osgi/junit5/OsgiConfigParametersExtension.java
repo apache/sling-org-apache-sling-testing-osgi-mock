@@ -18,16 +18,10 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +32,13 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Provides a lightweight alternative to {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl#registerInjectActivateService(Class, Object...)}
  * which relies on exported SCR xml files, for constructing configured instances of OSGi service components under test. This is not a
@@ -46,7 +47,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  * would be mocked anyway.
  * <p>
  * For this to work for your annotation type, you must specify {@code @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)}
- * on the type, or use {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig} to declare that your
+ * on the type, or use {@link ConfigType} to declare that your
  * config type is supported as a test parameter, as well as to specify a list of config properties to map to the type's attributes.
  */
 public class OsgiConfigParametersExtension implements ParameterResolver, BeforeEachCallback {
@@ -72,7 +73,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
                 .map(paramType -> ConfigCollectionImpl.collect(parameterContext, extensionContext,
                                 getConfigTypeContext(extensionContext),
                                 Collections.singleton(paramType))
-                        .streamApplyConfigAnnotations().findAny().isPresent())
+                        .streamConfigTypeAnnotations().findAny().isPresent())
                 .orElse(false);
     }
 

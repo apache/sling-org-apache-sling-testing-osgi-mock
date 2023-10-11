@@ -18,8 +18,8 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.junit.jupiter.api.Test;
@@ -34,20 +34,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "service.ranking:Integer=42",
         "service.vendor=Acme Software Foundation"
 })
-@ApplyConfig(type = ServiceVendor.class, property = "service.vendor=Apache Software Foundation")
+@ConfigType(type = ServiceVendor.class, property = "service.vendor=Apache Software Foundation")
 @ExtendWith(OsgiConfigParametersExtension.class)
 class ConfigCollectionImplTest {
 
     @SuppressWarnings("unchecked")
-    @ApplyConfig(type = ServiceRanking.class)
+    @ConfigType(type = ServiceRanking.class)
     @Test
     void collectConfigTypes(@CollectConfigTypes(ServiceRanking.class)
                             ConfigCollection configs) {
         assertTrue(configs.stream().map(TypedConfig::getType).anyMatch(ServiceRanking.class::isAssignableFrom));
-        assertTrue(configs.stream().map(TypedConfig::getType).noneMatch(ApplyConfig.class::isAssignableFrom));
+        assertTrue(configs.stream().map(TypedConfig::getType).noneMatch(ConfigType.class::isAssignableFrom));
     }
 
-    @ApplyConfig(type = ServiceRanking.class, property = "service.ranking:Integer=10")
+    @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=10")
     @Test
     void collectWithApplyPid(
             @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class})

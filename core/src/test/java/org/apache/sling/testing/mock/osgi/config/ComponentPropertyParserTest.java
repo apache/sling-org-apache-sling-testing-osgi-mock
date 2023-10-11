@@ -18,7 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfigs;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
@@ -234,7 +234,7 @@ public class ComponentPropertyParserTest {
         String abcValue() default "abcValue";
 
         // not allowed for component property types
-        ApplyConfigs annotationValue() default @ApplyConfigs;
+        ConfigTypes annotationValue() default @ConfigTypes;
 
         String xyzValue() default "xyzValue";
     }

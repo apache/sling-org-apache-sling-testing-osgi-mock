@@ -18,7 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.junit.After;
@@ -31,12 +31,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 
-@ApplyConfig(type = ServiceRanking.class)
+@ConfigType(type = ServiceRanking.class)
 public class AnnotationTypedConfigTest {
     private TestOsgiContext context;
     private ConfigTypeContext configTypeContext;
 
-    @ApplyConfig(type = ServiceVendor.class)
+    @ConfigType(type = ServiceVendor.class)
     static class TestOsgiContext extends OsgiContextImpl {
 
         void setUpContext() {
@@ -62,8 +62,8 @@ public class AnnotationTypedConfigTest {
 
     @Test
     public void testNewInstance() {
-        final ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
-        final ServiceRanking config = (ServiceRanking) configTypeContext.constructComponentPropertyType(annotation);
+        final ConfigType annotation = getClass().getAnnotation(ConfigType.class);
+        final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
         final TypedConfig<ServiceRanking> typedConfig = AnnotationTypedConfig.newInstance(ServiceRanking.class,
                 config, annotation);
         assertSame(ServiceRanking.class, typedConfig.getType());
@@ -73,8 +73,8 @@ public class AnnotationTypedConfigTest {
 
     @Test
     public void testNewInstanceUsingConfigAsAnnotation() {
-        final ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
-        final ServiceRanking config = (ServiceRanking) configTypeContext.constructComponentPropertyType(annotation);
+        final ConfigType annotation = getClass().getAnnotation(ConfigType.class);
+        final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
         final TypedConfig<ServiceRanking> typedConfig = AnnotationTypedConfig.newInstance(ServiceRanking.class,
                 config, config);
         assertSame(ServiceRanking.class, typedConfig.getType());
@@ -84,25 +84,25 @@ public class AnnotationTypedConfigTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testTypeCastMismatch() throws Exception {
-        ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
-        final ServiceRanking config = (ServiceRanking) configTypeContext.constructComponentPropertyType(annotation);
+        ConfigType annotation = getClass().getAnnotation(ConfigType.class);
+        final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
         AnnotationTypedConfig.newInstance(ServiceVendor.class, config, annotation);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTypeAnnotationMismatch() throws Exception {
-        ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
-        final ServiceRanking config = (ServiceRanking) configTypeContext.constructComponentPropertyType(annotation);
-        ApplyConfig wrongAnnotation = TestOsgiContext.class.getAnnotation(ApplyConfig.class);
+        ConfigType annotation = getClass().getAnnotation(ConfigType.class);
+        final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
+        ConfigType wrongAnnotation = TestOsgiContext.class.getAnnotation(ConfigType.class);
         AnnotationTypedConfig.newInstance(ServiceRanking.class, config, wrongAnnotation);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTypeAnnotationMismatchUsingConfigAsAnnotation() throws Exception {
-        ApplyConfig annotation = getClass().getAnnotation(ApplyConfig.class);
-        final ServiceRanking config = (ServiceRanking) configTypeContext.constructComponentPropertyType(annotation);
-        ApplyConfig wrongAnnotation = TestOsgiContext.class.getAnnotation(ApplyConfig.class);
-        final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructComponentPropertyType(wrongAnnotation);
+        ConfigType annotation = getClass().getAnnotation(ConfigType.class);
+        final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
+        ConfigType wrongAnnotation = TestOsgiContext.class.getAnnotation(ConfigType.class);
+        final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
         AnnotationTypedConfig.newInstance(ServiceRanking.class, config, wrongAnnotationConfig);
     }
 }

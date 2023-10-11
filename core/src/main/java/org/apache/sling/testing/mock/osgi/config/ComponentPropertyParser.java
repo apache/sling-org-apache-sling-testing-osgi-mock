@@ -18,6 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,15 +38,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * A few items borrowed from biz.aQute.bndlib DSAnnotationReader and PropertyDef to construct a Map for
  * felix scr Annotations.toObject() from a combination of an annotation type and an array of property key=value strings
- * provided via a {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig} annotation.
+ * provided via a {@link ConfigType} annotation.
  */
 public final class ComponentPropertyParser {
     private static final Logger log = LoggerFactory.getLogger(ComponentPropertyParser.class);

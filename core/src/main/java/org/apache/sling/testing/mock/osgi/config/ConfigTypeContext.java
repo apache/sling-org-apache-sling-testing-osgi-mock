@@ -20,7 +20,7 @@ package org.apache.sling.testing.mock.osgi.config;
 
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
@@ -37,8 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Performs configuration management and component property type construction for
- * {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig} and
+ * Performs configuration management and component property type construction for {@link ConfigType} and
  * {@link org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig} annotations.
  */
 public final class ConfigTypeContext {
@@ -57,8 +56,8 @@ public final class ConfigTypeContext {
      * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin}
      */
     static void updatePropertiesForConfigPid(@NotNull Map<String, Object> updatedProperties,
-                                                    @NotNull String pid,
-                                                    @Nullable ConfigurationAdmin configurationAdmin) {
+                                             @NotNull String pid,
+                                             @Nullable ConfigurationAdmin configurationAdmin) {
         if (configurationAdmin != null) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(pid);
@@ -79,8 +78,8 @@ public final class ConfigTypeContext {
      * @throws UnsupportedOperationException if an immutable map is passed
      */
     static void mergePropertiesFromConfigPid(@NotNull Map<String, Object> mergedProperties,
-                                                    @NotNull String pid,
-                                                    @Nullable ConfigurationAdmin configurationAdmin) {
+                                             @NotNull String pid,
+                                             @Nullable ConfigurationAdmin configurationAdmin) {
         if (configurationAdmin != null) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(pid);
@@ -124,27 +123,27 @@ public final class ConfigTypeContext {
 
     /**
      * Return a concrete instance of the OSGi config / Component Property Type represented by the given
-     * {@link ApplyConfig} annotation discovered via reflection.
+     * {@link ConfigType} annotation discovered via reflection.
      *
-     * @param annotation the {@link ApplyConfig}
-     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
+     * @param annotation the {@link ConfigType}
+     * @return a concrete instance of the type specified by the provided {@link ConfigType#type()}
      */
-    public Object constructComponentPropertyType(@NotNull final ApplyConfig annotation) {
-        return constructComponentPropertyType(annotation, null);
+    public Object constructConfigType(@NotNull final ConfigType annotation) {
+        return constructConfigType(annotation, null);
     }
 
     /**
      * Return a concrete instance of the OSGi config / Component Property Type represented by the given
-     * {@link ApplyConfig} annotation discovered via reflection.
+     * {@link ConfigType} annotation discovered via reflection.
      *
-     * @param annotation the {@link ApplyConfig}
-     * @param applyPid   if not empty, override any specified {@link ApplyConfig#pid()}.
-     * @return a concrete instance of the type specified by the provided {@link ApplyConfig#type()}
+     * @param annotation the {@link ConfigType}
+     * @param applyPid   if not empty, override any specified {@link ConfigType#pid()}.
+     * @return a concrete instance of the type specified by the provided {@link ConfigType#type()}
      */
-    public Object constructComponentPropertyType(@NotNull final ApplyConfig annotation,
-                                                       @Nullable final String applyPid) {
+    public Object constructConfigType(@NotNull final ConfigType annotation,
+                                      @Nullable final String applyPid) {
         if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
-            throw new IllegalArgumentException("illegal value for ApplyConfig " + annotation.type());
+            throw new IllegalArgumentException("illegal value for ConfigType type " + annotation.type());
         }
         final Map<String, Object> merged = new HashMap<>(
                 ComponentPropertyParser.parse(annotation.type(), annotation.property()));
@@ -157,7 +156,7 @@ public final class ConfigTypeContext {
     /**
      * Construct a collection typed config for the provided annotation.
      *
-     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
+     * @param annotation a component property type annotation or {@link ConfigType} annotation
      * @return a typed config
      */
     public TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation) {
@@ -167,17 +166,17 @@ public final class ConfigTypeContext {
     /**
      * Construct a collection typed config for the provided annotation.
      *
-     * @param annotation a component property type annotation or {@link ApplyConfig} annotation
-     * @param applyPid   optional non-empty configuration pid to apply if annotation is a {@link ApplyConfig}
+     * @param annotation a component property type annotation or {@link ConfigType} annotation
+     * @param applyPid   optional non-empty configuration pid to apply if annotation is a {@link ConfigType}
      * @return a typed config
      */
     public TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation,
                                          @Nullable final String applyPid) {
-        if (annotation instanceof ApplyConfig) {
-            ApplyConfig osgiConfig = (ApplyConfig) annotation;
+        if (annotation instanceof ConfigType) {
+            ConfigType osgiConfig = (ConfigType) annotation;
             Class<?> mappingType = osgiConfig.type();
             return AnnotationTypedConfig.newInstance(mappingType,
-                    mappingType.cast(constructComponentPropertyType(osgiConfig, applyPid)),
+                    mappingType.cast(constructConfigType(osgiConfig, applyPid)),
                     annotation);
         } else {
             return AnnotationTypedConfig.newInstance(annotation.annotationType(), annotation, annotation);

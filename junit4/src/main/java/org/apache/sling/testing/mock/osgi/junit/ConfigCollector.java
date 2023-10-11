@@ -27,10 +27,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
 import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +40,7 @@ import org.junit.runners.model.Statement;
 
 /**
  * A {@link org.junit.rules.TestRule} that collects runtime-retained component property type annotations and
- * {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig} annotations from the current test method
+ * {@link ConfigType} annotations from the current test method
  * and test class.
  */
 public class ConfigCollector implements TestRule, ConfigCollection {
@@ -52,8 +52,8 @@ public class ConfigCollector implements TestRule, ConfigCollection {
     /**
      * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
      * classes. Specify a non-empty applyPid value to override the
-     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig#pid()} attributes of any collected
-     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig} annotations.
+     * {@link ConfigType#pid()} attributes of any collected
+     * {@link ConfigType} annotations.
      *
      * @param osgiContext a osgi context
      * @param configType  one desired config type
@@ -68,8 +68,8 @@ public class ConfigCollector implements TestRule, ConfigCollection {
     /**
      * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
      * classes. Specify a non-empty applyPid value to override the
-     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig#pid()} attributes of
-     * any collected {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig} annotations.
+     * {@link ConfigType#pid()} attributes of
+     * any collected {@link ConfigType} annotations.
      *
      * @param osgiContext a osgi context
      * @param applyPid    specify a non-empty configuration pid
@@ -116,7 +116,7 @@ public class ConfigCollector implements TestRule, ConfigCollection {
                     .forEachOrdered(configTypeContext::updateConfiguration);
             final List<Annotation> applyAnnotations = new ArrayList<>(description.getAnnotations());
             applyAnnotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
-            entries = ConfigAnnotationUtil.findApplicableConfigAnnotations(applyAnnotations, ConfigCollector.this.configTypes)
+            entries = ConfigAnnotationUtil.findConfigTypeAnnotations(applyAnnotations, ConfigCollector.this.configTypes)
                     .map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid))
                     .collect(Collectors.toList());
         }
