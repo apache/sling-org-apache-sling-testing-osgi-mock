@@ -18,10 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
-import java.util.stream.Stream;
-
 import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
+
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Represents a single config entry within a {@link ConfigCollection}. It has its own config type, which may be a
@@ -52,7 +53,7 @@ public interface TypedConfig<T> {
     /**
      * Returns a 0- or 1-element entry stream (containing only this entry) depending on whether this entry's
      * {@link #getType()} matches the provided {@code otherType}. This is a convenience method for use in
-     * {@link Stream#flatMap(Function)} expressions on the containing {@link ConfigCollection#stream()}.
+     * {@link java.util.stream.Stream#flatMap(Function)} expressions on the containing {@link ConfigCollection#stream()}.
      *
      * @param otherType the other type to filter by
      * @param <U>       the other type

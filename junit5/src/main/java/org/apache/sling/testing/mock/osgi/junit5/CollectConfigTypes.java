@@ -24,34 +24,34 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate a {@link ConfigCollection} test parameter to specify the config types to collect within the given parameter
- * context.
+ * Annotate a {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection} test parameter to specify
+ * the config types to collect within the given parameter context.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface CollectConfigTypes {
 
     /**
-     * Specify the config types to collect. An empty value will result in an empty {@link ConfigCollection}.
+     * Specify the config types to collect. An empty value will result in an empty {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection}.
      *
      * @return the config types to collect
      */
     Class<?>[] value();
 
     /**
-     * Optionally specify a configuration pid to apply to any collected {@link ApplyConfig} annotations. A non-empty
-     * value will override any non-empty {@link ApplyConfig#pid()} attributes specified by those collected annotations.
-     * In order to specify the name of the {@link #component()} class as a configuration PID, set this value to
-     * {@link Component#NAME}. The default value is the empty string, which skips loading any configuration from
-     * ConfigurationAdmin.
+     * Optionally specify a configuration pid to apply to any collected {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig}
+     * annotations. A non-empty value will override any non-empty {@link org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig#pid()}
+     * attributes specified by those collected annotations. In order to specify the name of the {@link #component()}
+     * class as a configuration PID, set this value to {@link org.osgi.service.component.annotations.Component#NAME}.
+     * The default value is the empty string, which skips loading any configuration from ConfigurationAdmin.
      *
      * @return a configuration pid, or an empty string
      */
     String pid() default "";
 
     /**
-     * When {@link #pid()} is set to {@link Component#NAME}, set this attribute to a class whose name should be used
-     * instead.
+     * When {@link #pid()} is set to {@link org.osgi.service.component.annotations.Component#NAME}, set this attribute
+     * to a class whose name should be used instead.
      *
      * @return the configurable component class
      */

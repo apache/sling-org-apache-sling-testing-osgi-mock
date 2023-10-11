@@ -119,12 +119,12 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         if (ConfigCollection.class.isAssignableFrom(parameterContext.getParameter().getType())) {
             CollectConfigTypes configTypes = parameterContext.findAnnotation(CollectConfigTypes.class)
                     .orElse(null);
-            final ConfigTypeContext osgiContext = getConfigTypeContext(extensionContext);
+            final ConfigTypeContext configTypeContext = getConfigTypeContext(extensionContext);
             String applyPid = Optional.ofNullable(configTypes)
-                    .flatMap(annotation -> ConfigTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
+                    .flatMap(annotation -> configTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
                     .orElse("");
             return ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                    osgiContext, checkConfigTypes(configTypes), applyPid);
+                    configTypeContext, checkConfigTypes(configTypes), applyPid);
         }
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());
