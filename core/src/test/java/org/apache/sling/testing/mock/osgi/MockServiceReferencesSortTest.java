@@ -138,7 +138,7 @@ public class MockServiceReferencesSortTest {
 
     private ServiceRegistration<?> registerStringServiceWithRanking(String serviceValue, int index) {
         final Hashtable<String, Object> props = new Hashtable<String, Object>();
-        props.put(Constants.SERVICE_RANKING, new Integer(index));
+        props.put(Constants.SERVICE_RANKING, Integer.valueOf(index));
         return bundleContext.registerService(String.class, serviceValue, props);
     }
 
