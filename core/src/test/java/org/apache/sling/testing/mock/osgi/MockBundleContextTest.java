@@ -234,7 +234,7 @@ public class MockBundleContextTest {
         reg1.unregister();
 
         assertNull(bundleContext.getServiceReference(clazz1));
-        
+
         try {
             reg1.unregister();
             Assert.fail("Unregistering a non existant service should throw IllegalStateException");
@@ -295,7 +295,7 @@ public class MockBundleContextTest {
             System.getProperties().remove(propName);
         }
         assertNull(bundleContext.getProperty(propName));
-        
+
     }
 
     @Test
@@ -378,8 +378,8 @@ public class MockBundleContextTest {
     @Test
     public void testGetServicesWithNoClassOnlyFilter() throws InvalidSyntaxException {
         bundleContext.registerService(String.class, "service1", testProperty());
-        bundleContext.registerService(Long.class, new Long(2), testProperty());
-        bundleContext.registerService(Integer.class, new Integer(9), testProperty());
+        bundleContext.registerService(Long.class, Long.valueOf(2), testProperty());
+        bundleContext.registerService(Integer.class, Integer.valueOf(9), testProperty());
 
         // should return service with lowest service id = which was registered first
         ServiceReference[] refs = bundleContext.getServiceReferences((String)null, "(prop1=value1)");
