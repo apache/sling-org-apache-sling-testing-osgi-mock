@@ -18,10 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
-import org.jetbrains.annotations.NotNull;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.component.annotations.Component;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
@@ -30,6 +26,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.NotNull;
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Common functions for resolving OSGi config test parameters.
