@@ -18,10 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
-import org.osgi.service.component.annotations.Component;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

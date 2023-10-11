@@ -18,17 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
-import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.ApplyConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
-import org.jetbrains.annotations.NotNull;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +26,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.sling.testing.mock.osgi.config.AnnotationTypedConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigAnnotationUtil;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
+import org.jetbrains.annotations.NotNull;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 
 /**
  * A {@link org.junit.rules.TestRule} that collects runtime-retained component property type annotations and
