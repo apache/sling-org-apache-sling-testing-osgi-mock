@@ -58,4 +58,16 @@ public interface ConfigCollection {
         return stream().flatMap(entry -> entry.configStream(configType));
     }
 
+    /**
+     * Return the first available config of type configType, or throw if none are available.
+     *
+     * @param configType the desired configType
+     * @param <T>        the config type
+     * @return the first available config value
+     * @throws java.util.NoSuchElementException if no matching config is available
+     */
+    default <T> T firstConfig(@NotNull Class<T> configType) {
+        return configStream(configType).findFirst().orElseThrow();
+    }
+
 }

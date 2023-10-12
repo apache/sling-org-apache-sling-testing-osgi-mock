@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Executable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -42,7 +43,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
@@ -195,6 +198,30 @@ public class ConfigAnnotationUtilTest {
 
         assertArrayEquals(type1Values.toArray(new ParameterType1[0]),
                 ConfigAnnotationUtil.resolveParameterToArray(configCollection, ParameterType1.class));
+    }
+
+    @Test
+    public void resolveFirstParameter() {
+        List<ParameterType1> type1Values = List.of(
+                newMockType1Value("one"),
+                newMockType1Value("two"),
+                newMockType1Value("three"));
+        ConfigCollection configCollection = mock(ConfigCollection.class);
+        doAnswer(call -> type1Values.stream()).when(configCollection).configStream(ParameterType1.class);
+        doCallRealMethod().when(configCollection).firstConfig(any(Class.class));
+        assertEquals(type1Values.get(0), configCollection.firstConfig(ParameterType1.class));
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void resolveFirstParameterAbsent() {
+        List<ParameterType1> type1Values = List.of(
+                newMockType1Value("one"),
+                newMockType1Value("two"),
+                newMockType1Value("three"));
+        ConfigCollection configCollection = mock(ConfigCollection.class);
+        doAnswer(call -> type1Values.stream()).when(configCollection).configStream(ParameterType1.class);
+        doCallRealMethod().when(configCollection).firstConfig(any(Class.class));
+        assertEquals(type1Values.get(0), configCollection.firstConfig(ParameterType2.class));
     }
 
     public static class ExecutableClass {
