@@ -27,6 +27,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -42,25 +45,19 @@ public class ConfigCollectorTest {
     public OsgiContext osgiContext = new OsgiContextBuilder().build();
 
     @Rule
-    public ConfigCollector configCollector = new ConfigCollector(osgiContext,
-            ServiceRanking.class, ServiceVendor.class);
+    public ConfigCollector configCollector = new ConfigCollector(osgiContext);
 
     @Rule
-    public ConfigCollector justRankings = new ConfigCollector(osgiContext, ServiceRanking.class);
-
-    @Rule
-    public ConfigCollector appliedConfigs = new ConfigCollector(osgiContext, "common-config",
-            ServiceRanking.class, ServiceVendor.class);
+    public ConfigCollector appliedConfigs = new ConfigCollector(osgiContext, "common-config");
 
     @ConfigType(type = ServiceVendor.class, lenient = true)
     @Test
     public void testEvaluate() {
-        assertEquals(1, justRankings.stream().count());
-        assertEquals(2, configCollector.stream().count());
+        assertEquals(4, configCollector.stream().count());
         assertEquals(10, configCollector.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
         assertNull(configCollector.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
 
-        assertEquals(2, appliedConfigs.stream().count());
+        assertEquals(4, appliedConfigs.stream().count());
         assertEquals(42, appliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
         assertEquals("Acme Software Foundation",
                 appliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());

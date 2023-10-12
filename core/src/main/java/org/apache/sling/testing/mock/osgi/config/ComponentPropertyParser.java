@@ -123,18 +123,29 @@ public final class ComponentPropertyParser {
         }
     }
 
-    static boolean isSupportedPropertyMapValueType(Class<?> attributeType) {
-        if (attributeType.isArray()) {
-            return isSupportedPropertyMapValueType(attributeType.getComponentType());
-        }
+    static boolean isSupportedNonArraySimpleType(Class<?> attributeType) {
         return attributeType.isPrimitive() || BOXES.contains(attributeType) || attributeType.equals(String.class);
+    }
+
+    public static boolean isSupportedPropertyMapValueType(Class<?> attributeType) {
+        if (attributeType.isArray()) {
+            return isSupportedNonArraySimpleType(attributeType.getComponentType());
+        }
+        return isSupportedNonArraySimpleType(attributeType);
+    }
+
+    public static boolean isSupportedConfigTypeValueType(Class<?> attributeType) {
+        if (attributeType.isArray()) {
+            return isSupportedConfigTypeValueType(attributeType.getComponentType());
+        }
+        return isSupportedNonArraySimpleType(attributeType) || Class.class.equals(attributeType) || attributeType.isEnum();
     }
 
     static void getDefaults(@NotNull final Class<?> configType,
                             @NotNull final Map<String, Object> values) {
 
-        final AbstractPropertyDefaultsProvider defaultsProvider =
-                AbstractPropertyDefaultsProvider.getInstance(configType);
+        final AbstractConfigTypeReflectionProvider defaultsProvider =
+                AbstractConfigTypeReflectionProvider.getInstance(configType);
 
         Map<String, Object> defaults = defaultsProvider.getDefaults(values);
         if (!defaults.isEmpty()) {
@@ -224,8 +235,8 @@ public final class ComponentPropertyParser {
     public static void assertOneToOneMapping(@NotNull Class<?> configType, @NotNull String[] properties) {
         final Map<String, Object> props = parse(properties);
 
-        final AbstractPropertyDefaultsProvider defaultsProvider =
-                AbstractPropertyDefaultsProvider.getInstance(configType);
+        final AbstractConfigTypeReflectionProvider defaultsProvider =
+                AbstractConfigTypeReflectionProvider.getInstance(configType);
 
         Set<String> parsedProperties = new HashSet<>(props.keySet());
         Set<String> expectedProperties = Arrays.stream(defaultsProvider.getMethods())

@@ -34,7 +34,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Executable;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -55,19 +54,9 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface RuntimeRetainedNotIncluded {
-        String property() default "default";
-    }
-
-    public @interface NotSelected {
-        String property() default "default";
-    }
-
     @SetConfig(pid = "first")
     @ConfigType(type = ServiceRanking.class)
     @RuntimeRetained(property = "expected")
-    @RuntimeRetainedNotIncluded
     @SetConfigs({
             @SetConfig(pid = "second"),
             @SetConfig(pid = "third")
@@ -76,8 +65,7 @@ public class ConfigAnnotationUtilTest {
             @ConfigType(type = ServiceRanking.class),
             @ConfigType(type = ServiceVendor.class),
             @ConfigType(type = ConfigType.class),
-            @ConfigType(type = ConfigTypes.class),
-            @ConfigType(type = NotSelected.class)
+            @ConfigType(type = ConfigTypes.class)
     })
     public static class Configured {
         // not used
@@ -85,10 +73,7 @@ public class ConfigAnnotationUtilTest {
 
     @Test
     public void findAnnotationsFromAnnotatedElement() {
-        List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(Configured.class,
-                        Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
-                                // include our reserved annotations in the set to confirm that they are always excluded
-                                ConfigType.class, ConfigTypes.class, SetConfig.class, SetConfigs.class))
+        List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(Configured.class)
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
@@ -109,10 +94,7 @@ public class ConfigAnnotationUtilTest {
     @Test
     public void findAnnotationsFromCollection() {
         List<Annotation> allAnnotations = Arrays.asList(Configured.class.getAnnotations());
-        List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(allAnnotations,
-                        Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
-                                // include our reserved annotations in the set to confirm that they are always excluded
-                                ConfigType.class, ConfigTypes.class, SetConfig.class, SetConfigs.class))
+        List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(allAnnotations)
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());

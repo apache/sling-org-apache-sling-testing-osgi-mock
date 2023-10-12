@@ -23,30 +23,27 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
-final class SingleElementPropertyDefaultsProvider extends AbstractPropertyDefaultsProvider {
-    private static final String ATTR_VALUE = "value";
+import static org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser.isSupportedConfigTypeValueType;
+
+final class AnnotationReflectionProvider extends AbstractConfigTypeReflectionProvider {
     private final Class<? extends Annotation> annotationType;
     private final String prefix;
 
-    public SingleElementPropertyDefaultsProvider(@NotNull Class<? extends Annotation> annotationType,
-                                                 @Nullable String prefix) {
+    public AnnotationReflectionProvider(@NotNull Class<? extends Annotation> annotationType,
+                                        @Nullable String prefix) {
         this.annotationType = annotationType;
         this.prefix = prefix;
     }
 
     @Override
     public Method[] getMethods() {
-        return Stream.of(annotationType.getDeclaredMethods()).toArray(Method[]::new);
+        return annotationType.getDeclaredMethods();
     }
 
     @Override
-    public String getPropertyName(@NotNull final Method method) {
-        if (ATTR_VALUE.equals(method.getName())) {
-            return ComponentPropertyParser.singleElementAnnotationKey(annotationType.getSimpleName(), prefix);
-        } else {
-            throw new IllegalArgumentException("only the value method can be mapped to a config property: " + method.getName());
-        }
+    public String getPropertyName(@NotNull Method method) {
+        return ComponentPropertyParser.identifierToPropertyName(method.getName(), prefix);
     }
 }

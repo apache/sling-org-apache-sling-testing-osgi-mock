@@ -191,26 +191,6 @@ class OsgiConfigParametersExtensionTest {
         assertEquals("propName value", withValue.propName());
     }
 
-    public @interface NestedAnnotationWithDefaults {
-        String abcValue() default "abcValue";
-
-        // not allowed for component property types
-        ConfigTypes annotationValue() default @ConfigTypes;
-
-        String xyzValue() default "xyzValue";
-    }
-
-    @ConfigType(type = NestedAnnotationWithDefaults.class, lenient = true)
-    @Test
-    void nestedAnnotation(NestedAnnotationWithDefaults defaults) {
-        // defaults should not be set for types with nested annotations
-        assertNull(defaults.abcValue());
-        assertNull(defaults.xyzValue());
-
-        // accessing a nested annotation type should throw
-        assertThrows(ComponentException.class, defaults::annotationValue);
-    }
-
     public @interface SingleElementString {
         String value();
     }

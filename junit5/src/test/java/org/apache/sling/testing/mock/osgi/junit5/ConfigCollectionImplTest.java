@@ -41,7 +41,7 @@ class ConfigCollectionImplTest {
     @SuppressWarnings("unchecked")
     @ConfigType(type = ServiceRanking.class, lenient = true)
     @Test
-    void collectConfigTypes(@CollectConfigTypes(ServiceRanking.class)
+    void collectConfigTypes(@CollectConfigTypes
                             ConfigCollection configs) {
         assertTrue(configs.stream().map(TypedConfig::getType).anyMatch(ServiceRanking.class::isAssignableFrom));
         assertTrue(configs.stream().map(TypedConfig::getType).noneMatch(ConfigType.class::isAssignableFrom));
@@ -50,17 +50,17 @@ class ConfigCollectionImplTest {
     @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=10")
     @Test
     void collectWithApplyPid(
-            @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class})
+            @CollectConfigTypes
             ConfigCollection unappliedConfigs,
-            @CollectConfigTypes(value = {ServiceRanking.class, ServiceVendor.class}, pid = "common-config")
+            @CollectConfigTypes(pid = "common-config")
             ConfigCollection appliedConfigs) {
-        assertEquals(2, unappliedConfigs.stream().count());
+        assertEquals(4, unappliedConfigs.stream().count()); // @Test and @ExtendWith
         assertEquals(10,
                 unappliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
         assertEquals("Apache Software Foundation",
                 unappliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
 
-        assertEquals(2, appliedConfigs.stream().count());
+        assertEquals(4, appliedConfigs.stream().count()); // @Test and @ExtendWith
         assertEquals(42,
                 appliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
         assertEquals("Acme Software Foundation",

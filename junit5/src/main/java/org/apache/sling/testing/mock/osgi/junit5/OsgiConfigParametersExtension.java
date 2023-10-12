@@ -68,9 +68,9 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         return ConfigCollection.class.isAssignableFrom(parameterType)
                 || ConfigAnnotationUtil.determineSupportedConfigType(parameterType)
                 .map(paramType -> ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                                getConfigTypeContext(extensionContext),
-                                Collections.singleton(paramType))
-                        .streamConfigTypeAnnotations().findAny().isPresent())
+                                getConfigTypeContext(extensionContext))
+                        .streamConfigTypeAnnotations().anyMatch(ConfigAnnotationUtil
+                                .configTypeAnnotationPredicate(paramType::equals)))
                 .orElse(false);
     }
 
@@ -82,12 +82,11 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         return parameterType;
     }
 
-    static Set<Class<?>> checkConfigTypes(@Nullable CollectConfigTypes configTypesAnnotation) throws ParameterResolutionException {
+    static void checkConfigTypes(@Nullable CollectConfigTypes configTypesAnnotation) throws ParameterResolutionException {
         if (configTypesAnnotation == null) {
             throw new ParameterResolutionException("cannot resolve parameter of type " +
                     ConfigCollection.class + " without a " + CollectConfigTypes.class + " annotation.");
         }
-        return Arrays.stream(configTypesAnnotation.value()).collect(Collectors.toSet());
     }
 
     static Object requireSingleParameterValue(@NotNull Class<?> parameterType, @Nullable Object resolvedValue) throws ParameterResolutionException {
@@ -120,14 +119,14 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
             final ConfigTypeContext configTypeContext = getConfigTypeContext(extensionContext);
             String applyPid = Optional.ofNullable(configTypes)
                     .flatMap(annotation -> configTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
-                    .orElse("");
+                    .orElse(null);
             return ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                    configTypeContext, checkConfigTypes(configTypes), applyPid);
+                    configTypeContext, applyPid);
         }
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());
         ConfigCollection configCollection = ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                getConfigTypeContext(extensionContext), Collections.singleton(parameterType));
+                getConfigTypeContext(extensionContext));
         if (isArray) {
             return ConfigAnnotationUtil.resolveParameterToArray(configCollection, parameterType);
         } else {

@@ -18,13 +18,14 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -34,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,44 +47,30 @@ import java.util.stream.Stream;
  */
 public class ConfigCollector implements TestRule, ConfigCollection {
     private final ConfigTypeContext configTypeContext;
-    private final Set<Class<?>> configTypes;
     private final String applyPid;
     private Context context = null;
 
     /**
-     * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
-     * classes. Specify a non-empty applyPid value to override the
-     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#pid()} attributes of any collected
-     * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations.
+     * Create a new instance around the provided {@link OsgiContextImpl}.
      *
      * @param osgiContext an osgi context
-     * @param configType  one desired config type
-     * @param configTypes additional desired config types
      */
-    public ConfigCollector(@NotNull final OsgiContextImpl osgiContext,
-                           @NotNull final Class<?> configType,
-                           @NotNull final Class<?>... configTypes) {
-        this(osgiContext, "", configType, configTypes);
+    public ConfigCollector(@NotNull final OsgiContextImpl osgiContext) {
+        this(osgiContext, null);
     }
 
     /**
-     * Create a new instance around the provided {@link OsgiContextImpl} and one or more allowed desired config type
-     * classes. Specify a non-empty applyPid value to override the
+     * Create a new instance around the provided {@link OsgiContextImpl}. Specify a non-null applyPid value to override the
      * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#pid()} attributes of any collected
      * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations.
      *
      * @param osgiContext an osgi context
      * @param applyPid    specify a non-empty configuration pid
-     * @param configType  one desired config type
-     * @param configTypes additional desired config types
      */
     public ConfigCollector(@NotNull final OsgiContextImpl osgiContext,
-                           @NotNull final String applyPid,
-                           @NotNull final Class<?> configType,
-                           @NotNull final Class<?>... configTypes) {
+                           @Nullable final String applyPid) {
         this.configTypeContext = new ConfigTypeContext(osgiContext);
         this.applyPid = applyPid;
-        this.configTypes = Stream.concat(Stream.of(configType), Arrays.stream(configTypes)).collect(Collectors.toSet());
     }
 
     @Override
@@ -118,7 +104,7 @@ public class ConfigCollector implements TestRule, ConfigCollection {
                     .forEachOrdered(configTypeContext::updateConfiguration);
             final List<Annotation> applyAnnotations = new ArrayList<>(description.getAnnotations());
             applyAnnotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
-            entries = ConfigAnnotationUtil.findConfigTypeAnnotations(applyAnnotations, ConfigCollector.this.configTypes)
+            entries = ConfigAnnotationUtil.findConfigTypeAnnotations(applyAnnotations)
                     .map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid))
                     .collect(Collectors.toList());
         }

@@ -19,6 +19,7 @@
 package org.apache.sling.testing.mock.osgi.junit5;
 
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
+import org.osgi.service.component.annotations.Component;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -34,13 +35,6 @@ import java.lang.annotation.Target;
 public @interface CollectConfigTypes {
 
     /**
-     * Specify the config types to collect. An empty value will result in an empty {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection}.
-     *
-     * @return the config types to collect
-     */
-    Class<?>[] value();
-
-    /**
      * Optionally specify a configuration pid to apply to any collected {@link ConfigType}
      * annotations. A non-empty value will override any non-empty {@link ConfigType#pid()}
      * attributes specified by those collected annotations. In order to specify the name of the {@link #component()}
@@ -49,7 +43,7 @@ public @interface CollectConfigTypes {
      *
      * @return a configuration pid, or an empty string
      */
-    String pid() default "";
+    String pid() default Component.NAME;
 
     /**
      * When {@link #pid()} is set to {@link org.osgi.service.component.annotations.Component#NAME}, set this attribute
@@ -57,5 +51,5 @@ public @interface CollectConfigTypes {
      *
      * @return the configurable component class
      */
-    Class<?> component() default Object.class;
+    Class<?> component() default Void.class;
 }

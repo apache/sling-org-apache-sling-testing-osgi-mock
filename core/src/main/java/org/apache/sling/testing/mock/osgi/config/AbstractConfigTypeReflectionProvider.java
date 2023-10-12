@@ -27,17 +27,20 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser.isSupportedConfigTypeValueType;
+
 /**
- * Base property defaults provider class.
+ * Base config type reflection provider class.
  */
 @ProviderType
-abstract class AbstractPropertyDefaultsProvider {
-    private static final Logger log = LoggerFactory.getLogger(AbstractPropertyDefaultsProvider.class);
+abstract class AbstractConfigTypeReflectionProvider {
+    private static final Logger log = LoggerFactory.getLogger(AbstractConfigTypeReflectionProvider.class);
 
     /**
      * Return the property defaults provider that is appropriate for the given annotation type.
@@ -45,22 +48,27 @@ abstract class AbstractPropertyDefaultsProvider {
      * @param configType the config type
      * @return a property defaults provider
      */
-    static AbstractPropertyDefaultsProvider getInstance(@NotNull final Class<?> configType) {
+    static AbstractConfigTypeReflectionProvider getInstance(@NotNull final Class<?> configType) {
         final String prefix = Annotations.getPrefix(configType);
         if (configType.isAnnotation()) {
             if (Annotations.isSingleElementAnnotation(configType)) {
-                return new SingleElementPropertyDefaultsProvider((Class<? extends Annotation>) configType, prefix);
+                return new SingleElementAnnotationReflectionProvider((Class<? extends Annotation>) configType, prefix);
             } else {
-                return new AttributePropertyDefaultsProvider((Class<? extends Annotation>) configType, prefix);
+                return new AnnotationReflectionProvider((Class<? extends Annotation>) configType, prefix);
             }
         } else {
-            return new InterfacePropertyDefaultsProvider(configType, prefix);
+            return new InterfaceReflectionProvider(configType, prefix);
         }
     }
 
     abstract Method[] getMethods();
 
     abstract String getPropertyName(@NotNull Method method);
+
+    boolean isValidConfigType() {
+        return Arrays.stream(getMethods()).allMatch(method ->
+                method.getParameterCount() == 0 && isSupportedConfigTypeValueType(method.getReturnType()));
+    };
 
     boolean addSingleDefault(@NotNull String propertyName,
                              @NotNull Object value,

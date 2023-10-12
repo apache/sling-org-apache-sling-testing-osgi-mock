@@ -40,18 +40,15 @@ final class ConfigCollectionImpl implements ConfigCollection {
     private final ParameterContext parameterContext;
     private final ExtensionContext extensionContext;
     private final ConfigTypeContext configTypeContext;
-    private final Set<Class<?>> configTypes;
     private final String applyPid;
 
     ConfigCollectionImpl(@NotNull ParameterContext parameterContext,
                          @NotNull ExtensionContext extensionContext,
                          @NotNull ConfigTypeContext configTypeContext,
-                         @NotNull Set<Class<?>> configTypes,
                          @Nullable String applyPid) {
         this.parameterContext = parameterContext;
         this.extensionContext = extensionContext;
         this.configTypeContext = configTypeContext;
-        this.configTypes = Set.copyOf(configTypes);
         this.applyPid = applyPid;
     }
 
@@ -63,25 +60,23 @@ final class ConfigCollectionImpl implements ConfigCollection {
     Stream<Annotation> streamConfigTypeAnnotations() {
         return Stream.concat(
                 extensionContext.getElement().stream()
-                        .flatMap(element -> ConfigAnnotationUtil.findConfigTypeAnnotations(element, configTypes)),
+                        .flatMap(ConfigAnnotationUtil::findConfigTypeAnnotations),
                 extensionContext.getParent().stream()
                         .flatMap(parentContext -> ConfigCollectionImpl
-                                .collect(parameterContext, parentContext, configTypeContext, configTypes, applyPid)
+                                .collect(parameterContext, parentContext, configTypeContext, applyPid)
                                 .streamConfigTypeAnnotations()));
     }
 
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
                                         @NotNull ExtensionContext extensionContext,
-                                        @NotNull ConfigTypeContext configTypeContext,
-                                        @NotNull Set<Class<?>> configTypes) {
-        return collect(parameterContext, extensionContext, configTypeContext, configTypes, "");
+                                        @NotNull ConfigTypeContext configTypeContext) {
+        return collect(parameterContext, extensionContext, configTypeContext, null);
     }
 
     static ConfigCollectionImpl collect(@NotNull ParameterContext parameterContext,
                                         @NotNull ExtensionContext extensionContext,
                                         @NotNull ConfigTypeContext configTypeContext,
-                                        @NotNull Set<Class<?>> configTypes,
                                         @Nullable String applyPid) {
-        return new ConfigCollectionImpl(parameterContext, extensionContext, configTypeContext, configTypes, applyPid);
+        return new ConfigCollectionImpl(parameterContext, extensionContext, configTypeContext, applyPid);
     }
 }

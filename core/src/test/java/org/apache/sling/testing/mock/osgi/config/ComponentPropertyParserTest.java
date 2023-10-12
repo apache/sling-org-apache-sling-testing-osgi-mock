@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
@@ -230,15 +229,6 @@ public class ComponentPropertyParserTest {
         }
     }
 
-    public @interface NestedAnnotationNoDefaults {
-        String abcValue() default "abcValue";
-
-        // not allowed for component property types
-        ConfigTypes annotationValue() default @ConfigTypes;
-
-        String xyzValue() default "xyzValue";
-    }
-
     public @interface PropertyEscaped {
         String prop__name() default "prop__name default";
 
@@ -272,8 +262,6 @@ public class ComponentPropertyParserTest {
     @Test
     public void testGetAnnotationDefaults() {
         Map<Class<? extends Annotation>, Map<String, Object>> expectations = Map.of(
-                NestedAnnotationNoDefaults.class,
-                Collections.emptyMap(),
                 PropertyEscaped.class,
                 Map.of(
                         "prop_name", new String[]{"prop__name default"},
@@ -469,8 +457,8 @@ public class ComponentPropertyParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSingleElementAnnotationPropertyDefaultsProvider() throws Exception {
-        SingleElementPropertyDefaultsProvider defaultsProvider =
-                new SingleElementPropertyDefaultsProvider(NotSingleElementAnnotation.class, null);
+        SingleElementAnnotationReflectionProvider defaultsProvider =
+                new SingleElementAnnotationReflectionProvider(NotSingleElementAnnotation.class, null);
         defaultsProvider.getPropertyName(NotSingleElementAnnotation.class.getMethod("anotherProperty"));
     }
 
