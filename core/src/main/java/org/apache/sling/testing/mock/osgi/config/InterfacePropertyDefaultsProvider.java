@@ -19,28 +19,33 @@
 package org.apache.sling.testing.mock.osgi.config;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Map;
 
-final class AttributePropertyDefaultsProvider extends AbstractPropertyDefaultsProvider {
-    private final Class<? extends Annotation> annotationType;
+final class InterfacePropertyDefaultsProvider extends AbstractPropertyDefaultsProvider {
+    private final Class<?> configType;
     private final String prefix;
 
-    public AttributePropertyDefaultsProvider(@NotNull Class<? extends Annotation> annotationType,
-                                             @Nullable String prefix) {
-        this.annotationType = annotationType;
+    public InterfacePropertyDefaultsProvider(@NotNull Class<?> configType, String prefix) {
+        this.configType = configType;
         this.prefix = prefix;
     }
 
     @Override
-    public Method[] getMethods() {
-        return annotationType.getDeclaredMethods();
+    Method[] getMethods() {
+        return configType.getMethods();
     }
 
     @Override
-    public String getPropertyName(@NotNull Method method) {
+    String getPropertyName(@NotNull Method method) {
         return ComponentPropertyParser.identifierToPropertyName(method.getName(), prefix);
+    }
+
+    @Override
+    Map<String, Object> getDefaults(@NotNull Map<String, Object> existingValues) {
+        // interfaces do not have default attribute values.
+        return Collections.emptyMap();
     }
 }

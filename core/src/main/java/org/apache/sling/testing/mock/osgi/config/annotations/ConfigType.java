@@ -67,4 +67,13 @@ public @interface ConfigType {
      * @return osgi component properties
      */
     String[] property() default {};
+
+    /**
+     * Set to true to throw a {@link org.apache.sling.testing.mock.osgi.config.ConfigTypeSelfTestFailure} on construction
+     * if there is not an exact one-to-one mapping between property names specified in {@link #property()} and the
+     * addressable attributes of {@link #type()}.
+     *
+     * @return true to perform the self test on construction
+     */
+    boolean selfTest() default false;
 }

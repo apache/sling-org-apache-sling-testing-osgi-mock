@@ -145,6 +145,9 @@ public final class ConfigTypeContext {
         if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
             throw new IllegalArgumentException("illegal value for ConfigType type " + annotation.type());
         }
+        if (annotation.selfTest()) {
+            ComponentPropertyParser.assertOneToOneMapping(annotation.type(), annotation.property());
+        }
         final Map<String, Object> merged = new HashMap<>(
                 ComponentPropertyParser.parse(annotation.type(), annotation.property()));
         Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())

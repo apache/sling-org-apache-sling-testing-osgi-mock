@@ -25,7 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -128,11 +131,11 @@ public final class ComponentPropertyParser {
         return attributeType.isPrimitive() || BOXES.contains(attributeType) || attributeType.equals(String.class);
     }
 
-    static void getAnnotationDefaults(@NotNull final Class<? extends Annotation> annotationType,
-                                      @NotNull final Map<String, Object> values) {
+    static void getDefaults(@NotNull final Class<?> configType,
+                            @NotNull final Map<String, Object> values) {
 
         final AbstractPropertyDefaultsProvider defaultsProvider =
-                AbstractPropertyDefaultsProvider.getInstance(annotationType);
+                AbstractPropertyDefaultsProvider.getInstance(configType);
 
         Map<String, Object> defaults = defaultsProvider.getDefaults(values);
         if (!defaults.isEmpty()) {
@@ -215,10 +218,30 @@ public final class ComponentPropertyParser {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> parse(@NotNull Class<?> configType, @NotNull String[] properties) {
         final Map<String, Object> returnProps = parse(properties);
-
-        if (configType.isAnnotation()) {
-            getAnnotationDefaults((Class<? extends Annotation>) configType, returnProps);
-        }
+        getDefaults(configType, returnProps);
         return returnProps;
+    }
+
+    public static void assertOneToOneMapping(@NotNull Class<?> configType, @NotNull String[] properties) {
+        final Map<String, Object> props = parse(properties);
+
+        final AbstractPropertyDefaultsProvider defaultsProvider =
+                AbstractPropertyDefaultsProvider.getInstance(configType);
+
+        Set<String> parsedProperties = new HashSet<>(props.keySet());
+        Set<String> expectedProperties = Arrays.stream(defaultsProvider.getMethods())
+                .map(defaultsProvider::getPropertyName).collect(Collectors.toSet());
+
+        List<String> missingExpected = new ArrayList<>(expectedProperties);
+        missingExpected.removeAll(parsedProperties);
+
+        List<String> unexpectedParsed = new ArrayList<>(parsedProperties);
+        unexpectedParsed.removeAll(expectedProperties);
+
+        if (!missingExpected.isEmpty() || !unexpectedParsed.isEmpty()) {
+            throw new ConfigTypeSelfTestFailure(
+                    String.format("Config type %s failed one-to-one mapping test (missing=%s unexpected=%s) with properties %s",
+                            configType, missingExpected, unexpectedParsed, parsedProperties));
+        }
     }
 }

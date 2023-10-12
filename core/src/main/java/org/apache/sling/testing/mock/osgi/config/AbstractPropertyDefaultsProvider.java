@@ -42,15 +42,19 @@ abstract class AbstractPropertyDefaultsProvider {
     /**
      * Return the property defaults provider that is appropriate for the given annotation type.
      *
-     * @param annotationType the annotation type
-     * @return a proeprty defaults provider
+     * @param configType the config type
+     * @return a property defaults provider
      */
-    static AbstractPropertyDefaultsProvider getInstance(@NotNull final Class<? extends Annotation> annotationType) {
-        final String prefix = Annotations.getPrefix(annotationType);
-        if (Annotations.isSingleElementAnnotation(annotationType)) {
-            return new SingleElementPropertyDefaultsProvider(annotationType, prefix);
+    static AbstractPropertyDefaultsProvider getInstance(@NotNull final Class<?> configType) {
+        final String prefix = Annotations.getPrefix(configType);
+        if (configType.isAnnotation()) {
+            if (Annotations.isSingleElementAnnotation(configType)) {
+                return new SingleElementPropertyDefaultsProvider((Class<? extends Annotation>) configType, prefix);
+            } else {
+                return new AttributePropertyDefaultsProvider((Class<? extends Annotation>) configType, prefix);
+            }
         } else {
-            return new AttributePropertyDefaultsProvider(annotationType, prefix);
+            return new InterfacePropertyDefaultsProvider(configType, prefix);
         }
     }
 

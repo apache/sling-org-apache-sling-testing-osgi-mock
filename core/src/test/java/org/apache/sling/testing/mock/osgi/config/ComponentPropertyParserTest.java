@@ -219,13 +219,13 @@ public class ComponentPropertyParserTest {
         for (Map.Entry<Class<? extends Annotation>, Map<String, Object>> entry : expectations.entrySet()) {
             final Map<String, Object> expected = entry.getValue();
             final Map<String, Object> actual = new HashMap<>();
-            ComponentPropertyParser.getAnnotationDefaults(entry.getKey(), actual);
+            ComponentPropertyParser.getDefaults(entry.getKey(), actual);
             assertMapDeepEquals(expected, actual);
             final Map<String, Object> expectedAllSet = expected.keySet().stream()
                     .collect(Collectors.toMap(Function.identity(), (key) -> new String[]{"im set"}));
             final Map<String, Object> actualAllSet = expected.keySet().stream()
                     .collect(Collectors.toMap(Function.identity(), (key) -> new String[]{"im set"}));
-            ComponentPropertyParser.getAnnotationDefaults(entry.getKey(), actualAllSet);
+            ComponentPropertyParser.getDefaults(entry.getKey(), actualAllSet);
             assertMapDeepEquals(expectedAllSet, actualAllSet);
         }
     }
@@ -237,10 +237,6 @@ public class ComponentPropertyParserTest {
         ConfigTypes annotationValue() default @ConfigTypes;
 
         String xyzValue() default "xyzValue";
-    }
-
-    public interface AnInterface {
-
     }
 
     public @interface PropertyEscaped {
@@ -396,7 +392,7 @@ public class ComponentPropertyParserTest {
     }
 
     @Test
-    public void testParseInterface() {
+    public void testParsePrimitives() {
         assertMapDeepEquals(Map.of(
                         "single.element.string.default",
                         new String[]{"defaultDefaults"},
@@ -427,6 +423,25 @@ public class ComponentPropertyParserTest {
                         "float.value:Float=11.0",
                         "double.value:Double=111.0"
                 }));
+    }
+
+    public interface AnInterface {
+        String PREFIX_ = "prefix-"; // this only works if the interface is also public
+
+        String anotherProperty();
+
+        String value();
+    }
+
+
+    @Test
+    public void testParseInterface() {
+        Map<String, Object> props = ComponentPropertyParser.parse(AnInterface.class, new String[]{
+                "prefix-value=a value",
+                "prefix-anotherProperty=another value"
+        });
+
+        assertEquals(Map.of("prefix-value", "a value", "prefix-anotherProperty", "another value"), props);
     }
 
     @Test

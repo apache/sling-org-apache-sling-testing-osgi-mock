@@ -409,4 +409,93 @@ public class ConfigTypeContextImplTest {
         assertEquals(42, serviceRanking2.value());
     }
 
+    @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=42", selfTest = true)
+    public static final class SelfTestSingleElementPass {
+
+    }
+
+    @Test
+    public void testSelfTestSingleElementPass() {
+        ConfigType configAnnotation = SelfTestSingleElementPass.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
+
+    @ConfigType(type = ServiceRanking.class, property = "service.vendor=Acme", selfTest = true)
+    public static final class SelfTestSingleElementFail {
+
+    }
+
+    @Test(expected = ConfigTypeSelfTestFailure.class)
+    public void testSelfTestSingleElementFail() {
+        ConfigType configAnnotation = SelfTestSingleElementFail.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
+
+    public @interface ServiceRankingAndVendor {
+        int service_ranking();
+
+        String service_vendor();
+    }
+
+    @ConfigType(type = ServiceRankingAndVendor.class, property = {
+            "service.ranking:Integer=42",
+            "service.vendor=Acme"
+    }, selfTest = true)
+    public static final class SelfTestAnnotationPass {
+
+    }
+
+    @Test
+    public void testSelfTestAnnotationPass() {
+        ConfigType configAnnotation = SelfTestAnnotationPass.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
+
+    @ConfigType(type = ServiceRankingAndVendor.class, property = {
+            "service_ranking:Integer=42",
+            "service_vendor=Acme"
+    }, selfTest = true)
+    public static final class SelfTestAnnotationFail {
+
+    }
+
+    @Test(expected = ConfigTypeSelfTestFailure.class)
+    public void testSelfTestAnnotationFail() {
+        ConfigType configAnnotation = SelfTestAnnotationFail.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
+
+    public interface IServiceRankingAndVendor {
+        int service_ranking();
+
+        String service_vendor();
+    }
+
+    @ConfigType(type = IServiceRankingAndVendor.class, property = {
+            "service.ranking:Integer=42",
+            "service.vendor=Acme"
+    }, selfTest = true)
+    public static final class SelfTestInterfacePass {
+
+    }
+
+    @Test
+    public void testSelfTestInterfacePass() {
+        ConfigType configAnnotation = SelfTestInterfacePass.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
+
+    @ConfigType(type = IServiceRankingAndVendor.class, property = {
+            "service_ranking:Integer=42",
+            "service_vendor=Acme"
+    }, selfTest = true)
+    public static final class SelfTestInterfaceFail {
+
+    }
+
+    @Test(expected = ConfigTypeSelfTestFailure.class)
+    public void testSelfTestInterfaceFail() {
+        ConfigType configAnnotation = SelfTestInterfaceFail.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
 }

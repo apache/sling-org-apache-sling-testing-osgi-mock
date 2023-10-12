@@ -38,7 +38,7 @@ final class SingleElementPropertyDefaultsProvider extends AbstractPropertyDefaul
 
     @Override
     public Method[] getMethods() {
-        return Stream.of(annotationType.getMethods()).toArray(Method[]::new);
+        return Stream.of(annotationType.getDeclaredMethods()).toArray(Method[]::new);
     }
 
     @Override
@@ -46,7 +46,7 @@ final class SingleElementPropertyDefaultsProvider extends AbstractPropertyDefaul
         if (ATTR_VALUE.equals(method.getName())) {
             return ComponentPropertyParser.singleElementAnnotationKey(annotationType.getSimpleName(), prefix);
         } else {
-            throw new IllegalArgumentException("only the value method can be mapped to a config property");
+            throw new IllegalArgumentException("only the value method can be mapped to a config property: " + method.getName());
         }
     }
 }
