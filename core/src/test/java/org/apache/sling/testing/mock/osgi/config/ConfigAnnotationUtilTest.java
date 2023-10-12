@@ -18,12 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfigs;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
@@ -65,13 +64,13 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
-    @UpdateConfig(pid = "first")
+    @SetConfig(pid = "first")
     @ConfigType(type = ServiceRanking.class)
     @RuntimeRetained(property = "expected")
     @RuntimeRetainedNotIncluded
-    @UpdateConfigs({
-            @UpdateConfig(pid = "second"),
-            @UpdateConfig(pid = "third")
+    @SetConfigs({
+            @SetConfig(pid = "second"),
+            @SetConfig(pid = "third")
     })
     @ConfigTypes({
             @ConfigType(type = ServiceRanking.class),
@@ -89,7 +88,7 @@ public class ConfigAnnotationUtilTest {
         List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(Configured.class,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                ConfigType.class, ConfigTypes.class, UpdateConfig.class, UpdateConfigs.class))
+                                ConfigType.class, ConfigTypes.class, SetConfig.class, SetConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
@@ -113,7 +112,7 @@ public class ConfigAnnotationUtilTest {
         List<Annotation> annotations = ConfigAnnotationUtil.findConfigTypeAnnotations(allAnnotations,
                         Set.of(ServiceRanking.class, ServiceVendor.class, RuntimeRetained.class,
                                 // include our reserved annotations in the set to confirm that they are always excluded
-                                ConfigType.class, ConfigTypes.class, UpdateConfig.class, UpdateConfigs.class))
+                                ConfigType.class, ConfigTypes.class, SetConfig.class, SetConfigs.class))
                 .collect(Collectors.toList());
 
         assertEquals(4, annotations.size());
@@ -133,7 +132,7 @@ public class ConfigAnnotationUtilTest {
 
     @Test
     public void findUpdateConfigsFromAnnotatedElement() {
-        List<UpdateConfig> annotations = ConfigAnnotationUtil.findUpdateConfigAnnotations(Configured.class)
+        List<SetConfig> annotations = ConfigAnnotationUtil.findUpdateConfigAnnotations(Configured.class)
                 .collect(Collectors.toList());
 
         assertEquals(3, annotations.size());
@@ -146,7 +145,7 @@ public class ConfigAnnotationUtilTest {
     @Test
     public void findUpdateConfigsFromCollection() {
         List<Annotation> allAnnotations = Arrays.asList(Configured.class.getAnnotations());
-        List<UpdateConfig> annotations = ConfigAnnotationUtil.findUpdateConfigAnnotations(allAnnotations)
+        List<SetConfig> annotations = ConfigAnnotationUtil.findUpdateConfigAnnotations(allAnnotations)
                 .collect(Collectors.toList());
 
         assertEquals(3, annotations.size());

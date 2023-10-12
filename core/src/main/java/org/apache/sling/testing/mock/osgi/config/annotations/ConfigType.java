@@ -18,6 +18,9 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeStrictnessViolation;
+import org.osgi.service.component.annotations.Component;
+
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -44,22 +47,22 @@ public @interface ConfigType {
     Class<?> type();
 
     /**
-     * Optionally specify a configuration pid to load, any defined properties of which will override annotation defaults
-     * and values specified by {@link #property()}. In order to specify the name of the {@link #component()} class as a
-     * configuration PID, set this value to {@link org.osgi.service.component.annotations.Component#NAME}. The default
-     * value is the empty string, which skips loading any configuration from ConfigurationAdmin.
+     * Specify a configuration pid to load, which will override matching values specified by {@link #property()}. The
+     * default value is {@link Component#NAME}, which is a special string ("$") that can be used to specify the name of
+     * the {@link #component()} class as a configuration PID.
      *
      * @return a configuration pid, or an empty string
      */
-    String pid() default "";
+    String pid() default Component.NAME;
 
     /**
      * When {@link #pid()} is set to {@link org.osgi.service.component.annotations.Component#NAME}, set this attribute
-     * to a class whose name should be used instead.
+     * to a class whose name should be used instead. The default value is {@link Void}, which has a special significance
+     * for this annotation indicating that no configuration should be loaded from ConfigurationAdmin.
      *
      * @return the configurable component class
      */
-    Class<?> component() default Object.class;
+    Class<?> component() default Void.class;
 
     /**
      * Treat like {@link org.osgi.service.component.annotations.Component#property()}.
@@ -69,11 +72,11 @@ public @interface ConfigType {
     String[] property() default {};
 
     /**
-     * Set to true to throw a {@link org.apache.sling.testing.mock.osgi.config.ConfigTypeSelfTestFailure} on construction
-     * if there is not an exact one-to-one mapping between property names specified in {@link #property()} and the
-     * addressable attributes of {@link #type()}.
+     * When set to false, throw a {@link ConfigTypeStrictnessViolation} on construction if there is not an exact
+     * one-to-one mapping between property names specified in {@link #property()} and the addressable attributes of
+     * {@link #type()}. Properties loaded from configuration are not considered by the strictness check.
      *
-     * @return true to perform the self test on construction
+     * @return false to enforce strictness, true to skip the check
      */
-    boolean selfTest() default false;
+    boolean lenient() default false;
 }

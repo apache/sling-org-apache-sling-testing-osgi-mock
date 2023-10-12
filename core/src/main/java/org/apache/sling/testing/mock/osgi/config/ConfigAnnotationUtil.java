@@ -21,8 +21,8 @@ package org.apache.sling.testing.mock.osgi.config;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfigs;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfigs;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  */
 public final class ConfigAnnotationUtil {
     private static final Set<Class<? extends Annotation>> EXCLUDE_FEATURE_ANNOTATIONS = Set.of(
-            ConfigTypes.class, ConfigType.class, UpdateConfigs.class, UpdateConfig.class);
+            ConfigTypes.class, ConfigType.class, SetConfigs.class, SetConfig.class);
 
     private ConfigAnnotationUtil() {
         // prevent instantiation
@@ -82,37 +82,37 @@ public final class ConfigAnnotationUtil {
     }
 
     /**
-     * Find {@link UpdateConfig} annotations on the given {@link AnnotatedElement}. If the {@link AnnotatedElement} has
-     * an {@link UpdateConfigs} annotation, its nested {@link UpdateConfig} annotations will be included as well.
+     * Find {@link SetConfig} annotations on the given {@link AnnotatedElement}. If the {@link AnnotatedElement} has
+     * an {@link SetConfigs} annotation, its nested {@link SetConfig} annotations will be included as well.
      *
      * @param element the annotated element
      * @return a stream of annotations
      */
-    public static Stream<UpdateConfig> findUpdateConfigAnnotations(@NotNull AnnotatedElement element) {
+    public static Stream<SetConfig> findUpdateConfigAnnotations(@NotNull AnnotatedElement element) {
         return Stream.of(element.getAnnotations())
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
-                .filter(annotation -> UpdateConfig.class.isAssignableFrom(annotation.annotationType()))
-                .map(UpdateConfig.class::cast);
+                .filter(annotation -> SetConfig.class.isAssignableFrom(annotation.annotationType()))
+                .map(SetConfig.class::cast);
     }
 
     /**
-     * Find {@link UpdateConfig} annotations in the given collection. If the collection has
-     * an {@link UpdateConfigs} annotation, its nested {@link UpdateConfig} annotations will be included as well.
+     * Find {@link SetConfig} annotations in the given collection. If the collection has
+     * an {@link SetConfigs} annotation, its nested {@link SetConfig} annotations will be included as well.
      *
      * @param annotations a collection of annotations
      * @return a stream of annotations
      */
-    public static Stream<UpdateConfig> findUpdateConfigAnnotations(@NotNull Collection<Annotation> annotations) {
+    public static Stream<SetConfig> findUpdateConfigAnnotations(@NotNull Collection<Annotation> annotations) {
         return annotations.stream()
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
-                .filter(annotation -> UpdateConfig.class.isAssignableFrom(annotation.annotationType()))
-                .map(UpdateConfig.class::cast);
+                .filter(annotation -> SetConfig.class.isAssignableFrom(annotation.annotationType()))
+                .map(SetConfig.class::cast);
     }
 
     /**
      * Utility function for use as a flatMap expression for annotation streams that expands an {@link ConfigTypes}
-     * annotation into a substream of {@link ConfigType} annotations, and an {@link UpdateConfigs} annotation into
-     * a substream of {@link UpdateConfig} annotations.
+     * annotation into a substream of {@link ConfigType} annotations, and an {@link SetConfigs} annotation into
+     * a substream of {@link SetConfig} annotations.
      *
      * @param annotation input annotation
      * @return the flattened stream of annotations
@@ -120,8 +120,8 @@ public final class ConfigAnnotationUtil {
     private static Stream<Annotation> flattenAnnotation(@NotNull Annotation annotation) {
         if (ConfigTypes.class.isAssignableFrom(annotation.annotationType())) {
             return Stream.of(((ConfigTypes) annotation).value());
-        } else if (UpdateConfigs.class.isAssignableFrom(annotation.annotationType())) {
-            return Stream.of(((UpdateConfigs) annotation).value());
+        } else if (SetConfigs.class.isAssignableFrom(annotation.annotationType())) {
+            return Stream.of(((SetConfigs) annotation).value());
         } else {
             return Stream.of(annotation);
         }

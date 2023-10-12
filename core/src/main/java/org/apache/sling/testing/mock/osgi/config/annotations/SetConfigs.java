@@ -16,15 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.sling.testing.mock.osgi.config;
+package org.apache.sling.testing.mock.osgi.config.annotations;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Specific exception type thrown when a {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType}
- * annotation is resolved which has {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#selfTest()}
- * set to {@code true}, which fails to meet the documented assertion rules.
+ * {@link java.lang.annotation.Repeatable} container annotation for {@link SetConfig}. This annotation is used
+ * either implicitly or explicitly to specify multiple {@link SetConfig} annotations on a single
+ * {@link java.lang.reflect.AnnotatedElement}.
  */
-public class ConfigTypeSelfTestFailure extends RuntimeException {
-    public ConfigTypeSelfTestFailure(String message) {
-        super(message);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface SetConfigs {
+
+    /**
+     * Return an array of nested {@link SetConfig} annotations.
+     *
+     * @return the array of config updates
+     */
+    SetConfig[] value() default {};
 }

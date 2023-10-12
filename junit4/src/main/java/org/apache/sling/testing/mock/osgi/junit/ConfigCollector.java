@@ -21,6 +21,7 @@ package org.apache.sling.testing.mock.osgi.junit;
 import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
 /**
  * A {@link org.junit.rules.TestRule} that collects runtime-retained component property type annotations and
  * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations from the current test method and
- * test class. This rule is also responsible for discovering {@link org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig}
+ * test class. This rule is also responsible for discovering {@link SetConfig}
  * annotations and installing them into the provided {@link OsgiContextImpl}'s
  * ConfigurationAdmin service.
  */

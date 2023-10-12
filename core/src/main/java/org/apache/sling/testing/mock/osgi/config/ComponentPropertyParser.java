@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -231,15 +230,17 @@ public final class ComponentPropertyParser {
         Set<String> parsedProperties = new HashSet<>(props.keySet());
         Set<String> expectedProperties = Arrays.stream(defaultsProvider.getMethods())
                 .map(defaultsProvider::getPropertyName).collect(Collectors.toSet());
+        Set<String> defaults = defaultsProvider.getDefaults(props).keySet();
 
         List<String> missingExpected = new ArrayList<>(expectedProperties);
         missingExpected.removeAll(parsedProperties);
+        missingExpected.removeAll(defaults);
 
         List<String> unexpectedParsed = new ArrayList<>(parsedProperties);
         unexpectedParsed.removeAll(expectedProperties);
 
         if (!missingExpected.isEmpty() || !unexpectedParsed.isEmpty()) {
-            throw new ConfigTypeSelfTestFailure(
+            throw new ConfigTypeStrictnessViolation(
                     String.format("Config type %s failed one-to-one mapping test (missing=%s unexpected=%s) with properties %s",
                             configType, missingExpected, unexpectedParsed, parsedProperties));
         }

@@ -21,7 +21,7 @@ package org.apache.sling.testing.mock.osgi.config;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.junit.After;
 import org.junit.Before;
@@ -178,7 +178,7 @@ public class ConfigTypeContextImplTest {
         assertTrue(props.isEmpty());
     }
 
-    @UpdateConfig(pid = "a pid", property = "service.ranking:Integer=42")
+    @SetConfig(pid = "a pid", property = "service.ranking:Integer=42")
     public static class UpdatesConfiguration {
 
     }
@@ -187,12 +187,12 @@ public class ConfigTypeContextImplTest {
     public void testUpdateConfiguration() throws IOException {
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration("a pid").getProperties());
-        UpdateConfig updateConfig = UpdatesConfiguration.class.getAnnotation(UpdateConfig.class);
-        configTypeContext.updateConfiguration(updateConfig);
+        SetConfig setConfig = UpdatesConfiguration.class.getAnnotation(SetConfig.class);
+        configTypeContext.updateConfiguration(setConfig);
         assertEquals(42, configAdmin.getConfiguration("a pid").getProperties().get("service.ranking"));
     }
 
-    @UpdateConfig(pid = "a pid", property = {
+    @SetConfig(pid = "a pid", property = {
             "service.ranking:Integer=42",
             "service.ranking:Integer=55"
     })
@@ -204,14 +204,14 @@ public class ConfigTypeContextImplTest {
     public void testUpdateConfigurationArray() throws IOException {
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration("a pid").getProperties());
-        UpdateConfig updateConfig = UpdatesConfigurationArray.class.getAnnotation(UpdateConfig.class);
-        configTypeContext.updateConfiguration(updateConfig);
+        SetConfig setConfig = UpdatesConfigurationArray.class.getAnnotation(SetConfig.class);
+        configTypeContext.updateConfiguration(setConfig);
         assertArrayEquals(new Integer[]{42, 55},
                 (Integer[]) configAdmin.getConfiguration("a pid").getProperties().get("service.ranking"));
     }
 
 
-    @UpdateConfig(pid = "", property = "service.ranking:Integer=42")
+    @SetConfig(pid = "", property = "service.ranking:Integer=42")
     public static class NoUpdatesConfiguration {
 
     }
@@ -220,12 +220,12 @@ public class ConfigTypeContextImplTest {
     public void testUpdateConfigurationEmptyPid() throws IOException {
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration("").getProperties());
-        UpdateConfig updateConfig = NoUpdatesConfiguration.class.getAnnotation(UpdateConfig.class);
-        configTypeContext.updateConfiguration(updateConfig);
+        SetConfig setConfig = NoUpdatesConfiguration.class.getAnnotation(SetConfig.class);
+        configTypeContext.updateConfiguration(setConfig);
         assertNull(configAdmin.getConfiguration("").getProperties());
     }
 
-    @UpdateConfig(component = UpdatesConfigurationByComponentName.class,
+    @SetConfig(component = UpdatesConfigurationByComponentName.class,
             property = "service.ranking:Integer=42")
     public static class UpdatesConfigurationByComponentName {
 
@@ -236,14 +236,14 @@ public class ConfigTypeContextImplTest {
         final String pid = UpdatesConfigurationByComponentName.class.getName();
         final ConfigurationAdmin configAdmin = context.getService(ConfigurationAdmin.class);
         assertNull(configAdmin.getConfiguration(pid).getProperties());
-        UpdateConfig updateConfig = UpdatesConfigurationByComponentName.class.getAnnotation(UpdateConfig.class);
-        configTypeContext.updateConfiguration(updateConfig);
+        SetConfig setConfig = UpdatesConfigurationByComponentName.class.getAnnotation(SetConfig.class);
+        configTypeContext.updateConfiguration(setConfig);
         assertEquals(42, configAdmin.getConfiguration(pid).getProperties().get("service.ranking"));
     }
 
-    @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
-    @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
-    @UpdateConfig(component = AppliesMultipleConfigs.class, property = "service.ranking:Integer=55")
+    @SetConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
+    @SetConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @SetConfig(component = AppliesMultipleConfigs.class, property = "service.ranking:Integer=55")
     @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=10")
     public static class AppliesMultipleConfigs {
 
@@ -269,9 +269,9 @@ public class ConfigTypeContextImplTest {
                         AppliesMultipleConfigs.class.getName())).value());
     }
 
-    @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
-    @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
-    @UpdateConfig(component = AppliesMultipleConfigsWithOwnDefault.class, property = "service.ranking:Integer=55")
+    @SetConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
+    @SetConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @SetConfig(component = AppliesMultipleConfigsWithOwnDefault.class, property = "service.ranking:Integer=55")
     @ConfigType(type = ServiceRanking.class, pid = "ranking.is.21",
             property = "service.ranking:Integer=10")
     public static class AppliesMultipleConfigsWithOwnDefault {
@@ -296,9 +296,9 @@ public class ConfigTypeContextImplTest {
                         AppliesMultipleConfigsWithOwnDefault.class.getName())).value());
     }
 
-    @UpdateConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
-    @UpdateConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
-    @UpdateConfig(component = AppliesMultipleConfigsWithOwnDefaultComponent.class, property = "service.ranking:Integer=55")
+    @SetConfig(pid = "ranking.is.21", property = "service.ranking:Integer=21")
+    @SetConfig(pid = "ranking.is.42", property = "service.ranking:Integer=42")
+    @SetConfig(component = AppliesMultipleConfigsWithOwnDefaultComponent.class, property = "service.ranking:Integer=55")
     @ConfigType(type = ServiceRanking.class, pid = Component.NAME, component = AppliesMultipleConfigsWithOwnDefaultComponent.class,
             property = "service.ranking:Integer=10")
     public static class AppliesMultipleConfigsWithOwnDefaultComponent {
@@ -409,7 +409,7 @@ public class ConfigTypeContextImplTest {
         assertEquals(42, serviceRanking2.value());
     }
 
-    @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=42", selfTest = true)
+    @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=42", lenient = true)
     public static final class SelfTestSingleElementPass {
 
     }
@@ -420,27 +420,38 @@ public class ConfigTypeContextImplTest {
         assertNotNull(configTypeContext.constructConfigType(configAnnotation));
     }
 
-    @ConfigType(type = ServiceRanking.class, property = "service.vendor=Acme", selfTest = true)
+    @ConfigType(type = ServiceRanking.class, property = "service.vendor=Acme")
     public static final class SelfTestSingleElementFail {
 
     }
 
-    @Test(expected = ConfigTypeSelfTestFailure.class)
+    @Test(expected = ConfigTypeStrictnessViolation.class)
     public void testSelfTestSingleElementFail() {
         ConfigType configAnnotation = SelfTestSingleElementFail.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
+
+    @ConfigType(type = ServiceRanking.class, property = "service.vendor=Acme", lenient = true)
+    public static final class SelfTestSingleElementLenient {
+
+    }
+
+    @Test
+    public void testSelfTestSingleElementLenient() {
+        ConfigType configAnnotation = SelfTestSingleElementLenient.class.getAnnotation(ConfigType.class);
         assertNotNull(configTypeContext.constructConfigType(configAnnotation));
     }
 
     public @interface ServiceRankingAndVendor {
         int service_ranking();
 
-        String service_vendor();
+        String service_vendor() default "";
     }
 
     @ConfigType(type = ServiceRankingAndVendor.class, property = {
             "service.ranking:Integer=42",
             "service.vendor=Acme"
-    }, selfTest = true)
+    })
     public static final class SelfTestAnnotationPass {
 
     }
@@ -453,15 +464,28 @@ public class ConfigTypeContextImplTest {
 
     @ConfigType(type = ServiceRankingAndVendor.class, property = {
             "service_ranking:Integer=42",
-            "service_vendor=Acme"
-    }, selfTest = true)
-    public static final class SelfTestAnnotationFail {
+            "service.vendor=Acme"
+    })
+    public static final class SelfTestAnnotationUnexpectedFail {
 
     }
 
-    @Test(expected = ConfigTypeSelfTestFailure.class)
-    public void testSelfTestAnnotationFail() {
-        ConfigType configAnnotation = SelfTestAnnotationFail.class.getAnnotation(ConfigType.class);
+    @Test(expected = ConfigTypeStrictnessViolation.class)
+    public void testSelfTestAnnotationUnexpected() {
+        ConfigType configAnnotation = SelfTestAnnotationUnexpectedFail.class.getAnnotation(ConfigType.class);
+        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+    }
+
+    @ConfigType(type = ServiceRankingAndVendor.class, property = {
+            "service_vendor=Acme"
+    })
+    public static final class SelfTestAnnotationMissingFail {
+
+    }
+
+    @Test(expected = ConfigTypeStrictnessViolation.class)
+    public void testSelfTestAnnotationMissing() {
+        ConfigType configAnnotation = SelfTestAnnotationMissingFail.class.getAnnotation(ConfigType.class);
         assertNotNull(configTypeContext.constructConfigType(configAnnotation));
     }
 
@@ -474,7 +498,7 @@ public class ConfigTypeContextImplTest {
     @ConfigType(type = IServiceRankingAndVendor.class, property = {
             "service.ranking:Integer=42",
             "service.vendor=Acme"
-    }, selfTest = true)
+    })
     public static final class SelfTestInterfacePass {
 
     }
@@ -488,12 +512,12 @@ public class ConfigTypeContextImplTest {
     @ConfigType(type = IServiceRankingAndVendor.class, property = {
             "service_ranking:Integer=42",
             "service_vendor=Acme"
-    }, selfTest = true)
+    })
     public static final class SelfTestInterfaceFail {
 
     }
 
-    @Test(expected = ConfigTypeSelfTestFailure.class)
+    @Test(expected = ConfigTypeStrictnessViolation.class)
     public void testSelfTestInterfaceFail() {
         ConfigType configAnnotation = SelfTestInterfaceFail.class.getAnnotation(ConfigType.class);
         assertNotNull(configTypeContext.constructConfigType(configAnnotation));

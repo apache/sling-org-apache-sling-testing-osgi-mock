@@ -22,7 +22,7 @@ import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +44,7 @@ import java.util.stream.Stream;
  * Config Type Annotations present on test methods and classes, and then injects them as test parameters. For this to
  * work for your config type annotation, you must specify {@code @Retention(RetentionPolicy.RUNTIME)} on the desired
  * config type annotation class, or use {@link ConfigType} to declare that your config type is supported as a test
- * parameter. This extension is also responsible for discovering {@link UpdateConfig} annotations and installing them
+ * parameter. This extension is also responsible for discovering {@link SetConfig} annotations and installing them
  * into the {@link OsgiContextImpl}'s ConfigurationAdmin service.
  */
 public class OsgiConfigParametersExtension implements ParameterResolver, BeforeEachCallback {
@@ -97,7 +97,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         return resolvedValue;
     }
 
-    static Stream<UpdateConfig> streamUpdateConfigAnnotations(ExtensionContext extensionContext) {
+    static Stream<SetConfig> streamUpdateConfigAnnotations(ExtensionContext extensionContext) {
         return Stream.concat(
                 extensionContext.getParent().stream()
                         .flatMap(OsgiConfigParametersExtension::streamUpdateConfigAnnotations),

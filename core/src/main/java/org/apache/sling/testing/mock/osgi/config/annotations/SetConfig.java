@@ -30,9 +30,9 @@ import java.lang.annotation.RetentionPolicy;
  * Updates should be applied top-down for each test context scope, from with the outermost (class-level) to the
  * innermost (method-level).
  */
-@Repeatable(UpdateConfigs.class)
+@Repeatable(SetConfigs.class)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UpdateConfig {
+public @interface SetConfig {
 
     /**
      * Specify a configuration pid to update with values specified by {@link #property()}. The default value is
@@ -45,12 +45,14 @@ public @interface UpdateConfig {
 
     /**
      * When {@link #pid()} is set to the default value of {@link Component#NAME}, set this attribute to a class whose
-     * name should be used instead. This can be more convenient when using {@link UpdateConfig} in combination with
-     * {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl#registerInjectActivateService(Class)}.
+     * name should be used instead. This can be more convenient when using {@link SetConfig} in combination with
+     * {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl#registerInjectActivateService(Class)}. The
+     * default value is {@link Void}, which seems perfectly fine for a pid, but which in practice is a  somewhat
+     * challenging class to construct for binding the configuration to.
      *
      * @return the configurable component class
      */
-    Class<?> component() default Object.class;
+    Class<?> component() default Void.class;
 
     /**
      * Parsed like {@link Component#property()}.

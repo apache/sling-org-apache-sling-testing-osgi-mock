@@ -154,8 +154,8 @@ class OsgiConfigParametersExtensionTest {
         String propName() default "propName default";
     }
 
-    @ConfigType(type = PrefixedPropertyEscaped.class)
-    @ConfigType(type = PrefixedPropertyEscaped.class, property = {
+    @ConfigType(type = PrefixedPropertyEscaped.class, lenient = true)
+    @ConfigType(type = PrefixedPropertyEscaped.class, lenient = true, property = {
             "prefix-prop_name=prop__name value",
             "prefix-prop.name=prop_name value",
             "prefix-prop-name=prop$_$name value",
@@ -200,7 +200,7 @@ class OsgiConfigParametersExtensionTest {
         String xyzValue() default "xyzValue";
     }
 
-    @ConfigType(type = NestedAnnotationWithDefaults.class)
+    @ConfigType(type = NestedAnnotationWithDefaults.class, lenient = true)
     @Test
     void nestedAnnotation(NestedAnnotationWithDefaults defaults) {
         // defaults should not be set for types with nested annotations
@@ -227,13 +227,13 @@ class OsgiConfigParametersExtensionTest {
         String[] value() default {"arrayDefaultDefaults"};
     }
 
-    @ConfigType(type = SingleElementString.class)
+    @ConfigType(type = SingleElementString.class, lenient = true)
     @ConfigType(type = SingleElementString.class,
             property = "single.element.string=withValue")
     @ConfigType(type = SingleElementStringDefault.class)
     @ConfigType(type = SingleElementStringDefault.class,
             property = "single.element.string.default=defaultWithValue")
-    @ConfigType(type = SingleElementStringArray.class)
+    @ConfigType(type = SingleElementStringArray.class, lenient = true)
     @ConfigType(type = SingleElementStringArray.class,
             property = {
                     "single.element.string.array=first arrayWithValue",
@@ -285,13 +285,13 @@ class OsgiConfigParametersExtensionTest {
         int[] value() default {-20};
     }
 
-    @ConfigType(type = SingleElementInteger.class)
+    @ConfigType(type = SingleElementInteger.class, lenient = true)
     @ConfigType(type = SingleElementInteger.class,
             property = "single.element.integer=1")
     @ConfigType(type = SingleElementIntegerDefault.class)
     @ConfigType(type = SingleElementIntegerDefault.class,
             property = "single.element.integer.default=2")
-    @ConfigType(type = SingleElementIntegerArray.class)
+    @ConfigType(type = SingleElementIntegerArray.class, lenient = true)
     @ConfigType(type = SingleElementIntegerArray.class,
             property = {
                     "single.element.integer.array=10",
@@ -342,13 +342,13 @@ class OsgiConfigParametersExtensionTest {
         Class<?>[] value() default {OsgiConfigParametersExtensionTest.class};
     }
 
-    @ConfigType(type = SingleElementClass.class)
+    @ConfigType(type = SingleElementClass.class, lenient = true)
     @ConfigType(type = SingleElementClass.class,
             property = "single.element.class=java.lang.Class")
     @ConfigType(type = SingleElementClassDefault.class)
     @ConfigType(type = SingleElementClassDefault.class,
             property = "single.element.class.default=java.lang.String")
-    @ConfigType(type = SingleElementClassArray.class)
+    @ConfigType(type = SingleElementClassArray.class, lenient = true)
     @ConfigType(type = SingleElementClassArray.class,
             property = {
                     "single.element.class.array=java.lang.Integer",
@@ -404,13 +404,13 @@ class OsgiConfigParametersExtensionTest {
         YesOrNo[] value() default {YesOrNo.YES};
     }
 
-    @ConfigType(type = SingleElementEnum.class)
+    @ConfigType(type = SingleElementEnum.class, lenient = true)
     @ConfigType(type = SingleElementEnum.class,
             property = "single.element.enum=NO")
     @ConfigType(type = SingleElementEnumDefault.class)
     @ConfigType(type = SingleElementEnumDefault.class,
             property = "single.element.enum.default=YES")
-    @ConfigType(type = SingleElementEnumArray.class)
+    @ConfigType(type = SingleElementEnumArray.class, lenient = true)
     @ConfigType(type = SingleElementEnumArray.class,
             property = {
                     "single.element.enum.array=YES",
@@ -452,7 +452,7 @@ class OsgiConfigParametersExtensionTest {
         String value();
     }
 
-    @ConfigType(type = PrefixedSingleElementAnnotation.class)
+    @ConfigType(type = PrefixedSingleElementAnnotation.class, lenient = true)
     @ConfigType(type = PrefixedSingleElementAnnotation.class, property = {
             "prefix-prefixed.single.element.annotation=crazy, right?"
     })
@@ -516,7 +516,7 @@ class OsgiConfigParametersExtensionTest {
         double doubleValue() default Double.MIN_VALUE;
     }
 
-    @ConfigType(type = PrimitiveProperties.class)
+    @ConfigType(type = PrimitiveProperties.class, lenient = true)
     @ConfigType(type = PrimitiveProperties.class, property = {
             "boolValue=true",
             "byteValue=10",

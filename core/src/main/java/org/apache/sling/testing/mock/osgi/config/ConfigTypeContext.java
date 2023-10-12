@@ -22,7 +22,7 @@ import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +38,7 @@ import java.util.Optional;
 
 /**
  * Performs configuration management and component property type construction for {@link ConfigType} and
- * {@link org.apache.sling.testing.mock.osgi.config.annotations.UpdateConfig} annotations.
+ * {@link SetConfig} annotations.
  */
 public final class ConfigTypeContext {
     private final OsgiContextImpl osgiContext;
@@ -91,19 +91,21 @@ public final class ConfigTypeContext {
     }
 
     /**
-     * Construct a configuration pid for use with {@link ConfigurationAdmin#getConfiguration(String)}.
-     * If {@code pid} is empty, return {@link Optional#empty()}. If {@code pid} is equal to {@link Component#NAME} ("$"),
-     * return {@code component.getName()}.
+     * Construct a configuration pid for use with {@link ConfigurationAdmin#getConfiguration(String)}. If {@code pid}
+     * is not empty and not equal to {@link Component#NAME} ("$"), return {@code pid}. Otherwise, return
+     * {@code component.getName()}, except in the case of {@link Void}, in which case return {@code empty()}.
      *
      * @param pid       an explicit pid name, "$", or the empty string
-     * @param component a class whose name to use when pid is "$"
+     * @param component a class whose name to use when pid is "$", unless {@link Void}
      * @return a useful configuration pid or none
      */
     public Optional<String> getConfigurationPid(@NotNull final String pid, @NotNull final Class<?> component) {
-        if (pid.isEmpty()) {
-            return Optional.empty();
-        } else if (Component.NAME.equals(pid)) {
-            return Optional.of(component.getName());
+        if (pid.isEmpty() || Component.NAME.equals(pid)) {
+            if (Void.class.equals(component)) {
+                return Optional.empty();
+            } else {
+                return Optional.of(component.getName());
+            }
         } else {
             return Optional.of(pid);
         }
@@ -112,9 +114,9 @@ public final class ConfigTypeContext {
     /**
      * Updates a {@link Configuration} from the provided annotation.
      *
-     * @param annotation an {@link UpdateConfig} annotation
+     * @param annotation an {@link SetConfig} annotation
      */
-    public void updateConfiguration(@NotNull final UpdateConfig annotation) {
+    public void updateConfiguration(@NotNull final SetConfig annotation) {
         getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
             final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
             updatePropertiesForConfigPid(updated, pid, osgiContext.getService(ConfigurationAdmin.class));
@@ -145,7 +147,7 @@ public final class ConfigTypeContext {
         if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
             throw new IllegalArgumentException("illegal value for ConfigType type " + annotation.type());
         }
-        if (annotation.selfTest()) {
+        if (!annotation.lenient()) {
             ComponentPropertyParser.assertOneToOneMapping(annotation.type(), annotation.property());
         }
         final Map<String, Object> merged = new HashMap<>(
