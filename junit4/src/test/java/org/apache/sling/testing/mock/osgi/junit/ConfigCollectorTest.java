@@ -18,17 +18,22 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
+import org.apache.sling.testing.mock.osgi.MapUtil;
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -37,6 +42,11 @@ import static org.junit.Assert.assertNull;
         "service.ranking:Integer=42",
         "service.vendor=Acme Software Foundation"
 })
+@SetConfig(component = Object.class, property = {
+        "service.ranking:Integer=55",
+        "service.vendor=Eclipse"
+})
+@AutoConfig(List.class)
 @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=10")
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigCollectorTest {
@@ -48,18 +58,45 @@ public class ConfigCollectorTest {
     public ConfigCollector configCollector = new ConfigCollector(osgiContext);
 
     @Rule
-    public ConfigCollector appliedConfigs = new ConfigCollector(osgiContext, "common-config");
+    public ConfigCollector commonConfigs = new ConfigCollector(osgiContext, "common-config");
+
+    @Rule
+    public ConfigCollector objectConfigs = new ConfigCollector(osgiContext, Object.class);
 
     @ConfigType(type = ServiceVendor.class, lenient = true)
     @Test
     public void testEvaluate() {
-        assertEquals(4, configCollector.stream().count());
-        assertEquals(10, configCollector.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
-        assertNull(configCollector.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
+        assertEquals(10, configCollector.firstConfig(ServiceRanking.class).value());
+        assertNull(configCollector.firstConfig(ServiceVendor.class).value());
 
-        assertEquals(4, appliedConfigs.stream().count());
-        assertEquals(42, appliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
+        assertEquals(42, commonConfigs.firstConfig(ServiceRanking.class).value());
         assertEquals("Acme Software Foundation",
-                appliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
+                commonConfigs.firstConfig(ServiceVendor.class).value());
+
+        assertEquals(55, objectConfigs.firstConfig(ServiceRanking.class).value());
+        assertEquals("Eclipse", objectConfigs.firstConfig(ServiceVendor.class).value());
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ListConfig {
+        int size();
+
+        boolean reverse();
+    }
+
+    @Test
+    @ListConfig(size = 10, reverse = false)
+    public void autoConfig1() throws Exception {
+        ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
+        assertEquals(Map.of("size", 10, "reverse", false, "service.pid", List.class.getName()),
+                MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
+    }
+
+    @Test
+    @ListConfig(size = 12, reverse = true)
+    public void autoConfig2() throws Exception {
+        ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
+        assertEquals(Map.of("size", 12, "reverse", true, "service.pid", List.class.getName()),
+                MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
     }
 }

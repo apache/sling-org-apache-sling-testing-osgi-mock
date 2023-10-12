@@ -20,6 +20,7 @@ package org.apache.sling.testing.mock.osgi.junit;
 
 import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
@@ -29,11 +30,14 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.osgi.service.component.annotations.Component;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,11 +45,13 @@ import java.util.stream.Stream;
 /**
  * A {@link org.junit.rules.TestRule} that collects runtime-retained component property type annotations and
  * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations from the current test method and
- * test class. This rule is also responsible for discovering {@link SetConfig}
- * annotations and installing them into the provided {@link OsgiContextImpl}'s
- * ConfigurationAdmin service.
+ * test class. This rule is also responsible for discovering {@link SetConfig} annotations and installing them into the
+ * provided {@link OsgiContextImpl}'s ConfigurationAdmin service.
  */
 public class ConfigCollector implements TestRule, ConfigCollection {
+    // JUnit's annotations are noise we can filter out right at the start.
+    private static final ConfigAnnotationUtil.ConfigTypePredicate DEFAULT_CONFIG_TYPE_PREDICATE =
+            (parent, configType) -> !configType.getPackageName().startsWith("org.junit");
     private final ConfigTypeContext configTypeContext;
     private final String applyPid;
     private Context context = null;
@@ -56,7 +62,28 @@ public class ConfigCollector implements TestRule, ConfigCollection {
      * @param osgiContext an osgi context
      */
     public ConfigCollector(@NotNull final OsgiContextImpl osgiContext) {
-        this(osgiContext, null);
+        this(osgiContext, null, null);
+    }
+
+    /**
+     * Create a new instance around the provided {@link OsgiContextImpl}.
+     *
+     * @param osgiContext an osgi context
+     * @param pid         the configuration pid to apply
+     */
+    public ConfigCollector(@NotNull final OsgiContextImpl osgiContext, @NotNull String pid) {
+        this(osgiContext, null, pid);
+    }
+
+    /**
+     * Create a new instance around the provided {@link OsgiContextImpl}.
+     *
+     * @param osgiContext an osgi context
+     * @param component   the component type to use as a configuration pid to apply
+     */
+    @SuppressWarnings("rawtypes")
+    public ConfigCollector(@NotNull final OsgiContextImpl osgiContext, @NotNull Class component) {
+        this(osgiContext, component, null);
     }
 
     /**
@@ -65,12 +92,18 @@ public class ConfigCollector implements TestRule, ConfigCollection {
      * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations.
      *
      * @param osgiContext an osgi context
-     * @param applyPid    specify a non-empty configuration pid
+     * @param component   an optional component type as configuration pid to apply
+     * @param pid         specify a non-empty configuration pid
      */
+    @SuppressWarnings("rawtypes")
     public ConfigCollector(@NotNull final OsgiContextImpl osgiContext,
-                           @Nullable final String applyPid) {
+                           @Nullable final Class component,
+                           @Nullable final String pid) {
         this.configTypeContext = new ConfigTypeContext(osgiContext);
-        this.applyPid = applyPid;
+        this.applyPid = configTypeContext.getConfigurationPid(
+                        Optional.ofNullable(pid).orElse(Component.NAME),
+                        Optional.ofNullable(component).orElse(Void.class))
+                .orElse(null);
     }
 
     @Override
@@ -93,20 +126,52 @@ public class ConfigCollector implements TestRule, ConfigCollection {
         };
     }
 
+    void processSetConfigAnnotations(@NotNull final Description description) {
+        final List<Annotation> updateAnnotations = new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
+        updateAnnotations.addAll(description.getAnnotations());
+        ConfigAnnotationUtil.findUpdateConfigAnnotations(updateAnnotations)
+                .forEachOrdered(configTypeContext::updateConfiguration);
+    }
+
+    void processAutoConfigAnnotation(@NotNull final Description description) {
+        final String autoPid = Optional.ofNullable(description.getAnnotation(AutoConfig.class))
+                .or(() -> Optional.ofNullable(description.getTestClass().getAnnotation(AutoConfig.class)))
+                .flatMap(autoConfig -> configTypeContext.getConfigurationPid(autoConfig.pid(), autoConfig.value()))
+                .orElse(null);
+
+        if (autoPid != null) {
+            final List<Annotation> unboundConfigTypes = new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
+            unboundConfigTypes.addAll(description.getAnnotations());
+            final Map<String, Object> accumulator = new HashMap<>();
+            ConfigAnnotationUtil.findConfigTypeAnnotations(unboundConfigTypes, DEFAULT_CONFIG_TYPE_PREDICATE.and(
+                            // only include explicit config annotations or @ConfigType without pids and exclude org.junit config types
+                            (annotation, configType) -> !configType.getPackageName().startsWith("org.junit")
+                                    && annotation.map(some -> configTypeContext.getConfigurationPid(some.pid(), some.component())).isEmpty())
+                            ::test)
+                    .map(annotation -> configTypeContext.newTypedConfig(annotation).asPropertyMap())
+                    .forEachOrdered(accumulator::putAll);
+            configTypeContext.updateConfiguration(autoPid, accumulator);
+        }
+    }
+
+    List<TypedConfig<?>> collectTypedConfigs(@NotNull final Description description) {
+        final List<Annotation> applyAnnotations = new ArrayList<>(description.getAnnotations());
+        applyAnnotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
+        return ConfigAnnotationUtil.findConfigTypeAnnotations(applyAnnotations, DEFAULT_CONFIG_TYPE_PREDICATE)
+                .map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid))
+                .collect(Collectors.toList());
+    }
+
     private class Context implements ConfigCollection {
 
         private final List<TypedConfig<?>> entries;
 
         public Context(@NotNull final Description description) {
-            final List<Annotation> updateAnnotations = new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
-            updateAnnotations.addAll(description.getAnnotations());
-            ConfigAnnotationUtil.findUpdateConfigAnnotations(updateAnnotations)
-                    .forEachOrdered(configTypeContext::updateConfiguration);
-            final List<Annotation> applyAnnotations = new ArrayList<>(description.getAnnotations());
-            applyAnnotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
-            entries = ConfigAnnotationUtil.findConfigTypeAnnotations(applyAnnotations)
-                    .map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid))
-                    .collect(Collectors.toList());
+            processSetConfigAnnotations(description);
+
+            processAutoConfigAnnotation(description);
+
+            entries = collectTypedConfigs(description);
         }
 
         @Override

@@ -18,8 +18,9 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
@@ -32,11 +33,10 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -48,6 +48,9 @@ import java.util.stream.Stream;
  * into the {@link OsgiContextImpl}'s ConfigurationAdmin service.
  */
 public class OsgiConfigParametersExtension implements ParameterResolver, BeforeEachCallback {
+    // JUnit's annotations are noise we can filter out right at the start.
+    private static final ConfigAnnotationUtil.ConfigTypePredicate DEFAULT_CONFIG_TYPE_PREDICATE =
+            (parent, configType) -> !configType.getPackageName().startsWith("org.junit");
 
     /**
      * Gets or creates the {@link ConfigTypeContext} for the provided extension context.
@@ -55,24 +58,11 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
      * @param extensionContext the extension context
      * @return the {@link ConfigTypeContext}
      */
-    private ConfigTypeContext getConfigTypeContext(@NotNull ExtensionContext extensionContext) {
+    private static ConfigTypeContext getConfigTypeContext(@NotNull ExtensionContext extensionContext) {
         return new ConfigTypeContext(OsgiConfigParametersStore.getOrCreateOsgiContext(extensionContext,
                 extensionContext.getRequiredTestInstance()));
     }
 
-    @Override
-    public boolean supportsParameter(ParameterContext parameterContext,
-                                     ExtensionContext extensionContext)
-            throws ParameterResolutionException {
-        final Class<?> parameterType = parameterContext.getParameter().getType();
-        return ConfigCollection.class.isAssignableFrom(parameterType)
-                || ConfigAnnotationUtil.determineSupportedConfigType(parameterType)
-                .map(paramType -> ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                                getConfigTypeContext(extensionContext))
-                        .streamConfigTypeAnnotations().anyMatch(ConfigAnnotationUtil
-                                .configTypeAnnotationPredicate(paramType::equals)))
-                .orElse(false);
-    }
 
     static Class<?> requireSupportedParameterType(@NotNull Class<?> type) throws ParameterResolutionException {
         final Class<?> parameterType = ConfigAnnotationUtil.determineSupportedConfigType(type).orElse(null);
@@ -80,13 +70,6 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
             throw new ParameterResolutionException("Not a supported parameter type " + type);
         }
         return parameterType;
-    }
-
-    static void checkConfigTypes(@Nullable CollectConfigTypes configTypesAnnotation) throws ParameterResolutionException {
-        if (configTypesAnnotation == null) {
-            throw new ParameterResolutionException("cannot resolve parameter of type " +
-                    ConfigCollection.class + " without a " + CollectConfigTypes.class + " annotation.");
-        }
     }
 
     static Object requireSingleParameterValue(@NotNull Class<?> parameterType, @Nullable Object resolvedValue) throws ParameterResolutionException {
@@ -104,10 +87,56 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
                         .flatMap(ConfigAnnotationUtil::findUpdateConfigAnnotations));
     }
 
+    static Stream<Annotation> streamUnboundTypedConfigAnnotations(@NotNull ConfigTypeContext context,
+                                                                  @NotNull ExtensionContext extensionContext) {
+        return Stream.concat(
+                extensionContext.getParent().stream()
+                        .flatMap(parentContext ->
+                                OsgiConfigParametersExtension.streamUnboundTypedConfigAnnotations(context, parentContext)),
+                extensionContext.getElement().stream()
+                        .flatMap(element -> ConfigAnnotationUtil.findConfigTypeAnnotations(element,
+                                DEFAULT_CONFIG_TYPE_PREDICATE.and((annotation, configType) -> annotation.map(some ->
+                                                // only include explicit config annotations or @ConfigType without pids
+                                                context.getConfigurationPid(some.pid(), some.component()))
+                                        .isEmpty())::test)));
+    }
+
+    Optional<AutoConfig> findAutoConfig(ExtensionContext extensionContext) {
+        return extensionContext.getElement().map(element -> element.getAnnotation(AutoConfig.class))
+                .or(() -> extensionContext.getParent().flatMap(this::findAutoConfig));
+    }
+
     @Override
     public void beforeEach(ExtensionContext extensionContext) throws Exception {
+        final ConfigTypeContext context = getConfigTypeContext(extensionContext);
         streamUpdateConfigAnnotations(extensionContext)
-                .forEachOrdered(getConfigTypeContext(extensionContext)::updateConfiguration);
+                .forEachOrdered(context::updateConfiguration);
+
+        findAutoConfig(extensionContext)
+                .flatMap(annotation -> getConfigTypeContext(extensionContext)
+                        .getConfigurationPid(annotation.pid(), annotation.value()))
+                .ifPresent(autoPid -> {
+                    final Map<String, Object> accumulator = new HashMap<>();
+                    streamUnboundTypedConfigAnnotations(context, extensionContext)
+                            .map(annotation -> context.newTypedConfig(annotation).asPropertyMap())
+                            .forEachOrdered(accumulator::putAll);
+                    context.updateConfiguration(autoPid, accumulator);
+                });
+    }
+
+    @Override
+    public boolean supportsParameter(ParameterContext parameterContext,
+                                     ExtensionContext extensionContext)
+            throws ParameterResolutionException {
+        final Class<?> parameterType = parameterContext.getParameter().getType();
+        return ConfigCollection.class.isAssignableFrom(parameterType)
+                || ConfigAnnotationUtil.determineSupportedConfigType(parameterType)
+                .map(paramType -> ConfigCollectionImpl.collect(extensionContext,
+                                getConfigTypeContext(extensionContext))
+                        .streamConfigTypeAnnotations().anyMatch(ConfigAnnotationUtil
+                                .configTypeAnnotationFilter(DEFAULT_CONFIG_TYPE_PREDICATE.and(
+                                        (ann, configType) -> paramType.equals(configType))::test)))
+                .orElse(false);
     }
 
     @Override
@@ -120,12 +149,11 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
             String applyPid = Optional.ofNullable(configTypes)
                     .flatMap(annotation -> configTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
                     .orElse(null);
-            return ConfigCollectionImpl.collect(parameterContext, extensionContext,
-                    configTypeContext, applyPid);
+            return ConfigCollectionImpl.collect(extensionContext, configTypeContext, DEFAULT_CONFIG_TYPE_PREDICATE, applyPid);
         }
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());
-        ConfigCollection configCollection = ConfigCollectionImpl.collect(parameterContext, extensionContext,
+        ConfigCollection configCollection = ConfigCollectionImpl.collect(extensionContext,
                 getConfigTypeContext(extensionContext));
         if (isArray) {
             return ConfigAnnotationUtil.resolveParameterToArray(configCollection, parameterType);

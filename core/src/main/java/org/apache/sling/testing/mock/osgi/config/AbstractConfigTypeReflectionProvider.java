@@ -20,12 +20,14 @@ package org.apache.sling.testing.mock.osgi.config;
 
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,6 +63,8 @@ abstract class AbstractConfigTypeReflectionProvider {
         }
     }
 
+    abstract Class<?> getConfigType();
+
     abstract Method[] getMethods();
 
     abstract String getPropertyName(@NotNull Method method);
@@ -68,45 +72,17 @@ abstract class AbstractConfigTypeReflectionProvider {
     boolean isValidConfigType() {
         return Arrays.stream(getMethods()).allMatch(method ->
                 method.getParameterCount() == 0 && isSupportedConfigTypeValueType(method.getReturnType()));
-    };
+    }
 
     boolean addSingleDefault(@NotNull String propertyName,
                              @NotNull Object value,
                              @NotNull Map<String, Object> defaults) {
-        final Class<?> valueType = value.getClass();
-        final Class<?> singleType = valueType.isArray() ? valueType.getComponentType() : valueType;
-
-        if (ComponentPropertyParser.isSupportedPropertyMapValueType(singleType)) {
-            if (valueType.isArray()) {
-                defaults.put(propertyName, value);
-            } else {
-                Object array = Array.newInstance(singleType, 1);
-                Array.set(array, 0, value);
-                defaults.put(propertyName, array);
-            }
-        } else if (singleType.equals(Class.class)) {
-            // Class.class is the same as Class<Class<?>>
-            // this must be transformed to a String representing the FQDN
-            if (valueType.isArray()) {
-                defaults.put(propertyName,
-                        Stream.of((Class<?>[]) value).map(Class::getName).toArray(String[]::new));
-            } else {
-                defaults.put(propertyName, new String[]{((Class<?>) value).getName()});
-            }
-        } else if (singleType.isEnum()) {
-            if (valueType.isArray()) {
-                defaults.put(propertyName,
-                        Stream.of((Enum<?>[]) value).map(Enum::name).toArray(String[]::new));
-            } else {
-                defaults.put(propertyName, new String[]{((Enum<?>) value).name()});
-            }
-        } else {
-            // every other type of nested member invalid, return false to indicate to caller that
-            // all default values for this annotation should be discarded.
-            log.warn("illegal member type {} for annotation type", singleType);
-            return false;
+        final Object propertyValue = attributeValueToPropertyValue(value);
+        if (propertyValue != null) {
+            defaults.put(propertyName, propertyValue);
+            return true;
         }
-        return true;
+        return false;
     }
 
     Map<String, Object> getDefaults(@NotNull Map<String, Object> existingValues) {
@@ -127,5 +103,60 @@ abstract class AbstractConfigTypeReflectionProvider {
             }
         }
         return defaults;
+    }
+
+    Map<String, Object> getPropertyMap(@NotNull Object config) {
+        if (getConfigType().isInstance(config)) {
+            Map<String, Object> properties = new HashMap<>();
+            for (Method method : getMethods()) {
+                try {
+                    Object value = method.invoke(config, null);
+                    if (value != null) {
+                        final Object propertyValue = attributeValueToPropertyValue(value);
+                        if (propertyValue != null) {
+                            properties.put(getPropertyName(method), value);
+                        }
+                    }
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    log.error("Failed to invoke config type " + getConfigType() + " method " + method + " on object " + config, e);
+                }
+            }
+            return properties;
+        }
+        return Collections.emptyMap();
+    }
+
+    @Nullable
+    Object attributeValueToPropertyValue(@NotNull Object value) {
+        final Class<?> valueType = value.getClass();
+        final Class<?> singleType = valueType.isArray() ? valueType.getComponentType() : valueType;
+        if (ComponentPropertyParser.isSupportedPropertyMapValueType(singleType)) {
+            if (valueType.isArray()) {
+                return value;
+            } else {
+                Object array = Array.newInstance(singleType, 1);
+                Array.set(array, 0, value);
+                return array;
+            }
+        } else if (singleType.equals(Class.class)) {
+            // Class.class is the same as Class<Class<?>>
+            // this must be transformed to a String representing the FQDN
+            if (valueType.isArray()) {
+                return Stream.of((Class<?>[]) value).map(Class::getName).toArray(String[]::new);
+            } else {
+                return new String[]{((Class<?>) value).getName()};
+            }
+        } else if (singleType.isEnum()) {
+            if (valueType.isArray()) {
+                return Stream.of((Enum<?>[]) value).map(Enum::name).toArray(String[]::new);
+            } else {
+                return new String[]{((Enum<?>) value).name()};
+            }
+        } else {
+            // every other type of nested member invalid, return false to indicate to caller that
+            // all default values for this annotation should be discarded.
+            log.warn("illegal member type {} for annotation type", singleType);
+            return null;
+        }
     }
 }

@@ -23,6 +23,7 @@ import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
 
 /**
  * Default implementation of {@link TypedConfig}.
@@ -49,6 +50,11 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
     @NotNull
     public T getConfig() {
         return config;
+    }
+
+    @Override
+    public Map<String, Object> asPropertyMap() {
+        return AbstractConfigTypeReflectionProvider.getInstance(getType()).getPropertyMap(getConfig());
     }
 
     /**

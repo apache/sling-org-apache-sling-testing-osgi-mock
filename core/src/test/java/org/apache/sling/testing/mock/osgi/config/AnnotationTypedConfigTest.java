@@ -27,8 +27,11 @@ import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 
 @ConfigType(type = ServiceRanking.class, lenient = true)
@@ -104,5 +107,15 @@ public class AnnotationTypedConfigTest {
         ConfigType wrongAnnotation = TestOsgiContext.class.getAnnotation(ConfigType.class);
         final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
         AnnotationTypedConfig.newInstance(ServiceRanking.class, config, wrongAnnotationConfig);
+    }
+
+    @Test
+    public void testPropertyMap() {
+        ConfigType annotation = getClass().getAnnotation(ConfigType.class);
+        assertEquals(Map.of("service.ranking", 0),
+                configTypeContext.newTypedConfig(annotation).asPropertyMap());
+        ConfigType wrongAnnotation = TestOsgiContext.class.getAnnotation(ConfigType.class);
+        final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
+        assertTrue(AbstractConfigTypeReflectionProvider.getInstance(annotation.type()).getPropertyMap(wrongAnnotationConfig).isEmpty());
     }
 }

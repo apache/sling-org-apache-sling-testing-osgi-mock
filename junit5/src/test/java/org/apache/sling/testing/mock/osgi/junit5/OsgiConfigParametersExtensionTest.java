@@ -18,18 +18,23 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -40,7 +45,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(OsgiConfigParametersExtension.class)
+@AutoConfig(List.class)
+@OsgiConfigParametersExtensionTest.ListConfig(size = -5, reverse = false)
+@ExtendWith({OsgiConfigParametersExtension.class})
 class OsgiConfigParametersExtensionTest {
 
     @Test
@@ -84,13 +91,6 @@ class OsgiConfigParametersExtensionTest {
         assertThrows(ParameterResolutionException.class,
                 () -> OsgiConfigParametersExtension.requireSingleParameterValue(String.class, 42));
     }
-
-    @Test
-    void checkConfigTypes() {
-        assertThrows(ParameterResolutionException.class,
-                () -> OsgiConfigParametersExtension.checkConfigTypes(null));
-    }
-
 
     public @interface PropertyEscaped {
         String prop__name() default "prop__name default";
@@ -426,6 +426,7 @@ class OsgiConfigParametersExtensionTest {
                 arrayDefaultWithValue.value());
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface PrefixedSingleElementAnnotation {
         String PREFIX_ = "prefix-"; // this only works if the @interface is also public
 
@@ -582,5 +583,61 @@ class OsgiConfigParametersExtensionTest {
         // this should execute and not throw
         assertNotNull(unsupported);
         assertEquals(1, serviceRanking.value());
+    }
+
+    @Test
+    // overrides the @AutoConfig(List.class) on the class
+    @AutoConfig(Object.class)
+    // this annotation's value cannot update ConfigurationAdmin in any way other than via @AutoConfig
+    @PrefixedSingleElementAnnotation("will it update")
+    // this PrefixedSingleElementAnnotation is initially bound to "other-pid", so it won't get picked up by @AutoConfig
+    @ConfigType(type = PrefixedSingleElementAnnotation.class, pid = "other-pid",
+            property = "prefix-prefixed.single.element.annotation=not updated")
+    void autoConfig(PrefixedSingleElementAnnotation retained,
+                    PrefixedSingleElementAnnotation constructed,
+                    @CollectConfigTypes(component = Object.class)
+                    ConfigCollection configs) {
+        assertEquals("will it update", retained.value());
+        assertEquals("not updated", constructed.value());
+        // the ConfigCollection applies the java.lang.Object configuration to all collected @ConfigTypes
+        assertTrue(configs.configStream(PrefixedSingleElementAnnotation.class)
+                .allMatch(config -> "will it update".equals(config.value())));
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ListConfig {
+        int size();
+
+        boolean reverse();
+    }
+
+    @Test
+    // @SetConfig is evaluated first
+    @SetConfig(component = Object.class, property = "size:Integer=42")
+    // this config type is bound and injected first, but sets no size of its own
+    @ConfigType(type = ListConfig.class, pid = "other-pid", lenient = true)
+    // this config type is not bound and does not read config from config admin, and is injected second
+    @ListConfig(size = 10, reverse = true)
+    void autoConfig1(@CollectConfigTypes(component = Object.class)
+                     ConfigCollection objectPidConfigs,
+                     @CollectConfigTypes(component = List.class)
+                     ConfigCollection listPidConfigs) {
+        assertEquals(42, objectPidConfigs.firstConfig(ListConfig.class).size());
+        assertEquals(10, listPidConfigs.firstConfig(ListConfig.class).size());
+    }
+
+    @Test
+    // @SetConfig is evaluated first
+    @SetConfig(component = Object.class, property = "size:Integer=33")
+    // this config type is bound and injected first, but sets no size of its own
+    @ConfigType(type = ListConfig.class, pid = "other-pid", lenient = true)
+    // this config type is not bound and does not read config from config admin, and is injected second
+    @ListConfig(size = 15, reverse = true)
+    void autoConfig2(@CollectConfigTypes(component = Object.class)
+                     ConfigCollection objectPidConfigs,
+                     @CollectConfigTypes(component = List.class)
+                     ConfigCollection listPidConfigs) {
+        assertEquals(33, objectPidConfigs.firstConfig(ListConfig.class).size());
+        assertEquals(15, listPidConfigs.firstConfig(ListConfig.class).size());
     }
 }

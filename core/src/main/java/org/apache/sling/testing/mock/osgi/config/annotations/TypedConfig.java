@@ -21,6 +21,7 @@ package org.apache.sling.testing.mock.osgi.config.annotations;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
 
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -49,6 +50,14 @@ public interface TypedConfig<T> {
      */
     @NotNull
     T getConfig();
+
+    /**
+     * Convert the config instance into a traditional config property map.
+     *
+     * @return a property map
+     */
+    @NotNull
+    Map<String, Object> asPropertyMap();
 
     /**
      * Returns a 0- or 1-element entry stream (containing only this entry) depending on whether this entry's
@@ -80,4 +89,5 @@ public interface TypedConfig<T> {
     default <U> Stream<U> configStream(@NotNull Class<U> otherType) {
         return stream(otherType).map(TypedConfig::getConfig);
     }
+
 }

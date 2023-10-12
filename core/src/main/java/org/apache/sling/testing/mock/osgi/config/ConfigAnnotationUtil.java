@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
@@ -32,6 +33,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -40,10 +42,20 @@ import java.util.stream.Stream;
  */
 public final class ConfigAnnotationUtil {
     private static final Set<Class<? extends Annotation>> EXCLUDE_FEATURE_ANNOTATIONS = Set.of(
-            ConfigTypes.class, ConfigType.class, SetConfigs.class, SetConfig.class);
+            ConfigTypes.class, ConfigType.class, SetConfigs.class, SetConfig.class, AutoConfig.class);
 
     private ConfigAnnotationUtil() {
         // prevent instantiation
+    }
+
+    /**
+     * Predicate for custom filtering of fully identified candidate annotations, accepting an {@link Optional} of
+     * {@link ConfigType} representing the parent annotation when present, and the {@link Class} of the effective config
+     * type.
+     */
+    @FunctionalInterface
+    public interface ConfigTypePredicate extends BiPredicate<Optional<ConfigType>, Class<?>> {
+        // this is a marker interface extending the appropriately parameterized builtin predicate type
     }
 
     /**
@@ -57,9 +69,25 @@ public final class ConfigAnnotationUtil {
      * @return a stream of annotations
      */
     public static Stream<Annotation> findConfigTypeAnnotations(@NotNull AnnotatedElement element) {
+        return findConfigTypeAnnotations(element, null);
+    }
+
+    /**
+     * Find candidate OSGi config annotations on the given {@link AnnotatedElement}, returning a stream of only those
+     * matching one of the desired config types. An annotation matches a config type only if the annotation's own type
+     * is the same as the config type, or if the annotation is a {@link ConfigType} and its
+     * {@link ConfigType#type()} is the same as the config type. If the {@link AnnotatedElement} has a
+     * {@link ConfigTypes} annotation, its nested {@link ConfigType} annotations will be considered as well.
+     *
+     * @param element             the annotated element
+     * @param configTypePredicate an optional subsequent predicate for the applicable configType
+     * @return a stream of annotations
+     */
+    public static Stream<Annotation> findConfigTypeAnnotations(@NotNull AnnotatedElement element,
+                                                               @Nullable ConfigTypePredicate configTypePredicate) {
         return Stream.of(element.getAnnotations())
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
-                .filter(ConfigAnnotationUtil.configTypeAnnotationPredicate(null));
+                .filter(ConfigAnnotationUtil.configTypeAnnotationFilter(configTypePredicate));
     }
 
     /**
@@ -73,9 +101,25 @@ public final class ConfigAnnotationUtil {
      * @return a stream of annotations
      */
     public static Stream<Annotation> findConfigTypeAnnotations(@NotNull Collection<Annotation> annotations) {
+        return findConfigTypeAnnotations(annotations, null);
+    }
+
+    /**
+     * Find candidate OSGi config annotations in the given collection, returning a stream of only those
+     * matching one of the desired config types. An annotation matches a config type only if the annotation's own type
+     * is the same as the config type, or if the annotation is a {@link ConfigType} and its
+     * {@link ConfigType#type()} is the same as the config type. If the collection has a
+     * {@link ConfigTypes} annotation, its nested {@link ConfigType} annotations will be considered as well.
+     *
+     * @param annotations         a collection of annotations
+     * @param configTypePredicate an optional subsequent predicate for the applicable configType
+     * @return a stream of annotations
+     */
+    public static Stream<Annotation> findConfigTypeAnnotations(@NotNull Collection<Annotation> annotations,
+                                                               @Nullable ConfigTypePredicate configTypePredicate) {
         return annotations.stream()
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
-                .filter(ConfigAnnotationUtil.configTypeAnnotationPredicate(null));
+                .filter(ConfigAnnotationUtil.configTypeAnnotationFilter(configTypePredicate));
     }
 
     /**
@@ -143,20 +187,21 @@ public final class ConfigAnnotationUtil {
      * @param configTypePredicate an optional subsequent predicate for the applicable configType
      * @return an annotation stream predicate
      */
-    public static Predicate<Annotation> configTypeAnnotationPredicate(@Nullable Predicate<Class<?>> configTypePredicate) {
-        final Predicate<Class<?>> andThenConfigType = Optional.ofNullable(configTypePredicate).orElse(configType -> true);
+    public static Predicate<Annotation> configTypeAnnotationFilter(@Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate) {
+        final ConfigTypePredicate andThen = Optional.ofNullable(configTypePredicate)
+                .orElse((parentAnnotation, configType) -> true);
         return annotation -> {
             if (ConfigType.class.isAssignableFrom(annotation.annotationType())) {
                 final Class<?> configType = ((ConfigType) annotation).type();
                 return isValidConfigType(configType)
                         && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded ->
                         excluded.isAssignableFrom(configType))
-                        && andThenConfigType.test(configType);
+                        && andThen.test(Optional.of((ConfigType) annotation), configType);
             } else {
                 return isValidConfigType(annotation.annotationType())
                         && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded ->
                         excluded.isAssignableFrom(annotation.annotationType()))
-                        && andThenConfigType.test(annotation.annotationType());
+                        && andThen.test(Optional.empty(), annotation.annotationType());
             }
         };
     }

@@ -37,6 +37,11 @@ final class SingleElementAnnotationReflectionProvider extends AbstractConfigType
     }
 
     @Override
+    Class<?> getConfigType() {
+        return annotationType;
+    }
+
+    @Override
     public Method[] getMethods() {
         return Stream.of(annotationType.getDeclaredMethods()).toArray(Method[]::new);
     }

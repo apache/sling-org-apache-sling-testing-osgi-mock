@@ -34,6 +34,11 @@ final class InterfaceReflectionProvider extends AbstractConfigTypeReflectionProv
     }
 
     @Override
+    Class<?> getConfigType() {
+        return configType;
+    }
+
+    @Override
     Method[] getMethods() {
         return configType.getMethods();
     }

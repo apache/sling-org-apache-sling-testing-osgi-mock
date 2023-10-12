@@ -21,8 +21,8 @@ package org.apache.sling.testing.mock.osgi.config;
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -99,7 +99,8 @@ public final class ConfigTypeContext {
      * @param component a class whose name to use when pid is "$", unless {@link Void}
      * @return a useful configuration pid or none
      */
-    public Optional<String> getConfigurationPid(@NotNull final String pid, @NotNull final Class<?> component) {
+    @SuppressWarnings("rawtypes")
+    public Optional<String> getConfigurationPid(@NotNull final String pid, @NotNull final Class component) {
         if (pid.isEmpty() || Component.NAME.equals(pid)) {
             if (Void.class.equals(component)) {
                 return Optional.empty();
@@ -121,6 +122,16 @@ public final class ConfigTypeContext {
             final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
             updatePropertiesForConfigPid(updated, pid, osgiContext.getService(ConfigurationAdmin.class));
         });
+    }
+
+    /**
+     * Updates a {@link Configuration} from the provided pid and property map.
+     *
+     * @param pid         the configuration pid
+     * @param propertyMap config properties to set on the configuration
+     */
+    public void updateConfiguration(@NotNull final String pid, @NotNull final Map<String, Object> propertyMap) {
+        updatePropertiesForConfigPid(propertyMap, pid, osgiContext.getService(ConfigurationAdmin.class));
     }
 
     /**

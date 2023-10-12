@@ -38,6 +38,11 @@ final class AnnotationReflectionProvider extends AbstractConfigTypeReflectionPro
     }
 
     @Override
+    Class<?> getConfigType() {
+        return annotationType;
+    }
+
+    @Override
     public Method[] getMethods() {
         return annotationType.getDeclaredMethods();
     }

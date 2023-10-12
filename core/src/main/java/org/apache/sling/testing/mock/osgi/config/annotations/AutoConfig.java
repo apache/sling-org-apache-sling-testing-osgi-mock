@@ -18,6 +18,8 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
+import org.osgi.service.component.annotations.Component;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -36,4 +38,11 @@ public @interface AutoConfig {
      * @return the component class
      */
     Class<?> value();
+
+    /**
+     * If the component pid is different from the provided {@link #value()}, set this attribute appropriately.
+     *
+     * @return the configuration pid if not the same as the component name
+     */
+    String pid() default Component.NAME;
 }

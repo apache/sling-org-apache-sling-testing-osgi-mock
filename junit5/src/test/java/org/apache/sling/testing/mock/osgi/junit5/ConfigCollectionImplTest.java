@@ -54,13 +54,13 @@ class ConfigCollectionImplTest {
             ConfigCollection unappliedConfigs,
             @CollectConfigTypes(pid = "common-config")
             ConfigCollection appliedConfigs) {
-        assertEquals(4, unappliedConfigs.stream().count()); // @Test and @ExtendWith
+        assertEquals(2, unappliedConfigs.stream().count()); // excludes @Test and @ExtendWith
         assertEquals(10,
                 unappliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
         assertEquals("Apache Software Foundation",
                 unappliedConfigs.configStream(ServiceVendor.class).findFirst().orElseThrow().value());
 
-        assertEquals(4, appliedConfigs.stream().count()); // @Test and @ExtendWith
+        assertEquals(2, appliedConfigs.stream().count()); // excludes @Test and @ExtendWith
         assertEquals(42,
                 appliedConfigs.configStream(ServiceRanking.class).findFirst().orElseThrow().value());
         assertEquals("Acme Software Foundation",
