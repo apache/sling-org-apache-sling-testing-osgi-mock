@@ -29,7 +29,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 /**
- * Builds a mocked {@link ComponentContext}.
+ * Builds a mocked {@link ComponentContextX}.
  */
 public final class ComponentContextBuilder {
 
