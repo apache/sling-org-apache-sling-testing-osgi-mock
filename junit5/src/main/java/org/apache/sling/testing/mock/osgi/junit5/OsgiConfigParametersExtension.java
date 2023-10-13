@@ -34,6 +34,9 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -124,13 +127,18 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
                 });
     }
 
-    @Override
-    public boolean supportsParameter(ParameterContext parameterContext,
-                                     ExtensionContext extensionContext)
-            throws ParameterResolutionException {
-        final Class<?> parameterType = parameterContext.getParameter().getType();
-        return ConfigCollection.class.isAssignableFrom(parameterType)
-                || ConfigAnnotationUtil.determineSupportedConfigType(parameterType)
+    boolean isConfigCollectionParameterType(@NotNull Class<?> parameterType) {
+        return ConfigCollection.class.isAssignableFrom(parameterType);
+    }
+
+    boolean isConfigMapParameterType(@NotNull ParameterContext parameterContext,
+                                     @NotNull ExtensionContext extensionContext) {
+        return Map.class.isAssignableFrom(parameterContext.getParameter().getType()) &&
+                getConfigMapParameterConfigType(parameterContext.getParameter(), extensionContext).isPresent();
+    }
+
+    boolean isSupportedConfigType(@NotNull Class<?> parameterType, @NotNull ExtensionContext extensionContext) {
+        return ConfigAnnotationUtil.determineSupportedConfigType(parameterType)
                 .map(paramType -> ConfigCollectionImpl.collect(extensionContext,
                                 getConfigTypeContext(extensionContext))
                         .streamConfigTypeAnnotations().anyMatch(ConfigAnnotationUtil
@@ -140,21 +148,64 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
     }
 
     @Override
-    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+    public boolean supportsParameter(ParameterContext parameterContext,
+                                     ExtensionContext extensionContext)
             throws ParameterResolutionException {
-        if (ConfigCollection.class.isAssignableFrom(parameterContext.getParameter().getType())) {
-            CollectConfigTypes configTypes = parameterContext.findAnnotation(CollectConfigTypes.class)
-                    .orElse(null);
-            final ConfigTypeContext configTypeContext = getConfigTypeContext(extensionContext);
-            String applyPid = Optional.ofNullable(configTypes)
-                    .flatMap(annotation -> configTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
-                    .orElse(null);
-            ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate = Optional.ofNullable(configTypes)
-                    .map(ignored -> (ConfigAnnotationUtil.ConfigTypePredicate) DEFAULT_CONFIG_TYPE_PREDICATE.and(
-                            (parent, configType) -> parent.isPresent())::test)
-                    .orElse(DEFAULT_CONFIG_TYPE_PREDICATE);
-            return ConfigCollectionImpl.collect(extensionContext, configTypeContext, configTypePredicate, applyPid);
+        final Class<?> parameterType = parameterContext.getParameter().getType();
+        return isConfigCollectionParameterType(parameterType)
+                || isConfigMapParameterType(parameterContext, extensionContext)
+                || isSupportedConfigType(parameterType, extensionContext);
+    }
+
+    Object resolveConfigCollectionParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+        CollectConfigTypes configTypes = parameterContext.findAnnotation(CollectConfigTypes.class)
+                .orElse(null);
+        final ConfigTypeContext configTypeContext = getConfigTypeContext(extensionContext);
+        String applyPid = Optional.ofNullable(configTypes)
+                .flatMap(annotation -> configTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
+                .orElse(null);
+        ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate = Optional.ofNullable(configTypes)
+                .map(ignored -> (ConfigAnnotationUtil.ConfigTypePredicate) DEFAULT_CONFIG_TYPE_PREDICATE.and(
+                        (parent, configType) -> parent.isPresent())::test)
+                .orElse(DEFAULT_CONFIG_TYPE_PREDICATE);
+        return ConfigCollectionImpl.collect(extensionContext, configTypeContext, configTypePredicate, applyPid);
+    }
+
+    @SuppressWarnings("rawtypes")
+    Optional<Class> getConfigMapParameterConfigType(@NotNull Parameter parameter,
+                                                    @NotNull ExtensionContext extensionContext) {
+        return Optional.ofNullable(parameter.getAnnotation(ConfigMapParameter.class))
+                .map(ConfigMapParameter::value)
+                .map(Class.class::cast)
+                .filter(ignored -> Map.class.isAssignableFrom(parameter.getType()))
+                .filter(ConfigAnnotationUtil::isValidConfigType) // filter out by validity before filtering by in-scope
+                .filter(configType -> this.isSupportedConfigType(configType, extensionContext));
+    }
+
+    Class<?>[] getEffectiveParameterTypes(@NotNull Executable executable,
+                                          @NotNull ExtensionContext extensionContext) {
+        return Arrays.stream(executable.getParameters()).map(parameter ->
+                (Class<?>) getConfigMapParameterConfigType(parameter, extensionContext)
+                        .orElse(parameter.getType())).toArray(Class[]::new);
+    }
+
+    Object resolveConfigMapParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+        final Class<?> parameterConfigType =
+                (Class<?>) getConfigMapParameterConfigType(parameterContext.getParameter(),
+                        extensionContext).orElse(null);
+        if (parameterConfigType != null) {
+            ConfigCollection configCollection = ConfigCollectionImpl.collect(extensionContext,
+                    getConfigTypeContext(extensionContext));
+            Object value = ConfigAnnotationUtil.resolveParameterToConfigMap(configCollection,
+                    parameterConfigType,
+                    getEffectiveParameterTypes(parameterContext.getDeclaringExecutable(), extensionContext),
+                    parameterContext.getIndex()).orElse(null);
+            return requireSingleParameterValue(Map.class, value);
         }
+        return null;
+    }
+
+    Object resolveConfigTypeParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());
         ConfigCollection configCollection = ConfigCollectionImpl.collect(extensionContext,
@@ -164,9 +215,24 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         } else {
             Object value = ConfigAnnotationUtil.resolveParameterToValue(configCollection,
                     parameterType,
-                    parameterContext.getDeclaringExecutable().getParameterTypes(),
+                    getEffectiveParameterTypes(parameterContext.getDeclaringExecutable(), extensionContext),
                     parameterContext.getIndex()).orElse(null);
             return requireSingleParameterValue(parameterType, value);
         }
+    }
+
+    @Override
+    public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+            throws ParameterResolutionException {
+        // check for ConfigCollection parameter first
+        if (ConfigCollection.class.isAssignableFrom(parameterContext.getParameter().getType())) {
+            return resolveConfigCollectionParameter(parameterContext, extensionContext);
+        }
+        // explicitly check for Map so we can return null to short circuit
+        if (Map.class.isAssignableFrom(parameterContext.getParameter().getType())) {
+            return resolveConfigMapParameter(parameterContext, extensionContext);
+        }
+        // otherwise resolve config type or config type array parameter
+        return resolveConfigTypeParameter(parameterContext, extensionContext);
     }
 }

@@ -34,6 +34,7 @@ import org.osgi.service.component.propertytypes.ServiceVendor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,6 +93,7 @@ class OsgiConfigParametersExtensionTest {
                 () -> OsgiConfigParametersExtension.requireSingleParameterValue(String.class, 42));
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface PropertyEscaped {
         String prop__name() default "prop__name default";
 
@@ -138,6 +140,7 @@ class OsgiConfigParametersExtensionTest {
         assertEquals("propName value", withValue.propName());
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface PrefixedPropertyEscaped {
         String PREFIX_ = "prefix-"; // this only works if the @interface is also public
 
@@ -191,6 +194,7 @@ class OsgiConfigParametersExtensionTest {
         assertEquals("propName value", withValue.propName());
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
     public @interface SingleElementString {
         String value();
     }
@@ -640,4 +644,16 @@ class OsgiConfigParametersExtensionTest {
         assertEquals(33, objectPidConfigs.firstConfig(ListConfig.class).size());
         assertEquals(15, listPidConfigs.firstConfig(ListConfig.class).size());
     }
+
+    @Test
+    @SingleElementString("SingleElementString")
+    @PrefixedSingleElementAnnotation("PrefixedSingleElementAnnotation")
+    void configMapParameter(@ConfigMapParameter(SingleElementString.class)
+                            Map<String, Object> configMap,
+                            @ConfigMapParameter(PrefixedSingleElementAnnotation.class)
+                            Map<String, Object> prefixedMap) {
+        assertEquals(Map.of("single.element.string", "SingleElementString"), configMap);
+        assertEquals(Map.of("prefix-prefixed.single.element.annotation", "PrefixedSingleElementAnnotation"), prefixedMap);
+    }
+
 }

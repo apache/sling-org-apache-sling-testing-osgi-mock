@@ -447,6 +447,35 @@ public class ComponentPropertyParserTest {
 
         Stream.of(Class.class, Class[].class)
                 .forEach(type -> assertFalse(ComponentPropertyParser.isSupportedPropertyMapValueType(type)));
+
+        Stream.of(ConfigAnnotationUtilTest.AnEnum.class, ConfigAnnotationUtilTest.AnEnum[].class)
+                .forEach(type -> assertFalse(ComponentPropertyParser.isSupportedPropertyMapValueType(type)));
+
+        Stream.of(ConfigAnnotationUtilTest.AnAbstractClass.class, ConfigAnnotationUtilTest.AnAbstractClass.class)
+                .forEach(type -> assertFalse(ComponentPropertyParser.isSupportedPropertyMapValueType(type)));
+    }
+
+    @Test
+    public void testIsSupportedConfigTypeValueType() {
+        Stream.of(
+                        boolean.class, boolean[].class, Boolean.class, Boolean[].class,
+                        byte.class, byte[].class, Byte.class, Byte[].class,
+                        char.class, char[].class, Character.class, Character[].class,
+                        short.class, short[].class, Short.class, Short[].class,
+                        int.class, int[].class, Integer.class, Integer[].class,
+                        long.class, long[].class, Long.class, Long[].class,
+                        float.class, float[].class, Float.class, Float[].class,
+                        double.class, double[].class, Double.class, Double[].class)
+                .forEach(type -> assertTrue(ComponentPropertyParser.isSupportedConfigTypeValueType(type)));
+
+        Stream.of(Class.class, Class[].class)
+                .forEach(type -> assertTrue(ComponentPropertyParser.isSupportedConfigTypeValueType(type)));
+
+        Stream.of(ConfigAnnotationUtilTest.AnEnum.class, ConfigAnnotationUtilTest.AnEnum[].class)
+                .forEach(type -> assertTrue(ComponentPropertyParser.isSupportedConfigTypeValueType(type)));
+
+        Stream.of(ConfigAnnotationUtilTest.AnAbstractClass.class, ConfigAnnotationUtilTest.AnAbstractClass.class)
+                .forEach(type -> assertFalse(ComponentPropertyParser.isSupportedConfigTypeValueType(type)));
     }
 
     public @interface NotSingleElementAnnotation {
@@ -495,5 +524,65 @@ public class ComponentPropertyParserTest {
                 Map.of("single.element.enum.array.default", new String[]{"YES"})
         );
         assertGetAnnotationDefaultsExpectations(expectations);
+    }
+
+
+    public @interface PropertyEscapedNoDefaults {
+        String prop__name();
+
+        String prop_name();
+
+        String prop$_$name();
+
+        String prop$$name();
+
+        String prop$name();
+
+        String propName();
+    }
+
+    public @interface PrefixedPropertyEscapedNoDefaults {
+        String PREFIX_ = "prefix-"; // this only works if the @interface is also public
+
+        String prop__name();
+
+        String prop_name();
+
+        String prop$_$name();
+
+        String prop$$name();
+
+        String prop$name();
+
+        String propName();
+    }
+
+    @Test
+    public void testAssertOneToOneMapping() {
+        Map<Class<?>, String[]> expectations = Map.of(
+                SingleElementString.class,
+                new String[]{"single.element.string=value"},
+                PropertyEscapedNoDefaults.class,
+                new String[]{
+                        "prop_name=prop__name",
+                        "prop.name=prop_name",
+                        "prop-name=prop$_$name",
+                        "prop$name=prop$$name",
+                        "propname=prop$name",
+                        "propName=propName"
+                },
+                PrefixedPropertyEscapedNoDefaults.class,
+                new String[]{
+                        "prefix-prop_name=prop__name",
+                        "prefix-prop.name=prop_name",
+                        "prefix-prop-name=prop$_$name",
+                        "prefix-prop$name=prop$$name",
+                        "prefix-propname=prop$name",
+                        "prefix-propName=propName"
+                }
+        );
+        for (Map.Entry<Class<?>, String[]> entry : expectations.entrySet()) {
+            ComponentPropertyParser.assertOneToOneMapping(entry.getKey(), entry.getValue());
+        }
     }
 }

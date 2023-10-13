@@ -24,6 +24,7 @@ import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfigs;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +32,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
@@ -175,7 +177,9 @@ public final class ConfigAnnotationUtil {
      */
     public static boolean isValidConfigType(@NotNull Class<?> configType) {
         return (configType.isAnnotation() || configType.isInterface())
-                && AbstractConfigTypeReflectionProvider.getInstance(configType).isValidConfigType();
+                && AbstractConfigTypeReflectionProvider.getInstance(configType).isValidConfigType()
+                && EXCLUDE_FEATURE_ANNOTATIONS.stream()
+                .noneMatch(excluded -> excluded.isAssignableFrom(configType));
     }
 
     /**
@@ -188,20 +192,15 @@ public final class ConfigAnnotationUtil {
      * @return an annotation stream predicate
      */
     public static Predicate<Annotation> configTypeAnnotationFilter(@Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate) {
+        final ConfigTypePredicate primary = (parent, configType) -> isValidConfigType(configType);
         final ConfigTypePredicate andThen = Optional.ofNullable(configTypePredicate)
                 .orElse((parentAnnotation, configType) -> true);
         return annotation -> {
             if (ConfigType.class.isAssignableFrom(annotation.annotationType())) {
-                final Class<?> configType = ((ConfigType) annotation).type();
-                return isValidConfigType(configType)
-                        && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded ->
-                        excluded.isAssignableFrom(configType))
-                        && andThen.test(Optional.of((ConfigType) annotation), configType);
+                final ConfigType parentAnnotation = (ConfigType) annotation;
+                return primary.and(andThen).test(Optional.of(parentAnnotation), parentAnnotation.type());
             } else {
-                return isValidConfigType(annotation.annotationType())
-                        && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded ->
-                        excluded.isAssignableFrom(annotation.annotationType()))
-                        && andThen.test(Optional.empty(), annotation.annotationType());
+                return primary.and(andThen).test(Optional.empty(), annotation.annotationType());
             }
         };
     }
@@ -239,6 +238,40 @@ public final class ConfigAnnotationUtil {
     }
 
     /**
+     * Returns the first {@link TypedConfig} from the {@link ConfigCollection}, if present, after skipping the same
+     * number of values as there are matching signature parameter types with an index lower than the current
+     * parameterIndex. For example, if we are injecting values into a test method signature that accepts two
+     * {@code MyConfig} arguments, this method will be called twice for the same configCollection, parameterConfigType,
+     * and signatureParameterTypes array. The first call will specify a parameterIndex of 0, which will return the first
+     * value from the collection, and the second call will specify a parameterIndex of 1 which will return the second
+     * value from the collection. This method does not consider array or {@link ConfigCollection} parameter types when
+     * skipping values.
+     *
+     * @param configCollection        the config collection
+     * @param parameterConfigType     the parameter config type class (must be an interface or an annotation type)
+     * @param signatureParameterTypes the types of the signature's parameters
+     * @param parameterIndex          the 0-based index of the parameter in the executable's signature
+     * @param <T>                     the parameter config type
+     * @return a single parameter value if available, or empty
+     */
+    public static <T> Optional<TypedConfig<T>> resolveParameterToTypedConfig(@NotNull ConfigCollection configCollection,
+                                                                             @NotNull Class<T> parameterConfigType,
+                                                                             @NotNull Class<?>[] signatureParameterTypes,
+                                                                             int parameterIndex) {
+        if (parameterIndex < 0
+                || parameterIndex >= signatureParameterTypes.length
+                || !signatureParameterTypes[parameterIndex].isAssignableFrom(parameterConfigType)) {
+            // require a valid signature
+            return Optional.empty();
+        }
+        final long skip = Stream.of(signatureParameterTypes)
+                .limit(parameterIndex)
+                .filter(parameterConfigType::equals)
+                .count();
+        return configCollection.stream(parameterConfigType).skip(skip).findFirst();
+    }
+
+    /**
      * Returns the first config value from the {@link ConfigCollection}, if present, after skipping the same number of
      * values as there are matching signature parameter types with an index lower than the current parameterIndex.
      * For example, if we are injecting values into a test method signature that accepts two {@code MyConfig} arguments,
@@ -258,17 +291,33 @@ public final class ConfigAnnotationUtil {
                                                           @NotNull Class<T> parameterConfigType,
                                                           @NotNull Class<?>[] signatureParameterTypes,
                                                           int parameterIndex) {
-        if (parameterIndex < 0
-                || parameterIndex >= signatureParameterTypes.length
-                || !signatureParameterTypes[parameterIndex].isAssignableFrom(parameterConfigType)) {
-            // require a valid signature
-            return Optional.empty();
-        }
-        final long skip = Stream.of(signatureParameterTypes)
-                .limit(parameterIndex)
-                .filter(parameterConfigType::equals)
-                .count();
-        return configCollection.configStream(parameterConfigType).skip(skip).findFirst();
+        return resolveParameterToTypedConfig(configCollection, parameterConfigType,
+                signatureParameterTypes, parameterIndex).map(TypedConfig::getConfig);
+    }
+
+
+    /**
+     * Returns the first config map from the {@link ConfigCollection}, if present, after skipping the same number of
+     * values as there are matching signature parameter types with an index lower than the current parameterIndex.
+     * For example, if we are injecting values into a test method signature that accepts two {@code MyConfig} arguments,
+     * this method will be called twice for the same configCollection, parameterConfigType, and signatureParameterTypes
+     * array. The first call will specify a parameterIndex of 0, which will return the first value from the collection,
+     * and the second call will specify a parameterIndex of 1 which will return the second value from the collection.
+     * This method does not consider array or {@link ConfigCollection} parameter types when skipping values.
+     *
+     * @param configCollection        the config collection
+     * @param parameterConfigType     the parameter config type class (must be an interface or an annotation type)
+     * @param signatureParameterTypes the types of the signature's parameters
+     * @param parameterIndex          the 0-based index of the parameter in the executable's signature
+     * @param <T>                     the parameter config type
+     * @return a single parameter value if available, or empty
+     */
+    public static <T> Optional<Map<String, Object>> resolveParameterToConfigMap(@NotNull ConfigCollection configCollection,
+                                                                                @NotNull Class<T> parameterConfigType,
+                                                                                @NotNull Class<?>[] signatureParameterTypes,
+                                                                                int parameterIndex) {
+        return resolveParameterToTypedConfig(configCollection, parameterConfigType,
+                signatureParameterTypes, parameterIndex).map(TypedConfig::getConfigMap);
     }
 
 }
