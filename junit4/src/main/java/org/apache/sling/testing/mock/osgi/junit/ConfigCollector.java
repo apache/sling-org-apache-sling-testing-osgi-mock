@@ -145,9 +145,9 @@ public class ConfigCollector implements TestRule, ConfigCollection {
             unboundConfigTypes.addAll(description.getAnnotations());
             final Map<String, Object> accumulator = new HashMap<>();
             ConfigAnnotationUtil.findConfigTypeAnnotations(unboundConfigTypes, DEFAULT_CONFIG_TYPE_PREDICATE.and(
-                            // only include explicit config annotations or @ConfigType without pids and exclude org.junit config types
-                            (annotation, configType) -> !configType.getPackageName().startsWith("org.junit")
-                                    && annotation.map(some -> configTypeContext.getConfigurationPid(some.pid(), some.component())).isEmpty())
+                            // only include explicit config annotations or @ConfigType without pids
+                            (annotation, configType) -> annotation.map(some ->
+                                    configTypeContext.getConfigurationPid(some.pid(), some.component())).isEmpty())
                             ::test)
                     .map(annotation -> configTypeContext.newTypedConfig(annotation).getConfigMap())
                     .forEachOrdered(accumulator::putAll);

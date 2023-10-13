@@ -330,7 +330,7 @@ public class ConfigAnnotationUtilTest {
         assertTrue(ConfigAnnotationUtil.isValidConfigType(AnAnnotation.class));
         assertTrue(ConfigAnnotationUtil.isValidConfigType(AnInterface.class));
     }
-    
+
     @Test
     public void testConfigTypeAnnotationFilter() {
         RuntimeRetained cpt = Configured.class.getAnnotation(RuntimeRetained.class);

@@ -109,4 +109,12 @@ public class ConfigCollectorTest {
         assertEquals(Map.of("size", 12, "reverse", true, "service.pid", List.class.getName()),
                 MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
     }
+
+    @Test
+    @AutoConfig(Void.class) // overrides class annotation with unset config pid
+    @ListConfig(size = 12, reverse = true)
+    public void autoConfigVoid() throws Exception {
+        ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
+        assertNull(MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
+    }
 }
