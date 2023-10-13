@@ -31,6 +31,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AbstractConfigTypeReflectionProviderTest {
 
@@ -113,6 +116,14 @@ public class AbstractConfigTypeReflectionProviderTest {
         String name();
     }
 
+    public interface InvalidInterfaceConfig {
+        int size();
+
+        String name();
+
+        void setName(String name);
+    }
+
     @Test
     public void testInterfaceTypedConfig() {
         final AbstractConfigTypeReflectionProvider provider =
@@ -123,5 +134,17 @@ public class AbstractConfigTypeReflectionProviderTest {
         assertEquals(InterfaceConfig.class, provider.getConfigType());
 
         assertEquals(Collections.emptyMap(), provider.getDefaults(Collections.emptyMap()));
+
+        final InterfaceConfig mocked = mock(InterfaceConfig.class);
+        doReturn(10).when(mocked).size();
+        assertEquals(Map.of("size", 10), provider.getPropertyMap(mocked));
+
+        final AbstractConfigTypeReflectionProvider invalidProvider =
+                AbstractConfigTypeReflectionProvider.getInstance(InvalidInterfaceConfig.class);
+
+        assertFalse(invalidProvider.isValidConfigType());
+
+        assertEquals(InvalidInterfaceConfig.class, invalidProvider.getConfigType());
     }
+    
 }
