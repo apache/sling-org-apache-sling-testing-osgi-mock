@@ -17,4 +17,5 @@
  * under the License.
  */
 
+@Library('sling@feature/SLING-12089-javadocs') _
 slingOsgiBundleBuild()
