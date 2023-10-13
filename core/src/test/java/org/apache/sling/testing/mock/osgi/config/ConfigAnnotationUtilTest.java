@@ -57,9 +57,15 @@ public class ConfigAnnotationUtilTest {
         String property() default "default";
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface InvalidCpt {
+        RuntimeRetained nestedAnnotation() default @RuntimeRetained(property = "defaultDefaultdEfAuLt");
+    }
+
     @SetConfig(pid = "first")
     @ConfigType(type = ServiceRanking.class)
     @RuntimeRetained(property = "expected")
+    @InvalidCpt
     @SetConfigs({
             @SetConfig(pid = "second"),
             @SetConfig(pid = "third")
@@ -140,19 +146,19 @@ public class ConfigAnnotationUtilTest {
         assertEquals("third", annotations.get(2).pid());
     }
 
-    enum AnEnum {
+    public enum AnEnum {
         YES, NO
     }
 
-    static abstract class AnAbstractClass {
+    public static abstract class AnAbstractClass {
         // not used
     }
 
-    interface AnInterface {
+    public interface AnInterface {
         // not used
     }
 
-    @interface AnAnnotation {
+    public @interface AnAnnotation {
         // not used
     }
 
@@ -315,5 +321,23 @@ public class ConfigAnnotationUtilTest {
                 ParameterType1.class,
                 executable.getParameterTypes(),
                 executable.getParameterTypes().length + 1).orElse(null));
+    }
+
+    @Test
+    public void testIsValidConfigType() {
+        assertFalse(ConfigAnnotationUtil.isValidConfigType(AnAbstractClass.class));
+        assertFalse(ConfigAnnotationUtil.isValidConfigType(AnEnum.class));
+        assertTrue(ConfigAnnotationUtil.isValidConfigType(AnAnnotation.class));
+        assertTrue(ConfigAnnotationUtil.isValidConfigType(AnInterface.class));
+    }
+    
+    @Test
+    public void testConfigTypeAnnotationFilter() {
+        RuntimeRetained cpt = Configured.class.getAnnotation(RuntimeRetained.class);
+        assertTrue(ConfigAnnotationUtil.configTypeAnnotationFilter((parent, configType) -> parent.isEmpty()).test(cpt));
+        ConfigType cta = Configured.class.getAnnotation(ConfigType.class);
+        assertFalse(ConfigAnnotationUtil.configTypeAnnotationFilter((parent, configType) -> parent.isEmpty()).test(cta));
+        InvalidCpt invalidCpt = Configured.class.getAnnotation(InvalidCpt.class);
+        assertFalse(ConfigAnnotationUtil.configTypeAnnotationFilter((parent, configType) -> parent.isEmpty()).test(invalidCpt));
     }
 }
