@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
@@ -331,13 +332,25 @@ public class ConfigAnnotationUtilTest {
         assertTrue(ConfigAnnotationUtil.isValidConfigType(AnInterface.class));
     }
 
+    @AutoConfig(Void.class)
+    public static class AutoConfigured {
+
+    }
+
     @Test
     public void testConfigTypeAnnotationFilter() {
         RuntimeRetained cpt = Configured.class.getAnnotation(RuntimeRetained.class);
-        assertTrue(ConfigAnnotationUtil.configTypeAnnotationFilter((parent, configType) -> parent.isEmpty()).test(cpt));
+        assertTrue(ConfigAnnotationUtil.configTypeAnnotationFilter(
+                (parent, configType) -> parent.isEmpty() && configType.equals(cpt.annotationType())).test(cpt));
         ConfigType cta = Configured.class.getAnnotation(ConfigType.class);
-        assertFalse(ConfigAnnotationUtil.configTypeAnnotationFilter((parent, configType) -> parent.isEmpty()).test(cta));
+        assertFalse(ConfigAnnotationUtil.configTypeAnnotationFilter(
+                (parent, configType) -> parent.isEmpty()).test(cta));
         InvalidCpt invalidCpt = Configured.class.getAnnotation(InvalidCpt.class);
-        assertFalse(ConfigAnnotationUtil.configTypeAnnotationFilter((parent, configType) -> parent.isEmpty()).test(invalidCpt));
+        assertFalse(ConfigAnnotationUtil.configTypeAnnotationFilter(
+                (parent, configType) -> parent.isEmpty()).test(invalidCpt));
+        // AutoConfig is excluded from the filter
+        AutoConfig aca = AutoConfigured.class.getAnnotation(AutoConfig.class);
+        assertFalse(ConfigAnnotationUtil.configTypeAnnotationFilter(
+                (parent, configType) -> parent.isEmpty()).test(aca));
     }
 }
