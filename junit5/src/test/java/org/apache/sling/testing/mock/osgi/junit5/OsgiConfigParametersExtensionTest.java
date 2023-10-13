@@ -18,10 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -33,9 +35,10 @@ import org.osgi.service.component.propertytypes.ServiceVendor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -45,6 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @AutoConfig(List.class)
 @OsgiConfigParametersExtensionTest.ListConfig(size = -5, reverse = false)
@@ -656,4 +661,68 @@ class OsgiConfigParametersExtensionTest {
         assertEquals(Map.of("prefix-prefixed.single.element.annotation", "PrefixedSingleElementAnnotation"), prefixedMap);
     }
 
+    public static final class TestClass {
+        @SingleElementString("a value")
+        public void testMethod1(
+                @ConfigMapParameter(SingleElementString.class)
+                Map<String, Object> configMap) {
+        }
+
+        @ConfigType(type = SingleElementString.class, lenient = true)
+        public void testMethod2(
+                @ConfigMapParameter(ConfigType.class)
+                Map<String, Object> configMap) {
+        }
+
+        public void testMethod3(Map<String, Object> configMap) {
+        }
+    }
+
+    public static final class TestContext extends OsgiContextImpl {
+        public void setUpContext() {
+            super.setUp();
+        }
+
+        public void tearDownContext() {
+            super.tearDown();
+        }
+    }
+
+    @Test
+    void isConfigMapParameterType() throws Exception {
+        Map<String, Boolean> expectations = Map.of(
+                "testMethod1", true,
+                "testMethod2", false,
+                "testMethod3", false
+        );
+
+        final TestClass testInstance = new TestClass();
+
+        final ExtensionContext parentExtensionContext = mock(ExtensionContext.class);
+        doReturn(Optional.empty()).when(parentExtensionContext).getParent();
+        doReturn(Optional.of(TestClass.class)).when(parentExtensionContext).getElement();
+        doReturn(testInstance).when(parentExtensionContext).getRequiredTestInstance();
+
+        final ExtensionContext extensionContext = mock(ExtensionContext.class);
+        doReturn(Optional.of(parentExtensionContext)).when(extensionContext).getParent();
+        final ExtensionContext.Store store = mock(ExtensionContext.Store.class);
+        doReturn(store).when(extensionContext).getStore(OsgiConfigParametersStore.NAMESPACE);
+
+        doReturn(testInstance).when(extensionContext).getRequiredTestInstance();
+        final TestContext context = new TestContext();
+        context.setUpContext();
+        doReturn(context).when(store).get(testInstance, OsgiContextImpl.class);
+
+        final ParameterContext parameterContext = mock(ParameterContext.class);
+
+        OsgiConfigParametersExtension extension = new OsgiConfigParametersExtension();
+        for (Map.Entry<String, Boolean> entry : expectations.entrySet()) {
+            Method method = TestClass.class.getMethod(entry.getKey(), Map.class);
+            doReturn(method).when(parameterContext).getDeclaringExecutable();
+            doReturn(method.getParameters()[0]).when(parameterContext).getParameter();
+            doReturn(Optional.of(method)).when(extensionContext).getElement();
+            doReturn(0).when(parameterContext).getIndex();
+            assertEquals(entry.getValue(), extension.isConfigMapParameterType(parameterContext, extensionContext));
+        }
+    }
 }

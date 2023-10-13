@@ -32,7 +32,7 @@ import java.util.Optional;
  * extension context store.
  */
 final class OsgiConfigParametersStore {
-    private static final ExtensionContext.Namespace NAMESPACE =
+    static final ExtensionContext.Namespace NAMESPACE =
             ExtensionContext.Namespace.create(OsgiConfigParametersExtension.class);
 
     private OsgiConfigParametersStore() {

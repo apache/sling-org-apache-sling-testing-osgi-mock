@@ -585,4 +585,17 @@ public class ComponentPropertyParserTest {
             ComponentPropertyParser.assertOneToOneMapping(entry.getKey(), entry.getValue());
         }
     }
+
+    @Test(expected = ConfigTypeStrictnessViolation.class)
+    public void testAssertOneToOneMappingMissingExpected() {
+        ComponentPropertyParser.assertOneToOneMapping(SingleElementString.class, new String[0]);
+    }
+
+    @Test(expected = ConfigTypeStrictnessViolation.class)
+    public void testAssertOneToOneMappingUnexpectedParsed() {
+        ComponentPropertyParser.assertOneToOneMapping(SingleElementString.class, new String[]{
+                "single.element.string=value",
+                "single.element.integer:Integer=10"
+        });
+    }
 }

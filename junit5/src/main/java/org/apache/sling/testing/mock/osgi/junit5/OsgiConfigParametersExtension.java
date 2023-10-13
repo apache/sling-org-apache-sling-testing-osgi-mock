@@ -225,7 +225,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         if (ConfigCollection.class.isAssignableFrom(parameterContext.getParameter().getType())) {
             return resolveConfigCollectionParameter(parameterContext, extensionContext);
         }
-        // explicitly check for Map so we can return null to short circuit
+        // explicitly check for Map so we short circuit
         if (Map.class.isAssignableFrom(parameterContext.getParameter().getType())) {
             return resolveConfigMapParameter(parameterContext, extensionContext);
         }
