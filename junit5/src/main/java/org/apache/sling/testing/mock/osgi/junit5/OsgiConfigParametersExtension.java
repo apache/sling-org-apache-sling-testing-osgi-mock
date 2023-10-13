@@ -190,19 +190,16 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
     }
 
     Object resolveConfigMapParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-        final Class<?> parameterConfigType =
-                (Class<?>) getConfigMapParameterConfigType(parameterContext.getParameter(),
-                        extensionContext).orElse(null);
-        if (parameterConfigType != null) {
+        final Object value = getConfigMapParameterConfigType(parameterContext.getParameter(),
+                extensionContext).flatMap(parameterConfigType -> {
             ConfigCollection configCollection = ConfigCollectionImpl.collect(extensionContext,
                     getConfigTypeContext(extensionContext));
-            Object value = ConfigAnnotationUtil.resolveParameterToConfigMap(configCollection,
-                    parameterConfigType,
+            return ConfigAnnotationUtil.resolveParameterToConfigMap(configCollection,
+                    (Class<?>) parameterConfigType,
                     getEffectiveParameterTypes(parameterContext.getDeclaringExecutable(), extensionContext),
-                    parameterContext.getIndex()).orElse(null);
-            return requireSingleParameterValue(Map.class, value);
-        }
-        return null;
+                    parameterContext.getIndex());
+        }).orElse(null);
+        return requireSingleParameterValue(Map.class, value);
     }
 
     Object resolveConfigTypeParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
