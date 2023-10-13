@@ -69,12 +69,22 @@ public class ConfigCollectorTest {
         assertEquals(10, configCollector.firstConfig(ServiceRanking.class).value());
         assertNull(configCollector.firstConfig(ServiceVendor.class).value());
 
+        assertEquals(10, configCollector.firstConfigMap(ServiceRanking.class).get("service.ranking"));
+        assertNull(configCollector.firstConfigMap(ServiceVendor.class).get("service.vendor"));
+
         assertEquals(42, commonConfigs.firstConfig(ServiceRanking.class).value());
         assertEquals("Acme Software Foundation",
                 commonConfigs.firstConfig(ServiceVendor.class).value());
 
+        assertEquals(42, commonConfigs.firstConfigMap(ServiceRanking.class).get("service.ranking"));
+        assertNull(commonConfigs.firstConfigMap(ServiceVendor.class).get("Acme Software Foundation"));
+
         assertEquals(55, objectConfigs.firstConfig(ServiceRanking.class).value());
         assertEquals("Eclipse", objectConfigs.firstConfig(ServiceVendor.class).value());
+
+        assertEquals(55, objectConfigs.firstConfigMap(ServiceRanking.class).get("service.ranking"));
+        assertNull(objectConfigs.firstConfigMap(ServiceVendor.class).get("Eclipse"));
+
     }
 
     @Retention(RetentionPolicy.RUNTIME)

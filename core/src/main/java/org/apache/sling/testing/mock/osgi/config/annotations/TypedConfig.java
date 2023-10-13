@@ -57,7 +57,7 @@ public interface TypedConfig<T> {
      * @return a property map
      */
     @NotNull
-    Map<String, Object> asPropertyMap();
+    Map<String, Object> getConfigMap();
 
     /**
      * Returns a 0- or 1-element entry stream (containing only this entry) depending on whether this entry's

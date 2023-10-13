@@ -118,7 +118,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
                 .ifPresent(autoPid -> {
                     final Map<String, Object> accumulator = new HashMap<>();
                     streamUnboundTypedConfigAnnotations(context, extensionContext)
-                            .map(annotation -> context.newTypedConfig(annotation).asPropertyMap())
+                            .map(annotation -> context.newTypedConfig(annotation).getConfigMap())
                             .forEachOrdered(accumulator::putAll);
                     context.updateConfiguration(autoPid, accumulator);
                 });
@@ -149,7 +149,11 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
             String applyPid = Optional.ofNullable(configTypes)
                     .flatMap(annotation -> configTypeContext.getConfigurationPid(annotation.pid(), annotation.component()))
                     .orElse(null);
-            return ConfigCollectionImpl.collect(extensionContext, configTypeContext, DEFAULT_CONFIG_TYPE_PREDICATE, applyPid);
+            ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate = Optional.ofNullable(configTypes)
+                    .map(ignored -> (ConfigAnnotationUtil.ConfigTypePredicate) DEFAULT_CONFIG_TYPE_PREDICATE.and(
+                            (parent, configType) -> parent.isPresent())::test)
+                    .orElse(DEFAULT_CONFIG_TYPE_PREDICATE);
+            return ConfigCollectionImpl.collect(extensionContext, configTypeContext, configTypePredicate, applyPid);
         }
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());

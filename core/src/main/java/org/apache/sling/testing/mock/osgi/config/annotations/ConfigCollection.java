@@ -21,6 +21,7 @@ package org.apache.sling.testing.mock.osgi.config.annotations;
 import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -68,6 +69,18 @@ public interface ConfigCollection {
      */
     default <T> T firstConfig(@NotNull Class<T> configType) {
         return configStream(configType).findFirst().orElseThrow();
+    }
+
+    /**
+     * Return the first available config of type configType as a {@link java.util.Map}, or throw if none are available.
+     *
+     * @param configType the desired configType
+     * @param <T>        the config type
+     * @return the first available config value as a map
+     * @throws java.util.NoSuchElementException if no matching config is available
+     */
+    default <T> Map<String, Object> firstConfigMap(@NotNull Class<T> configType) {
+        return stream(configType).findFirst().orElseThrow().getConfigMap();
     }
 
 }

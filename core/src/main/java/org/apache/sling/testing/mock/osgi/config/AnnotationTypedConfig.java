@@ -53,7 +53,7 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
     }
 
     @Override
-    public Map<String, Object> asPropertyMap() {
+    public Map<String, Object> getConfigMap() {
         return AbstractConfigTypeReflectionProvider.getInstance(getType()).getPropertyMap(getConfig());
     }
 

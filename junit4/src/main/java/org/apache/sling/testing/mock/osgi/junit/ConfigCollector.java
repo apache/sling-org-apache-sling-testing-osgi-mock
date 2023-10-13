@@ -148,7 +148,7 @@ public class ConfigCollector implements TestRule, ConfigCollection {
                             (annotation, configType) -> !configType.getPackageName().startsWith("org.junit")
                                     && annotation.map(some -> configTypeContext.getConfigurationPid(some.pid(), some.component())).isEmpty())
                             ::test)
-                    .map(annotation -> configTypeContext.newTypedConfig(annotation).asPropertyMap())
+                    .map(annotation -> configTypeContext.newTypedConfig(annotation).getConfigMap())
                     .forEachOrdered(accumulator::putAll);
             configTypeContext.updateConfiguration(autoPid, accumulator);
         }

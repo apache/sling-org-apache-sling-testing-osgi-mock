@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.osgi.service.component.annotations.Component;
 
 import java.lang.annotation.ElementType;
@@ -27,16 +26,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate a {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection} test parameter to specify
- * the config types to collect within the given parameter context.
+ * Annotate a {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection} test parameter to only
+ * include {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType}-constructed configs and optionally
+ * override the configuration pid applied to them.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface CollectConfigTypes {
 
     /**
-     * Optionally specify a configuration pid to apply to any collected {@link ConfigType}
-     * annotations. A non-empty value will override any non-empty {@link ConfigType#pid()}
+     * Optionally specify a configuration pid to apply to any collected {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType}
+     * annotations. A non-empty value will override any non-empty {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#pid()}
      * attributes specified by those collected annotations. In order to specify the name of the {@link #component()}
      * class as a configuration PID, set this value to {@link org.osgi.service.component.annotations.Component#NAME}.
      * The default value is the empty string, which skips loading any configuration from ConfigurationAdmin.

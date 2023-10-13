@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
@@ -27,11 +28,17 @@ import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
 
 
 @ConfigType(type = ServiceRanking.class, lenient = true)
@@ -110,14 +117,19 @@ public class AnnotationTypedConfigTest {
     }
 
     @Test
-    public void testPropertyMap() {
+    public void testGetConfigMap() {
         ConfigType annotation = getClass().getAnnotation(ConfigType.class);
         assertEquals(Map.of("service.ranking", 0),
-                configTypeContext.newTypedConfig(annotation).asPropertyMap());
+                configTypeContext.newTypedConfig(annotation).getConfigMap());
         ConfigType wrongAnnotation = TestOsgiContext.class.getAnnotation(ConfigType.class);
         final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
         assertTrue(AbstractConfigTypeReflectionProvider.getInstance(annotation.type()).getPropertyMap(wrongAnnotationConfig).isEmpty());
+
+        ConfigCollection collection = mock(ConfigCollection.class);
+        doCallRealMethod().when(collection).stream(any(Class.class));
+        doCallRealMethod().when(collection).firstConfigMap(any(Class.class));
+        doAnswer(call -> Stream.of(configTypeContext.newTypedConfig(annotation))).when(collection).stream();
+
+        assertEquals(Map.of("service.ranking", 0), collection.firstConfigMap(ServiceRanking.class));
     }
-
-
 }
