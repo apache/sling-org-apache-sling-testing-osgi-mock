@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
-public @interface ConfigMapParameter {
+public @interface ConfigMap {
 
     /**
      * Specify a matching config annotation type or {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#type()}.

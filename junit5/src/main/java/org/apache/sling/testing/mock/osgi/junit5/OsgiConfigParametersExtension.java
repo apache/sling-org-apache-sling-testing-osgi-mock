@@ -174,8 +174,8 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
     @SuppressWarnings("rawtypes")
     Optional<Class> getConfigMapParameterConfigType(@NotNull Parameter parameter,
                                                     @NotNull ExtensionContext extensionContext) {
-        return Optional.ofNullable(parameter.getAnnotation(ConfigMapParameter.class))
-                .map(ConfigMapParameter::value)
+        return Optional.ofNullable(parameter.getAnnotation(ConfigMap.class))
+                .map(ConfigMap::value)
                 .map(Class.class::cast)
                 .filter(ignored -> Map.class.isAssignableFrom(parameter.getType()))
                 .filter(ConfigAnnotationUtil::isValidConfigType) // filter out by validity before filtering by in-scope

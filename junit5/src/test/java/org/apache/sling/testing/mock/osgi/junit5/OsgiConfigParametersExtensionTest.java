@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
@@ -653,9 +652,9 @@ class OsgiConfigParametersExtensionTest {
     @Test
     @SingleElementString("SingleElementString")
     @PrefixedSingleElementAnnotation("PrefixedSingleElementAnnotation")
-    void configMapParameter(@ConfigMapParameter(SingleElementString.class)
+    void configMapParameter(@ConfigMap(SingleElementString.class)
                             Map<String, Object> configMap,
-                            @ConfigMapParameter(PrefixedSingleElementAnnotation.class)
+                            @ConfigMap(PrefixedSingleElementAnnotation.class)
                             Map<String, Object> prefixedMap) {
         assertEquals(Map.of("single.element.string", "SingleElementString"), configMap);
         assertEquals(Map.of("prefix-prefixed.single.element.annotation", "PrefixedSingleElementAnnotation"), prefixedMap);
@@ -664,13 +663,13 @@ class OsgiConfigParametersExtensionTest {
     public static final class TestClass {
         @SingleElementString("a value")
         public void testMethod1(
-                @ConfigMapParameter(SingleElementString.class)
+                @ConfigMap(SingleElementString.class)
                 Map<String, Object> configMap) {
         }
 
         @ConfigType(type = SingleElementString.class, lenient = true)
         public void testMethod2(
-                @ConfigMapParameter(ConfigType.class)
+                @ConfigMap(ConfigType.class)
                 Map<String, Object> configMap) {
         }
 
