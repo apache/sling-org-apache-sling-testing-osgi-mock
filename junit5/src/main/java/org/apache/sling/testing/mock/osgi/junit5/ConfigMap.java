@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * properties.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 public @interface ConfigMap {
 
     /**

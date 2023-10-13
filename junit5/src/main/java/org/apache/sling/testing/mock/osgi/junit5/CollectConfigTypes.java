@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * override the configuration pid applied to them.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 public @interface CollectConfigTypes {
 
     /**
