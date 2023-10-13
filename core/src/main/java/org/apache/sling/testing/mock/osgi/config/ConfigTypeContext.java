@@ -175,7 +175,8 @@ public final class ConfigTypeContext {
      * @param annotation a component property type annotation or {@link ConfigType} annotation
      * @return a typed config
      */
-    public TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation) {
+    @SuppressWarnings("rawtypes")
+    public TypedConfig newTypedConfig(@NotNull final Annotation annotation) {
         return newTypedConfig(annotation, null);
     }
 
@@ -186,7 +187,8 @@ public final class ConfigTypeContext {
      * @param applyPid   optional non-empty configuration pid to apply if annotation is a {@link ConfigType}
      * @return a typed config
      */
-    public TypedConfig<?> newTypedConfig(@NotNull final Annotation annotation,
+    @SuppressWarnings("rawtypes")
+    public TypedConfig newTypedConfig(@NotNull final Annotation annotation,
                                          @Nullable final String applyPid) {
         if (annotation instanceof ConfigType) {
             ConfigType osgiConfig = (ConfigType) annotation;

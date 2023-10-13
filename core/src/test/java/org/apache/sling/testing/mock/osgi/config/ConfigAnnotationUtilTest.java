@@ -221,7 +221,7 @@ public class ConfigAnnotationUtilTest {
         ConfigCollection configCollection = mock(ConfigCollection.class);
         doAnswer(call -> type1Values.stream()).when(configCollection).configStream(ParameterType1.class);
         doCallRealMethod().when(configCollection).firstConfig(any(Class.class));
-        assertEquals(type1Values.get(0), configCollection.firstConfig(ParameterType2.class));
+        configCollection.firstConfig(ParameterType2.class);
     }
 
     public static class ExecutableClass {

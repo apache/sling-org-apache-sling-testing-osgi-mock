@@ -428,7 +428,7 @@ public class ConfigTypeContextImplTest {
     @Test(expected = ConfigTypeStrictnessViolation.class)
     public void testSelfTestSingleElementFail() {
         ConfigType configAnnotation = SelfTestSingleElementFail.class.getAnnotation(ConfigType.class);
-        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+        configTypeContext.constructConfigType(configAnnotation);
     }
 
     @ConfigType(type = ServiceRanking.class, property = "service.vendor=Acme", lenient = true)
@@ -473,7 +473,7 @@ public class ConfigTypeContextImplTest {
     @Test(expected = ConfigTypeStrictnessViolation.class)
     public void testSelfTestAnnotationUnexpected() {
         ConfigType configAnnotation = SelfTestAnnotationUnexpectedFail.class.getAnnotation(ConfigType.class);
-        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+        configTypeContext.constructConfigType(configAnnotation);
     }
 
     @ConfigType(type = ServiceRankingAndVendor.class, property = {
@@ -486,7 +486,7 @@ public class ConfigTypeContextImplTest {
     @Test(expected = ConfigTypeStrictnessViolation.class)
     public void testSelfTestAnnotationMissing() {
         ConfigType configAnnotation = SelfTestAnnotationMissingFail.class.getAnnotation(ConfigType.class);
-        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+        configTypeContext.constructConfigType(configAnnotation);
     }
 
     public interface IServiceRankingAndVendor {
@@ -520,6 +520,6 @@ public class ConfigTypeContextImplTest {
     @Test(expected = ConfigTypeStrictnessViolation.class)
     public void testSelfTestInterfaceFail() {
         ConfigType configAnnotation = SelfTestInterfaceFail.class.getAnnotation(ConfigType.class);
-        assertNotNull(configTypeContext.constructConfigType(configAnnotation));
+        configTypeContext.constructConfigType(configAnnotation);
     }
 }

@@ -35,7 +35,8 @@ public interface ConfigCollection {
      *
      * @return an untyped stream of typed configs
      */
-    Stream<TypedConfig<?>> stream();
+    @SuppressWarnings("rawtypes")
+    Stream<TypedConfig> stream();
 
     /**
      * Return a typed stream of only those entries in the collection that match the desired config type.
@@ -44,6 +45,7 @@ public interface ConfigCollection {
      * @param <T>        the config type
      * @return a typed stream of typed configs
      */
+    @SuppressWarnings("unchecked")
     default <T> Stream<TypedConfig<T>> stream(@NotNull Class<T> configType) {
         return stream().flatMap(entry -> entry.stream(configType));
     }
@@ -55,6 +57,7 @@ public interface ConfigCollection {
      * @param <T>        the config type
      * @return a typed stream of config values
      */
+    @SuppressWarnings("unchecked")
     default <T> Stream<T> configStream(@NotNull Class<T> configType) {
         return stream().flatMap(entry -> entry.configStream(configType));
     }

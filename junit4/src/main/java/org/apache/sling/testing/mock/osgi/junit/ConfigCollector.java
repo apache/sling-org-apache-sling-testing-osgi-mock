@@ -106,8 +106,9 @@ public class ConfigCollector implements TestRule, ConfigCollection {
                 .orElse(null);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Stream<TypedConfig<?>> stream() {
+    public Stream<TypedConfig> stream() {
         return Optional.ofNullable(context).stream().flatMap(Context::stream);
     }
 
@@ -154,7 +155,8 @@ public class ConfigCollector implements TestRule, ConfigCollection {
         }
     }
 
-    List<TypedConfig<?>> collectTypedConfigs(@NotNull final Description description) {
+    @SuppressWarnings("rawtypes")
+    List<TypedConfig> collectTypedConfigs(@NotNull final Description description) {
         final List<Annotation> applyAnnotations = new ArrayList<>(description.getAnnotations());
         applyAnnotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
         return ConfigAnnotationUtil.findConfigTypeAnnotations(applyAnnotations, DEFAULT_CONFIG_TYPE_PREDICATE)
@@ -164,7 +166,8 @@ public class ConfigCollector implements TestRule, ConfigCollection {
 
     private class Context implements ConfigCollection {
 
-        private final List<TypedConfig<?>> entries;
+        @SuppressWarnings("rawtypes")
+        private final List<TypedConfig> entries;
 
         public Context(@NotNull final Description description) {
             processSetConfigAnnotations(description);
@@ -174,8 +177,9 @@ public class ConfigCollector implements TestRule, ConfigCollection {
             entries = collectTypedConfigs(description);
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
-        public Stream<TypedConfig<?>> stream() {
+        public Stream<TypedConfig> stream() {
             return entries.stream();
         }
     }

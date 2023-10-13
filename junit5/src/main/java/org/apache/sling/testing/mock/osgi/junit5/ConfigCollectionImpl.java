@@ -51,8 +51,9 @@ final class ConfigCollectionImpl implements ConfigCollection {
         this.applyPid = applyPid;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public Stream<TypedConfig<?>> stream() {
+    public Stream<TypedConfig> stream() {
         return streamConfigTypeAnnotations().map(annotation -> configTypeContext.newTypedConfig(annotation, applyPid));
     }
 
