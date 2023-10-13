@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -109,16 +108,12 @@ abstract class AbstractConfigTypeReflectionProvider {
         if (getConfigType().isInstance(config)) {
             Map<String, Object> properties = new HashMap<>();
             for (Method method : getMethods()) {
-                try {
-                    Object value = method.invoke(config, null);
-                    if (value != null) {
-                        final Object propertyValue = attributeValueToPropertyValue(value);
-                        if (propertyValue != null) {
-                            properties.put(getPropertyName(method), value);
-                        }
+                Object value = invokeAttribute(method, config);
+                if (value != null) {
+                    final Object propertyValue = attributeValueToPropertyValue(value);
+                    if (propertyValue != null) {
+                        properties.put(getPropertyName(method), value);
                     }
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    log.error("Failed to invoke config type " + getConfigType() + " method " + method + " on object " + config, e);
                 }
             }
             return properties;
@@ -127,30 +122,34 @@ abstract class AbstractConfigTypeReflectionProvider {
     }
 
     @Nullable
+    Object invokeAttribute(Method method, Object config) {
+        try {
+            return method.invoke(config, (Object[]) null);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            log.error("Failed to invoke config type " + getConfigType() + " method " + method + " on object " + config, e);
+            return null;
+        }
+    }
+
+    @Nullable
     Object attributeValueToPropertyValue(@NotNull Object value) {
         final Class<?> valueType = value.getClass();
         final Class<?> singleType = valueType.isArray() ? valueType.getComponentType() : valueType;
         if (ComponentPropertyParser.isSupportedPropertyMapValueType(singleType)) {
-            if (valueType.isArray()) {
-                return value;
-            } else {
-                Object array = Array.newInstance(singleType, 1);
-                Array.set(array, 0, value);
-                return array;
-            }
+            return value;
         } else if (singleType.equals(Class.class)) {
             // Class.class is the same as Class<Class<?>>
             // this must be transformed to a String representing the FQDN
             if (valueType.isArray()) {
                 return Stream.of((Class<?>[]) value).map(Class::getName).toArray(String[]::new);
             } else {
-                return new String[]{((Class<?>) value).getName()};
+                return ((Class<?>) value).getName();
             }
         } else if (singleType.isEnum()) {
             if (valueType.isArray()) {
                 return Stream.of((Enum<?>[]) value).map(Enum::name).toArray(String[]::new);
             } else {
-                return new String[]{((Enum<?>) value).name()};
+                return ((Enum<?>) value).name();
             }
         } else {
             // every other type of nested member invalid, return false to indicate to caller that

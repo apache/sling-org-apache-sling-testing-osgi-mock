@@ -120,7 +120,7 @@ public final class ConfigTypeContext {
     public void updateConfiguration(@NotNull final SetConfig annotation) {
         getConfigurationPid(annotation.pid(), annotation.component()).ifPresent(pid -> {
             final Map<String, Object> updated = ComponentPropertyParser.parse(annotation.property());
-            updatePropertiesForConfigPid(updated, pid, osgiContext.getService(ConfigurationAdmin.class));
+            updateConfiguration(pid, updated);
         });
     }
 

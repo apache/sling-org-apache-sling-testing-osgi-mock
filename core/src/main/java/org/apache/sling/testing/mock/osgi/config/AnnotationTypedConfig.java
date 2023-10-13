@@ -84,11 +84,4 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
         return new AnnotationTypedConfig<>(type, type.cast(config));
     }
 
-    @Override
-    public String toString() {
-        return "AnnotationTypedConfig{" +
-                "type=" + type +
-                ", config=" + config +
-                '}';
-    }
 }

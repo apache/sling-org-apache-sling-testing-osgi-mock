@@ -118,4 +118,6 @@ public class AnnotationTypedConfigTest {
         final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
         assertTrue(AbstractConfigTypeReflectionProvider.getInstance(annotation.type()).getPropertyMap(wrongAnnotationConfig).isEmpty());
     }
+
+
 }

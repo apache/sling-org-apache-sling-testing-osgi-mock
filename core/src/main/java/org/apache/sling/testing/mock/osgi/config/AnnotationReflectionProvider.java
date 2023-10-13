@@ -23,9 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-
-import static org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser.isSupportedConfigTypeValueType;
 
 final class AnnotationReflectionProvider extends AbstractConfigTypeReflectionProvider {
     private final Class<? extends Annotation> annotationType;
