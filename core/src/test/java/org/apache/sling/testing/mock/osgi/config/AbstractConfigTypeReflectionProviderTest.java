@@ -18,8 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.commons.lang3.NotImplementedException;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,13 +31,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.apache.commons.lang3.NotImplementedException;
+import org.junit.Test;
 
 public class AbstractConfigTypeReflectionProviderTest {
 
@@ -146,5 +145,5 @@ public class AbstractConfigTypeReflectionProviderTest {
 
         assertEquals(InvalidInterfaceConfig.class, invalidProvider.getConfigType());
     }
-    
+
 }

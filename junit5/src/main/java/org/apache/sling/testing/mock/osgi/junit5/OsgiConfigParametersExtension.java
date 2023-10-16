@@ -18,21 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
-import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
-import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
-import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
@@ -41,6 +26,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
+import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
 
 /**
  * An {@link org.junit.jupiter.api.extension.Extension} which uses JUnit5 context reflection to discover OSGi

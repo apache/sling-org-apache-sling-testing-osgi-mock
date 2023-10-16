@@ -18,12 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
+import java.util.Map;
+import java.util.stream.Stream;
+
 import org.jetbrains.annotations.NotNull;
 import org.osgi.annotation.versioning.ProviderType;
-
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Represents a single config entry within a {@link ConfigCollection}. It has its own config type, which may be a

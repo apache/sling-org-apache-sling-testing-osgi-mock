@@ -18,12 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
-import org.apache.sling.testing.mock.osgi.config.ConfigTypeStrictnessViolation;
-import org.osgi.service.component.annotations.Component;
-
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Defines an instance of an OSGi R7 Component Property Type as a combination of a {@link Class} and an array of strings

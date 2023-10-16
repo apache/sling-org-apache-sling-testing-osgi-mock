@@ -18,6 +18,17 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
@@ -27,18 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
 
 
 @ConfigType(type = ServiceRanking.class, lenient = true)

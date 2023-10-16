@@ -19,6 +19,9 @@
 package org.apache.sling.testing.mock.osgi.junit5;
 
 
+import java.lang.annotation.Annotation;
+import java.util.stream.Stream;
+
 import org.apache.sling.testing.mock.osgi.config.ConfigAnnotationUtil;
 import org.apache.sling.testing.mock.osgi.config.ConfigTypeContext;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
@@ -26,10 +29,6 @@ import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-
-import java.lang.annotation.Annotation;
-import java.util.stream.Stream;
 
 /**
  * Encapsulation of lookup operations around a {@link ParameterContext} and {@link ExtensionContext}.
