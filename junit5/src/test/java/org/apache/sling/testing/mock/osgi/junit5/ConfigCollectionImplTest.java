@@ -18,6 +18,9 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
@@ -27,9 +30,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @SetConfig(pid = "common-config", property = {
         "service.ranking:Integer=42",
         "service.vendor=Acme Software Foundation"
@@ -38,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(OsgiConfigParametersExtension.class)
 class ConfigCollectionImplTest {
 
-    @SuppressWarnings("unchecked")
     @ConfigType(type = ServiceRanking.class, lenient = true)
     @Test
     void collectConfigTypes(@CollectConfigTypes

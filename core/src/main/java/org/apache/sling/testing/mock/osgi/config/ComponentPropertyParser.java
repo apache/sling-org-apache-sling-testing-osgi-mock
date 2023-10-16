@@ -224,7 +224,6 @@ public final class ComponentPropertyParser {
         return getTypedProperties(propertyType, map);
     }
 
-    @SuppressWarnings("unchecked")
     public static Map<String, Object> parse(@NotNull Class<?> configType, @NotNull String[] properties) {
         final Map<String, Object> returnProps = parse(properties);
         getDefaults(configType, returnProps);
