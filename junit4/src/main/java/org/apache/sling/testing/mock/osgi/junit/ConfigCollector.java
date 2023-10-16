@@ -44,7 +44,8 @@ import org.osgi.service.component.annotations.Component;
 /**
  * A {@link org.junit.rules.TestRule} that collects runtime-retained component property type annotations and
  * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotations from the current test method and
- * test class. This rule is also responsible for discovering {@link SetConfig} annotations and installing them into the
+ * test class. This rule is also responsible for discovering
+ * {@link org.apache.sling.testing.mock.osgi.config.annotations.SetConfig} annotations and installing them into the
  * provided {@link OsgiContextImpl}'s ConfigurationAdmin service.
  */
 public class ConfigCollector implements TestRule, ConfigCollection {

@@ -18,16 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
-import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.SetConfigs;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
@@ -38,6 +28,16 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfigs;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Common functions for resolving OSGi config test parameters.
@@ -173,6 +173,7 @@ public final class ConfigAnnotationUtil {
     /**
      * Utility function for filtering out component property types that can't be mapped to configurations.
      *
+     * @param configType Config type
      * @return true if the provided class is a valid config type
      */
     public static boolean isValidConfigType(@NotNull Class<?> configType) {

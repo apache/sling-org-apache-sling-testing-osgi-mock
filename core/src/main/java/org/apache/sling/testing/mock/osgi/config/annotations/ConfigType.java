@@ -71,9 +71,10 @@ public @interface ConfigType {
     String[] property() default {};
 
     /**
-     * When set to false, throw a {@link ConfigTypeStrictnessViolation} on construction if there is not an exact
-     * one-to-one mapping between property names specified in {@link #property()} and the addressable attributes of
-     * {@link #type()}. Properties loaded from configuration are not considered by the strictness check.
+     * When set to false, throw a {@link org.apache.sling.testing.mock.osgi.config.ConfigTypeStrictnessViolation} on
+     * construction if there is not an exact one-to-one mapping between property names specified in {@link #property()}
+     * and the addressable attributes of {@link #type()}. Properties loaded from configuration are not considered by
+     * the strictness check.
      *
      * @return false to enforce strictness, true to skip the check
      */

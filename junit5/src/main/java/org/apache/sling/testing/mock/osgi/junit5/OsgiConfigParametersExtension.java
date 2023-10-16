@@ -44,9 +44,10 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  * An {@link org.junit.jupiter.api.extension.Extension} which uses JUnit5 context reflection to discover OSGi
  * Config Type Annotations present on test methods and classes, and then injects them as test parameters. For this to
  * work for your config type annotation, you must specify {@code @Retention(RetentionPolicy.RUNTIME)} on the desired
- * config type annotation class, or use {@link ConfigType} to declare that your config type is supported as a test
- * parameter. This extension is also responsible for discovering {@link SetConfig} annotations and installing them
- * into the {@link OsgiContextImpl}'s ConfigurationAdmin service.
+ * config type annotation class, or use {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType}
+ * to declare that your config type is supported as a test parameter. This extension is also responsible for discovering
+ * {@link SetConfig} annotations and installing them into the
+ * {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl}'s ConfigurationAdmin service.
  */
 public class OsgiConfigParametersExtension implements ParameterResolver, BeforeEachCallback {
     // JUnit's annotations are noise we can filter out right at the start.

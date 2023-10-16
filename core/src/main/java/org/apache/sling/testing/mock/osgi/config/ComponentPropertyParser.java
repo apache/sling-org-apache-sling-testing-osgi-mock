@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A few items borrowed from biz.aQute.bndlib DSAnnotationReader and PropertyDef to construct a Map for
  * felix scr Annotations.toObject() from a combination of an annotation type and an array of property key=value strings
- * provided via a {@link ConfigType} annotation.
+ * provided via a {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} annotation.
  */
 public final class ComponentPropertyParser {
     private static final Logger log = LoggerFactory.getLogger(ComponentPropertyParser.class);
