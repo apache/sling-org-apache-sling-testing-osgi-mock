@@ -17,7 +17,7 @@
  * under the License.
  */
 /**
- * JUnit 5 extensions for OSGi context.
+ * Annotations and interfaces intended to be referenced in end-user test classes for parameter and config resolution.
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.apache.sling.testing.mock.osgi.junit5;
+@org.osgi.annotation.versioning.Version("1.0.0")
+package org.apache.sling.testing.mock.osgi.config.annotations;

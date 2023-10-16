@@ -17,7 +17,7 @@
  * under the License.
  */
 /**
- * JUnit 5 extensions for OSGi context.
+ * OSGi Config Type Parameters core implementation.
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.apache.sling.testing.mock.osgi.junit5;
+@org.osgi.annotation.versioning.Version("1.0.0")
+package org.apache.sling.testing.mock.osgi.config;

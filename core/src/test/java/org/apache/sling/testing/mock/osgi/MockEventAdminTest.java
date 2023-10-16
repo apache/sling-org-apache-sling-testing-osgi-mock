@@ -21,7 +21,6 @@ package org.apache.sling.testing.mock.osgi;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
@@ -126,7 +125,7 @@ public class MockEventAdminTest {
         }
 
         public List<Event> getReceivedEvents() {
-            return Collections.unmodifiableList(receivedEvents);
+            return List.copyOf(receivedEvents);
         }
 
     }

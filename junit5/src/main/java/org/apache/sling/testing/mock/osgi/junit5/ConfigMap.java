@@ -16,8 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/**
- * JUnit 5 extensions for OSGi context.
- */
-@org.osgi.annotation.versioning.Version("1.1.0")
 package org.apache.sling.testing.mock.osgi.junit5;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Annotate a test parameter of type {@link java.util.Map} to inject a matching component property type or
+ * {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType} after converting it to a map of config
+ * properties.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+public @interface ConfigMap {
+
+    /**
+     * Specify a matching config annotation type or {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#type()}.
+     * Array types are not supported.
+     *
+     * @return the desired config type
+     */
+    Class<?> value();
+}

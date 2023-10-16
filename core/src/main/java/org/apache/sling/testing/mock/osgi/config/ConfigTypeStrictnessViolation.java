@@ -16,8 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.sling.testing.mock.osgi.config;
+
 /**
- * JUnit 5 extensions for OSGi context.
+ * Specific exception type thrown when a {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType}
+ * annotation is resolved which has {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigType#lenient()}
+ * set to {@code true}, which fails to meet the documented assertion rules.
  */
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.apache.sling.testing.mock.osgi.junit5;
+public class ConfigTypeStrictnessViolation extends RuntimeException {
+    public ConfigTypeStrictnessViolation(String message) {
+        super(message);
+    }
+}
