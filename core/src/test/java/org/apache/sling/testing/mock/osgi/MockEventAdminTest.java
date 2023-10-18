@@ -34,9 +34,12 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("null")
 public class MockEventAdminTest {
+    private static final Logger log = LoggerFactory.getLogger(MockEventAdminTest.class);
 
     private static final String TOPIC_SAMPLE_1 = "sample/topic1";
     private static final String TOPIC_SAMPLE_2 = "sample/topic2";
@@ -101,6 +104,10 @@ public class MockEventAdminTest {
 
     @Test(timeout = 3000)
     public void testPostEvents() {
+        eventHandler1.setExpectedEvents(List.of());
+        eventHandler12.setExpectedEvents(List.of(EVENT_SAMPLE_2));
+        eventHandlerSampleAll.setExpectedEvents(List.of(EVENT_SAMPLE_2));
+        eventHandlerAll.setExpectedEvents(List.of(EVENT_SAMPLE_2, EVENT_OTHER_3));
         EventAdmin eventAdmin = context.getService(EventAdmin.class);
         eventAdmin.postEvent(EVENT_SAMPLE_2);
         eventAdmin.postEvent(EVENT_OTHER_3);
@@ -108,16 +115,18 @@ public class MockEventAdminTest {
         // wait until result is as expected (with timeout)
         boolean expectedResult = false;
         while (!expectedResult) {
-            expectedResult = Objects.equals(List.of(), eventHandler1.getReceivedEvents())
-                    && Objects.equals(List.of(EVENT_SAMPLE_2), eventHandler12.getReceivedEvents())
-                    && Objects.equals(List.of(EVENT_SAMPLE_2), eventHandlerSampleAll.getReceivedEvents())
-                    && Objects.equals(List.of(EVENT_SAMPLE_2, EVENT_OTHER_3), eventHandlerAll.getReceivedEvents());
+            expectedResult = eventHandler1.hasExpected()
+                    && eventHandler12.hasExpected()
+                    && eventHandlerSampleAll.hasExpected()
+                    && eventHandlerAll.hasExpected();
         }
     }
 
     private static class DummyEventHandler implements EventHandler {
 
         private final List<Event> receivedEvents = new ArrayList<Event>();
+
+        private List<Event> expectedEvents = null;
 
         @Override
         public void handleEvent(Event event) {
@@ -128,6 +137,18 @@ public class MockEventAdminTest {
             return List.copyOf(receivedEvents);
         }
 
+        public void setExpectedEvents(List<Event> expectedEvents) {
+            this.expectedEvents = expectedEvents;
+        }
+
+        public boolean hasExpected() {
+            List<Event> received = getReceivedEvents();
+            if (expectedEvents != null && !Objects.equals(expectedEvents, received)) {
+                log.error("missed expectations {} received {}", expectedEvents, received);
+                return false;
+            }
+            return true;
+        }
     }
 
 }
