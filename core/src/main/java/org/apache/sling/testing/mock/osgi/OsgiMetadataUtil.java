@@ -289,7 +289,7 @@ final class OsgiMetadataUtil {
 
     private static Map<String, Object> getProperties(Class clazz, Document metadata) {
         Map<String, Object> props = new HashMap<String, Object>();
-        String query = getComponentXPathQuery(clazz) + "/property[@name!='' and @value!='']";
+        String query = getComponentXPathQuery(clazz) + "/property[@name!='' and boolean(@value)]";
         NodeList nodes = queryNodes(metadata, query);
         if (nodes != null) {
             for (int i = 0; i < nodes.getLength(); i++) {

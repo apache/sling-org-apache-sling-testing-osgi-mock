@@ -32,6 +32,8 @@ import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferenceCardinality;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceWithDefaultValues;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceWithDefaultValuesConstructor;
 import org.junit.Test;
 import org.osgi.framework.Constants;
 
@@ -79,6 +81,26 @@ public class OsgiMetadataUtilTest {
     public void testActivateMethodName() {
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(Service3.class);
         assertEquals("activate", metadata.getActivateMethodName());
+    }
+
+    @Test
+    public void testWithDefaultValues() {
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(ServiceWithDefaultValues.class);
+
+        Map<String, Object> props = metadata.getProperties();
+        assertEquals(2, props.size());
+        assertEquals("", props.get("empty.string"));
+        assertEquals("value", props.get("value.string"));
+    }
+
+    @Test
+    public void testWithDefaultValuesViaConstructor() {
+        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(ServiceWithDefaultValuesConstructor.class);
+
+        Map<String, Object> props = metadata.getProperties();
+        assertEquals(2, props.size());
+        assertEquals("", props.get("empty.string"));
+        assertEquals("value", props.get("value.string"));
     }
 
     static class ServiceWithMetadata {
