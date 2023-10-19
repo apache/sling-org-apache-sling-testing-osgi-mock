@@ -19,12 +19,14 @@
 package org.apache.sling.testing.mock.osgi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Before;
@@ -120,6 +122,7 @@ public class MockEventAdminTest {
                     && eventHandlerSampleAll.hasExpected()
                     && eventHandlerAll.hasExpected();
         }
+        assertTrue(expectedResult);
     }
 
     private static class DummyEventHandler implements EventHandler {
@@ -143,8 +146,10 @@ public class MockEventAdminTest {
 
         public boolean hasExpected() {
             List<Event> received = getReceivedEvents();
-            if (expectedEvents != null && !Objects.equals(expectedEvents, received)) {
-                log.error("missed expectations {} received {}", expectedEvents, received);
+            List<String> expecedEventTopics = expectedEvents.stream().map(Event::getTopic).collect(Collectors.toList());
+            List<String> receivedEventTopics = received.stream().map(Event::getTopic).collect(Collectors.toList());
+            if (expectedEvents != null && !Objects.equals(expecedEventTopics, receivedEventTopics)) {
+                log.error("missed expectations {} received {}", expecedEventTopics, receivedEventTopics);
                 return false;
             }
             return true;

@@ -63,7 +63,7 @@ public final class MockEventAdmin implements EventAdmin {
     @Activate
     protected void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
-        asyncHandler = Executors.newCachedThreadPool();
+        asyncHandler = Executors.newSingleThreadExecutor();
     }
 
     @Deactivate
