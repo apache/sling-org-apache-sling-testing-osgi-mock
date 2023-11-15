@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.jetbrains.annotations.NotNull;
@@ -228,12 +229,7 @@ public final class MockOsgi {
         MockOsgi.injectServices(component, bundleContext, mergedProperties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
         OsgiServiceUtil.activateDeactivate(component, (MockComponentContext)componentContext, true);
-        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(component.getClass());
-        if (!metadata.getServiceInterfaces().isEmpty()) {
-            // convert component properties to service properties (http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-service.properties)
-            Dictionary<String, Object> serviceProperties = mergedProperties.entrySet().stream().filter(e -> e.getKey() != null && !e.getKey().startsWith(".")).collect(new DictionaryCollector<String, Object>(Entry::getKey, Entry::getValue));
-            bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, serviceProperties);
-        }
+        registerDSComponent(component, bundleContext, mergedProperties);
     }
 
     /**
@@ -270,13 +266,21 @@ public final class MockOsgi {
         Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(dsComponentClass, getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
         T component = OsgiServiceUtil.activateInjectServices(dsComponentClass, (MockComponentContext)componentContext);
-        OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(dsComponentClass);
-        if (!metadata.getServiceInterfaces().isEmpty()) {
-            // convert component properties to service properties (http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-service.properties)
-            Dictionary<String, Object> serviceProperties = mergedProperties.entrySet().stream().filter(e -> e.getKey() != null && !e.getKey().startsWith(".")).collect(new DictionaryCollector<String, Object>(Entry::getKey, Entry::getValue));
-            bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, serviceProperties);
-        }
+        registerDSComponent(component, bundleContext, mergedProperties);
         return component;
+    }
+
+    private static <T> void registerDSComponent(@NotNull T component, @NotNull BundleContext bundleContext, Map<String, Object> mergedProperties) {
+        OsgiMetadata metadata = Objects.requireNonNull(OsgiMetadataUtil.getMetadata(component.getClass()),
+                "No metadata found for " + component.getClass());
+
+        // convert component properties to service properties (http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-service.properties)
+        Dictionary<String, Object> serviceProperties = mergedProperties.entrySet().stream()
+                .filter(e -> e.getKey() != null && !e.getKey().startsWith("."))
+                .collect(new DictionaryCollector<>(Entry::getKey, Entry::getValue));
+
+        // we also register DS Components that aren't services in order for bind/unbind to work - they are registered with no service interfaces
+        bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, serviceProperties);
     }
 
     /**
