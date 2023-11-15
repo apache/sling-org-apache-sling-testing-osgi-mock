@@ -141,8 +141,7 @@ public class OsgiServiceUtilBindUnbindTest {
 
     @SuppressWarnings({ "null", "unchecked" })
     private <T> T registerInjectService(T service) {
-        MockOsgi.injectServices(service, bundleContext);
-        bundleContext.registerService((Class<T>)service.getClass(), service, (Dictionary)null);
+        MockOsgi.registerInjectActivateService(service, bundleContext);
         return service;
     }
 
