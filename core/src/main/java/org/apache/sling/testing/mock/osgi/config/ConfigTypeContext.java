@@ -18,6 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.apache.felix.scr.impl.inject.Annotations;
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
@@ -29,12 +35,6 @@ import org.jetbrains.annotations.Nullable;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.annotations.Component;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * Performs configuration management and component property type construction for {@link ConfigType} and
@@ -153,6 +153,7 @@ public final class ConfigTypeContext {
      * @param applyPid   if not empty, override any specified {@link ConfigType#pid()}.
      * @return a concrete instance of the type specified by the provided {@link ConfigType#type()}
      */
+    @SuppressWarnings("null")
     public Object constructConfigType(@NotNull final ConfigType annotation,
                                       @Nullable final String applyPid) {
         if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
@@ -187,7 +188,7 @@ public final class ConfigTypeContext {
      * @param applyPid   optional non-empty configuration pid to apply if annotation is a {@link ConfigType}
      * @return a typed config
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "null" })
     public TypedConfig newTypedConfig(@NotNull final Annotation annotation,
                                          @Nullable final String applyPid) {
         if (annotation instanceof ConfigType) {

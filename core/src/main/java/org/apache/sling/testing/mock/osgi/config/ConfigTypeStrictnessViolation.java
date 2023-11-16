@@ -24,6 +24,8 @@ package org.apache.sling.testing.mock.osgi.config;
  * set to {@code true}, which fails to meet the documented assertion rules.
  */
 public class ConfigTypeStrictnessViolation extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     public ConfigTypeStrictnessViolation(String message) {
         super(message);
     }

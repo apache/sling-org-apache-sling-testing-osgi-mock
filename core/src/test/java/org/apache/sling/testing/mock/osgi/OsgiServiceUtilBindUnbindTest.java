@@ -20,7 +20,6 @@ package org.apache.sling.testing.mock.osgi;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -139,7 +138,7 @@ public class OsgiServiceUtilBindUnbindTest {
     }
 
 
-    @SuppressWarnings({ "null", "unchecked" })
+    @SuppressWarnings("null")
     private <T> T registerInjectService(T service) {
         MockOsgi.registerInjectActivateService(service, bundleContext);
         return service;

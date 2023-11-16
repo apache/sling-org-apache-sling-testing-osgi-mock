@@ -18,28 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
-import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
-import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
-import org.apache.sling.testing.mock.osgi.config.annotations.SetConfigs;
-import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.osgi.service.component.propertytypes.ServiceRanking;
-import org.osgi.service.component.propertytypes.ServiceVendor;
-
-import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.Executable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,6 +30,29 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Executable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+
+import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
+import org.apache.sling.testing.mock.osgi.config.annotations.ConfigTypes;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfig;
+import org.apache.sling.testing.mock.osgi.config.annotations.SetConfigs;
+import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
+import org.mockito.quality.Strictness;
+import org.osgi.service.component.propertytypes.ServiceRanking;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 public class ConfigAnnotationUtilTest {
 
@@ -190,22 +191,25 @@ public class ConfigAnnotationUtilTest {
         String value();
     }
 
+    @SuppressWarnings("null")
     ParameterType1 newMockType1Value(@NotNull final String value) {
-        ParameterType1 mocked = mock(ParameterType1.class, withSettings().lenient());
+        ParameterType1 mocked = mock(ParameterType1.class, withSettings().strictness(Strictness.LENIENT));
         doReturn(value).when(mocked).value();
         return mocked;
     }
 
+    @SuppressWarnings({ "null", "unchecked" })
     TypedConfig<ParameterType1> newMockTypedConfig1(@NotNull final String value) {
         ParameterType1 mockedConfig = newMockType1Value(value);
         TypedConfig<ParameterType1> mocked =
-                (TypedConfig<ParameterType1>) mock(TypedConfig.class, withSettings().lenient());
+                mock(TypedConfig.class, withSettings().strictness(Strictness.LENIENT));
         doReturn(mockedConfig).when(mocked).getConfig();
         doAnswer(call -> Map.of("parameter.type1", value)).when(mocked).getConfigMap();
         return mocked;
     }
 
     @Test
+    @SuppressWarnings("null")
     public void resolveParameterToArray() {
         List<ParameterType1> type1Values = List.of(
                 newMockType1Value("one"),
@@ -219,6 +223,7 @@ public class ConfigAnnotationUtilTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void resolveFirstParameter() {
         List<ParameterType1> type1Values = List.of(
                 newMockType1Value("one"),
@@ -231,6 +236,7 @@ public class ConfigAnnotationUtilTest {
     }
 
     @Test(expected = NoSuchElementException.class)
+    @SuppressWarnings("unchecked")
     public void resolveFirstParameterAbsent() {
         List<ParameterType1> type1Values = List.of(
                 newMockType1Value("one"),
@@ -272,6 +278,7 @@ public class ConfigAnnotationUtilTest {
     }
 
     @Test
+    @SuppressWarnings({ "null", "unused" })
     public void resolveParameterToValueOrConfigMap() throws Exception {
         List<TypedConfig<ParameterType1>> type1Values = List.of(
                 newMockTypedConfig1("one"),

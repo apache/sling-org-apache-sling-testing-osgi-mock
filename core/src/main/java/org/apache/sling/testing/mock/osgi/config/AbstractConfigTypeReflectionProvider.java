@@ -18,12 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.apache.felix.scr.impl.inject.Annotations;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.osgi.annotation.versioning.ProviderType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser.isSupportedConfigTypeValueType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -34,7 +29,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser.isSupportedConfigTypeValueType;
+import org.apache.felix.scr.impl.inject.Annotations;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.osgi.annotation.versioning.ProviderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base config type reflection provider class.
@@ -49,6 +49,7 @@ abstract class AbstractConfigTypeReflectionProvider {
      * @param configType the config type
      * @return a property defaults provider
      */
+    @SuppressWarnings("unchecked")
     static AbstractConfigTypeReflectionProvider getInstance(@NotNull final Class<?> configType) {
         final String prefix = Annotations.getPrefix(configType);
         if (configType.isAnnotation()) {

@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -427,7 +428,7 @@ final class OsgiMetadataUtil {
             if (properties != null) {
                 pid = (String)properties.get(Constants.SERVICE_PID);
             }
-            return StringUtils.defaultString(pid, name);
+            return Objects.toString(pid, name);
         }
 
         public String[] getConfigurationPID() {

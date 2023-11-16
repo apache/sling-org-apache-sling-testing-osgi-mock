@@ -78,6 +78,7 @@ public final class ComponentPropertyParser {
         }
     }
 
+    @SuppressWarnings("null")
     static String identifierToPropertyName(@NotNull String name, @Nullable String prefix) {
         Matcher m = IDENTIFIERTOPROPERTY.matcher(name);
         if (!m.find()) {

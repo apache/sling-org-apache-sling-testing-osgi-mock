@@ -18,12 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
 import org.apache.sling.testing.mock.osgi.config.annotations.TypedConfig;
 import org.jetbrains.annotations.NotNull;
-
-import java.lang.annotation.Annotation;
-import java.util.Map;
 
 /**
  * Default implementation of {@link TypedConfig}.
@@ -48,6 +48,7 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
 
     @Override
     @NotNull
+    @SuppressWarnings("null")
     public T getConfig() {
         return config;
     }
@@ -67,6 +68,7 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
      * @param <T>        the config type
      * @return a new instance
      */
+    @SuppressWarnings("null")
     public static <T> AnnotationTypedConfig<T> newInstance(@NotNull Class<T> type,
                                                            @NotNull Object config,
                                                            @NotNull Annotation annotation) {

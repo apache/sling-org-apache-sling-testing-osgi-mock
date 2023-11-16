@@ -18,15 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.osgi.service.component.propertytypes.ServiceRanking;
-import org.osgi.service.component.propertytypes.ServiceVendor;
-
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -37,11 +28,21 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
 
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
+import org.mockito.quality.Strictness;
+import org.osgi.service.component.propertytypes.ServiceRanking;
+import org.osgi.service.component.propertytypes.ServiceVendor;
+
 public class ConfigCollectionTest {
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     private <T> TypedConfig<T> newMockEntry(@NotNull final Class<T> configType, @NotNull final T config) {
-        TypedConfig<T> mocked = (TypedConfig<T>) mock(TypedConfig.class, withSettings().lenient());
+        TypedConfig<T> mocked = mock(TypedConfig.class, withSettings().strictness(Strictness.LENIENT));
         doReturn(configType).when(mocked).getType();
         doReturn(config).when(mocked).getConfig();
         doCallRealMethod().when(mocked).stream(any(Class.class));
@@ -49,9 +50,9 @@ public class ConfigCollectionTest {
         return mocked;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "null" })
     private ConfigCollection newMockConfigCollection(@NotNull final Supplier<Stream<TypedConfig<?>>> entryStreamSupplier) {
-        ConfigCollection mocked = mock(ConfigCollection.class, withSettings().lenient());
+        ConfigCollection mocked = mock(ConfigCollection.class, withSettings().strictness(Strictness.LENIENT));
         doCallRealMethod().when(mocked).stream(any(Class.class));
         doCallRealMethod().when(mocked).configStream(any(Class.class));
         doAnswer(call -> entryStreamSupplier.get()).when(mocked).stream();

@@ -116,6 +116,7 @@ public class AnnotationTypedConfigTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testGetConfigMap() {
         ConfigType annotation = getClass().getAnnotation(ConfigType.class);
         assertEquals(Map.of("service.ranking", 0),

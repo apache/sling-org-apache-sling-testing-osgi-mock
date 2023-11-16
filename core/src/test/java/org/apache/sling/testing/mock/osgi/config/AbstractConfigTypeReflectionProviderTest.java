@@ -56,6 +56,7 @@ public class AbstractConfigTypeReflectionProviderTest {
     @InvalidAnnotationConfig(size = 10, name = "Fred",
             other_config = @AnnotationConfig(size = 2, name = "Willy"))
     public static class HasAnnotationConfig {
+        @SuppressWarnings("unused")
         private String getInaccessibleValue() {
             return "";
         }
