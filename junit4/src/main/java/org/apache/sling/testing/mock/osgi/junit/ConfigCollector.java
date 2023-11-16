@@ -95,7 +95,7 @@ public class ConfigCollector implements TestRule, ConfigCollection {
      * @param component   an optional component type as configuration pid to apply
      * @param pid         specify a non-empty configuration pid
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "null" })
     public ConfigCollector(@NotNull final OsgiContextImpl osgiContext,
                            @Nullable final Class component,
                            @Nullable final String pid) {

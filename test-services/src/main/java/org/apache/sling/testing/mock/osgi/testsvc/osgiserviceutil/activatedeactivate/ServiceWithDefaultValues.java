@@ -24,6 +24,7 @@ import org.osgi.service.component.annotations.Component;
 @Component
 public class ServiceWithDefaultValues {
 
+    @SuppressWarnings("unused")
     private ServiceWithDefaultValuesConfig config;
 
     @Activate

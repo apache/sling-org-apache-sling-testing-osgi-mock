@@ -156,6 +156,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
                 || isSupportedConfigType(parameterType, extensionContext);
     }
 
+    @SuppressWarnings("null")
     Object resolveConfigCollectionParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
         CollectConfigTypes configTypes = parameterContext.findAnnotation(CollectConfigTypes.class)
                 .orElse(null);
@@ -201,6 +202,7 @@ public class OsgiConfigParametersExtension implements ParameterResolver, BeforeE
         return requireSingleParameterValue(Map.class, value);
     }
 
+    @SuppressWarnings("null")
     Object resolveConfigTypeParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
         final boolean isArray = parameterContext.getParameter().getType().isArray();
         final Class<?> parameterType = requireSupportedParameterType(parameterContext.getParameter().getType());

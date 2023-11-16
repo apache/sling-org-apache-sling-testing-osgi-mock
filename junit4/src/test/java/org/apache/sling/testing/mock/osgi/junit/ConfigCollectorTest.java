@@ -18,6 +18,14 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.sling.testing.mock.osgi.MapUtil;
 import org.apache.sling.testing.mock.osgi.config.annotations.AutoConfig;
 import org.apache.sling.testing.mock.osgi.config.annotations.ConfigType;
@@ -29,14 +37,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 @SetConfig(pid = "common-config", property = {
         "service.ranking:Integer=42",
@@ -96,6 +96,7 @@ public class ConfigCollectorTest {
 
     @Test
     @ListConfig(size = 10, reverse = false)
+    @SuppressWarnings("null")
     public void autoConfig1() throws Exception {
         ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
         assertEquals(Map.of("size", 10, "reverse", false, "service.pid", List.class.getName()),
@@ -104,6 +105,7 @@ public class ConfigCollectorTest {
 
     @Test
     @ListConfig(size = 12, reverse = true)
+    @SuppressWarnings("null")
     public void autoConfig2() throws Exception {
         ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
         assertEquals(Map.of("size", 12, "reverse", true, "service.pid", List.class.getName()),
@@ -113,6 +115,7 @@ public class ConfigCollectorTest {
     @Test
     @AutoConfig(Void.class) // overrides class annotation with unset config pid
     @ListConfig(size = 12, reverse = true)
+    @SuppressWarnings("null")
     public void autoConfigVoid() throws Exception {
         ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
         assertNull(MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
