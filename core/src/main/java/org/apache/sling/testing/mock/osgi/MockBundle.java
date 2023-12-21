@@ -210,7 +210,7 @@ public final class MockBundle implements Bundle {
 
     /**
      * This is primarily used within the context of unit testing by
-     * {@link org.apache.felix.scr.impl.inject.Annotations#toObject(Class, Map, Bundle, boolean)} for injection of
+     * {@link org.apache.felix.scr.impl.inject.internal.Annotations#toObject(Class, Map, Bundle, boolean)} for injection of
      * {@code Class}-typed OSGi config attributes for default values and String properties representing FQDNs.
      *
      * @param name The name of the class to load.
