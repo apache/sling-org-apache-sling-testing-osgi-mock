@@ -40,7 +40,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.impl.inject.Annotations;
+import org.apache.felix.scr.impl.inject.internal.Annotations;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.FieldCollectionType;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
