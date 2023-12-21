@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.felix.scr.impl.inject.Annotations;
+import org.apache.felix.scr.impl.inject.internal.Annotations;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ProviderType;

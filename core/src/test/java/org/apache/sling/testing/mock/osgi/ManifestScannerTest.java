@@ -33,7 +33,7 @@ public class ManifestScannerTest {
     @Test
     public void testGetValues() {
         Collection<String> bundleSymbolicNames = ManifestScanner.getValues(Constants.BUNDLE_SYMBOLICNAME);
-        assertTrue(bundleSymbolicNames.contains("org.apache.commons.io"));
+        assertTrue(bundleSymbolicNames.contains("org.apache.commons.commons-io"));
 
         Collection<String> includeResource = ManifestScanner.getValues("Include-Resource");
         assertTrue(includeResource.contains("META-INF/LICENSE.txt=LICENSE.txt"));
