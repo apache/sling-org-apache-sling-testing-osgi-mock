@@ -23,19 +23,19 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling-bundle-parent</artifactId>
-        <version>52</version>
+        <version>60</version>
         <relativePath />
     </parent>
 
     <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
-    <version>3.4.3-SNAPSHOT</version>
+    <version>3.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache Sling Testing OSGi Mock Parent</name>
     <description>Mock implementation of selected OSGi APIs.</description>
 
     <properties>
-        <project.build.outputTimestamp>2024-01-22T13:54:57Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2024-04-09T15:35:54Z</project.build.outputTimestamp>
     </properties>
 
     <dependencies>
