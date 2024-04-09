@@ -31,5 +31,4 @@ public class ServiceWithDefaultValuesConstructor {
     public ServiceWithDefaultValuesConstructor(ServiceWithDefaultValuesConfig config) {
         this.config = config;
     }
-
 }

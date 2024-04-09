@@ -18,14 +18,14 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test with {@link OsgiContext} with context plugins.
@@ -65,5 +65,4 @@ class OsgiContextPluginTest {
     public void tearDown() throws Exception {
         verify(contextBeforeTeardown).execute(context);
     }
-
 }

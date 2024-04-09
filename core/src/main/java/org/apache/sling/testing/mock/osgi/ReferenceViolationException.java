@@ -29,5 +29,4 @@ public final class ReferenceViolationException extends RuntimeException {
     public ReferenceViolationException(@NotNull String message) {
         super(message);
     }
-
 }

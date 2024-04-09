@@ -18,10 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +37,10 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+
 @RunWith(MockitoJUnitRunner.class)
 public class MockBundleContextStaticGreedyReferencesTest {
 
@@ -50,18 +50,25 @@ public class MockBundleContextStaticGreedyReferencesTest {
 
     @Mock
     private ServiceInterface1 dependency1a;
+
     @Mock
     private ServiceInterface1 dependency1b;
+
     @Mock
     private ServiceInterface1Optional dependency1aOptional;
+
     @Mock
     private ServiceInterface1Optional dependency1bOptional;
+
     @Mock
     private ServiceInterface2 dependency2a;
+
     @Mock
     private ServiceInterface2 dependency2b;
+
     @Mock
     private ServiceSuperInterface3 dependency3a;
+
     @Mock
     private ServiceSuperInterface3 dependency3b;
 
@@ -86,7 +93,8 @@ public class MockBundleContextStaticGreedyReferencesTest {
 
     @Test
     public void testAddRemoveOptionalUnaryService() {
-        ServiceRegistration reg1aOptional = bundleContext.registerService(ServiceInterface1Optional.class.getName(), dependency1aOptional, null);
+        ServiceRegistration reg1aOptional =
+                bundleContext.registerService(ServiceInterface1Optional.class.getName(), dependency1aOptional, null);
         assertDependency1Optional(dependency1aOptional);
 
         reg1aOptional.unregister();
@@ -97,7 +105,8 @@ public class MockBundleContextStaticGreedyReferencesTest {
         bundleContext.registerService(ServiceInterface1Optional.class.getName(), dependency1aOptional, null);
         assertDependency1Optional(dependency1aOptional);
 
-        // in real OSGi this should fail - but this is not covered by the current implementation. so test the real implementation here.
+        // in real OSGi this should fail - but this is not covered by the current implementation. so test the real
+        // implementation here.
         bundleContext.registerService(ServiceInterface1Optional.class.getName(), dependency1bOptional, null);
         assertDependency1Optional(dependency1bOptional);
     }
@@ -115,10 +124,12 @@ public class MockBundleContextStaticGreedyReferencesTest {
 
     @Test
     public void testAddRemoveOptionalMultipleService() {
-        ServiceRegistration reg3a = bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a, null);
+        ServiceRegistration reg3a =
+                bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a, null);
         assertDependencies3(dependency3a);
 
-        ServiceRegistration reg3b = bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b, null);
+        ServiceRegistration reg3b =
+                bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b, null);
         assertDependencies3(dependency3a, dependency3b);
 
         reg3a.unregister();
@@ -130,7 +141,8 @@ public class MockBundleContextStaticGreedyReferencesTest {
 
     @Test
     public void testAddRemoveMandatoryMultipleService() {
-        ServiceRegistration reg2b = bundleContext.registerService(ServiceInterface2.class.getName(), dependency2b, null);
+        ServiceRegistration reg2b =
+                bundleContext.registerService(ServiceInterface2.class.getName(), dependency2b, null);
         assertDependencies2(dependency2a, dependency2b);
 
         reg2b.unregister();
@@ -139,7 +151,8 @@ public class MockBundleContextStaticGreedyReferencesTest {
 
     @Test(expected = ReferenceViolationException.class)
     public void testAddRemoveMandatoryMultipleService_FailReg2aUnregister() {
-        ServiceRegistration reg2b = bundleContext.registerService(ServiceInterface2.class.getName(), dependency2b, null);
+        ServiceRegistration reg2b =
+                bundleContext.registerService(ServiceInterface2.class.getName(), dependency2b, null);
         assertDependencies2(dependency2a, dependency2b);
 
         reg2b.unregister();
@@ -153,10 +166,14 @@ public class MockBundleContextStaticGreedyReferencesTest {
     public void testReferenceWithTargetFilter() {
         assertDependencies3Filtered();
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3a,
+        bundleContext.registerService(
+                ServiceInterface3.class.getName(),
+                dependency3a,
                 MapUtil.toDictionary(Map.<String, Object>of("prop1", "abc")));
 
-        bundleContext.registerService(ServiceInterface3.class.getName(), dependency3b,
+        bundleContext.registerService(
+                ServiceInterface3.class.getName(),
+                dependency3b,
                 MapUtil.toDictionary(Map.<String, Object>of("prop1", "def")));
 
         assertDependencies3Filtered(dependency3a);
@@ -166,8 +183,7 @@ public class MockBundleContextStaticGreedyReferencesTest {
         Service3StaticGreedy service = getService();
         if (instance == null) {
             assertNull(service.getReference1());
-        }
-        else {
+        } else {
             assertSame(instance, service.getReference1());
         }
     }
@@ -176,33 +192,32 @@ public class MockBundleContextStaticGreedyReferencesTest {
         Service3StaticGreedy service = getService();
         if (instance == null) {
             assertNull(service.getReference1Optional());
-        }
-        else {
+        } else {
             assertSame(instance, service.getReference1Optional());
         }
     }
 
     private void assertDependencies2(ServiceInterface2... instances) {
         Service3StaticGreedy service = getService();
-        assertEquals(Set.<ServiceInterface2>of(instances),
-                Set.<ServiceInterface2>copyOf(service.getReferences2()));
+        assertEquals(Set.<ServiceInterface2>of(instances), Set.<ServiceInterface2>copyOf(service.getReferences2()));
     }
 
     private void assertDependencies3(ServiceSuperInterface3... instances) {
         Service3StaticGreedy service = getService();
-        assertEquals(Set.<ServiceSuperInterface3>of(instances),
+        assertEquals(
+                Set.<ServiceSuperInterface3>of(instances),
                 Set.<ServiceSuperInterface3>copyOf(service.getReferences3()));
     }
 
     private Service3StaticGreedy getService() {
         ServiceReference<?> serviceRef = bundleContext.getServiceReference(Service3StaticGreedy.class.getName());
-        return (Service3StaticGreedy)bundleContext.getService(serviceRef);
+        return (Service3StaticGreedy) bundleContext.getService(serviceRef);
     }
 
     private void assertDependencies3Filtered(ServiceSuperInterface3... instances) {
         Service3StaticGreedy service = getService();
-        assertEquals(Set.<ServiceSuperInterface3>of(instances),
+        assertEquals(
+                Set.<ServiceSuperInterface3>of(instances),
                 Set.<ServiceSuperInterface3>copyOf(service.getReferences3Filtered()));
     }
-
 }

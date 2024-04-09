@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 
-@Component(service = { ServiceInterface1.class, ServiceInterface2.class })
+@Component(service = {ServiceInterface1.class, ServiceInterface2.class})
 public class Service8 implements ServiceInterface1, ServiceInterface2, ServiceInterface3 {
 
     private ServiceRegistration<ServiceInterface3> serviceRegistration;
@@ -43,5 +43,4 @@ public class Service8 implements ServiceInterface1, ServiceInterface2, ServiceIn
         // explicitly set to null to ensure deactivate is never called twice
         serviceRegistration = null;
     }
-
 }

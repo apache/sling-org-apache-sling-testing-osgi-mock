@@ -63,5 +63,4 @@ public abstract class Service9Super1 implements ServiceInterface1 {
     public Class<?> getUnbindSvc1FromClass() {
         return unbindSvc1FromClass;
     }
-
 }

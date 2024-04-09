@@ -27,5 +27,4 @@ public class MyComponent implements MyService {
     public String foo() {
         return "bar";
     }
-
 }

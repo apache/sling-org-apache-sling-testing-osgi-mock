@@ -43,8 +43,8 @@ import org.jetbrains.annotations.Nullable;
  * Common functions for resolving OSGi config test parameters.
  */
 public final class ConfigAnnotationUtil {
-    private static final Set<Class<? extends Annotation>> EXCLUDE_FEATURE_ANNOTATIONS = Set.of(
-            ConfigTypes.class, ConfigType.class, SetConfigs.class, SetConfig.class, AutoConfig.class);
+    private static final Set<Class<? extends Annotation>> EXCLUDE_FEATURE_ANNOTATIONS =
+            Set.of(ConfigTypes.class, ConfigType.class, SetConfigs.class, SetConfig.class, AutoConfig.class);
 
     private ConfigAnnotationUtil() {
         // prevent instantiation
@@ -85,8 +85,8 @@ public final class ConfigAnnotationUtil {
      * @param configTypePredicate an optional subsequent predicate for the applicable configType
      * @return a stream of annotations
      */
-    public static Stream<Annotation> findConfigTypeAnnotations(@NotNull AnnotatedElement element,
-                                                               @Nullable ConfigTypePredicate configTypePredicate) {
+    public static Stream<Annotation> findConfigTypeAnnotations(
+            @NotNull AnnotatedElement element, @Nullable ConfigTypePredicate configTypePredicate) {
         return Stream.of(element.getAnnotations())
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
                 .filter(ConfigAnnotationUtil.configTypeAnnotationFilter(configTypePredicate));
@@ -117,8 +117,8 @@ public final class ConfigAnnotationUtil {
      * @param configTypePredicate an optional subsequent predicate for the applicable configType
      * @return a stream of annotations
      */
-    public static Stream<Annotation> findConfigTypeAnnotations(@NotNull Collection<Annotation> annotations,
-                                                               @Nullable ConfigTypePredicate configTypePredicate) {
+    public static Stream<Annotation> findConfigTypeAnnotations(
+            @NotNull Collection<Annotation> annotations, @Nullable ConfigTypePredicate configTypePredicate) {
         return annotations.stream()
                 .flatMap(ConfigAnnotationUtil::flattenAnnotation)
                 .filter(ConfigAnnotationUtil.configTypeAnnotationFilter(configTypePredicate));
@@ -179,8 +179,7 @@ public final class ConfigAnnotationUtil {
     public static boolean isValidConfigType(@NotNull Class<?> configType) {
         return (configType.isAnnotation() || configType.isInterface())
                 && AbstractConfigTypeReflectionProvider.getInstance(configType).isValidConfigType()
-                && EXCLUDE_FEATURE_ANNOTATIONS.stream()
-                .noneMatch(excluded -> excluded.isAssignableFrom(configType));
+                && EXCLUDE_FEATURE_ANNOTATIONS.stream().noneMatch(excluded -> excluded.isAssignableFrom(configType));
     }
 
     /**
@@ -192,10 +191,11 @@ public final class ConfigAnnotationUtil {
      * @param configTypePredicate an optional subsequent predicate for the applicable configType
      * @return an annotation stream predicate
      */
-    public static Predicate<Annotation> configTypeAnnotationFilter(@Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate) {
+    public static Predicate<Annotation> configTypeAnnotationFilter(
+            @Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate) {
         final ConfigTypePredicate primary = (parent, configType) -> isValidConfigType(configType);
-        final ConfigTypePredicate andThen = Optional.ofNullable(configTypePredicate)
-                .orElse((parentAnnotation, configType) -> true);
+        final ConfigTypePredicate andThen =
+                Optional.ofNullable(configTypePredicate).orElse((parentAnnotation, configType) -> true);
         return annotation -> {
             if (ConfigType.class.isAssignableFrom(annotation.annotationType())) {
                 final ConfigType parentAnnotation = (ConfigType) annotation;
@@ -232,10 +232,10 @@ public final class ConfigAnnotationUtil {
      * @return an array of matching configs
      */
     @SuppressWarnings("unchecked")
-    public static <T> T[] resolveParameterToArray(@NotNull ConfigCollection configCollection,
-                                                  @NotNull Class<T> configType) {
-        return configCollection.configStream(configType)
-                .toArray((int size) -> (T[]) Array.newInstance(configType, size));
+    public static <T> T[] resolveParameterToArray(
+            @NotNull ConfigCollection configCollection, @NotNull Class<T> configType) {
+        return configCollection.configStream(configType).toArray((int size) ->
+                (T[]) Array.newInstance(configType, size));
     }
 
     /**
@@ -255,10 +255,11 @@ public final class ConfigAnnotationUtil {
      * @param <T>                     the parameter config type
      * @return a single parameter value if available, or empty
      */
-    public static <T> Optional<TypedConfig<T>> resolveParameterToTypedConfig(@NotNull ConfigCollection configCollection,
-                                                                             @NotNull Class<T> parameterConfigType,
-                                                                             @NotNull Class<?>[] signatureParameterTypes,
-                                                                             int parameterIndex) {
+    public static <T> Optional<TypedConfig<T>> resolveParameterToTypedConfig(
+            @NotNull ConfigCollection configCollection,
+            @NotNull Class<T> parameterConfigType,
+            @NotNull Class<?>[] signatureParameterTypes,
+            int parameterIndex) {
         if (parameterIndex < 0
                 || parameterIndex >= signatureParameterTypes.length
                 || !signatureParameterTypes[parameterIndex].isAssignableFrom(parameterConfigType)) {
@@ -288,14 +289,15 @@ public final class ConfigAnnotationUtil {
      * @param <T>                     the parameter config type
      * @return a single parameter value if available, or empty
      */
-    public static <T> Optional<T> resolveParameterToValue(@NotNull ConfigCollection configCollection,
-                                                          @NotNull Class<T> parameterConfigType,
-                                                          @NotNull Class<?>[] signatureParameterTypes,
-                                                          int parameterIndex) {
-        return resolveParameterToTypedConfig(configCollection, parameterConfigType,
-                signatureParameterTypes, parameterIndex).map(TypedConfig::getConfig);
+    public static <T> Optional<T> resolveParameterToValue(
+            @NotNull ConfigCollection configCollection,
+            @NotNull Class<T> parameterConfigType,
+            @NotNull Class<?>[] signatureParameterTypes,
+            int parameterIndex) {
+        return resolveParameterToTypedConfig(
+                        configCollection, parameterConfigType, signatureParameterTypes, parameterIndex)
+                .map(TypedConfig::getConfig);
     }
-
 
     /**
      * Returns the first config map from the {@link ConfigCollection}, if present, after skipping the same number of
@@ -313,12 +315,13 @@ public final class ConfigAnnotationUtil {
      * @param <T>                     the parameter config type
      * @return a single parameter value if available, or empty
      */
-    public static <T> Optional<Map<String, Object>> resolveParameterToConfigMap(@NotNull ConfigCollection configCollection,
-                                                                                @NotNull Class<T> parameterConfigType,
-                                                                                @NotNull Class<?>[] signatureParameterTypes,
-                                                                                int parameterIndex) {
-        return resolveParameterToTypedConfig(configCollection, parameterConfigType,
-                signatureParameterTypes, parameterIndex).map(TypedConfig::getConfigMap);
+    public static <T> Optional<Map<String, Object>> resolveParameterToConfigMap(
+            @NotNull ConfigCollection configCollection,
+            @NotNull Class<T> parameterConfigType,
+            @NotNull Class<?>[] signatureParameterTypes,
+            int parameterIndex) {
+        return resolveParameterToTypedConfig(
+                        configCollection, parameterConfigType, signatureParameterTypes, parameterIndex)
+                .map(TypedConfig::getConfigMap);
     }
-
 }

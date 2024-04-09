@@ -66,5 +66,4 @@ public class MockLogServiceTest {
     public void testLogExceptionInvalidLevel() {
         this.logService.log(0, "message 2", new Exception());
     }
-
 }

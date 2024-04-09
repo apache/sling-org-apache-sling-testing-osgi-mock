@@ -43,7 +43,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final @NotNull OsgiContextBuilder plugin(@NotNull ContextPlugin<? extends OsgiContextImpl> @NotNull ... plugin) {
+    public final @NotNull OsgiContextBuilder plugin(
+            @NotNull ContextPlugin<? extends OsgiContextImpl> @NotNull ... plugin) {
         plugins.addPlugin(plugin);
         return this;
     }
@@ -53,7 +54,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final @NotNull OsgiContextBuilder beforeSetUp(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeSetUpCallback) {
+    public final @NotNull OsgiContextBuilder beforeSetUp(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeSetUpCallback) {
         plugins.addBeforeSetUpCallback(beforeSetUpCallback);
         return this;
     }
@@ -63,7 +65,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final @NotNull OsgiContextBuilder afterSetUp(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterSetUpCallback) {
+    public final @NotNull OsgiContextBuilder afterSetUp(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterSetUpCallback) {
         plugins.addAfterSetUpCallback(afterSetUpCallback);
         return this;
     }
@@ -73,7 +76,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final @NotNull OsgiContextBuilder beforeTearDown(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeTearDownCallback) {
+    public final @NotNull OsgiContextBuilder beforeTearDown(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeTearDownCallback) {
         plugins.addBeforeTearDownCallback(beforeTearDownCallback);
         return this;
     }
@@ -83,7 +87,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final @NotNull OsgiContextBuilder afterTearDown(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterTearDownCallback) {
+    public final @NotNull OsgiContextBuilder afterTearDown(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterTearDownCallback) {
         plugins.addAfterTearDownCallback(afterTearDownCallback);
         return this;
     }
@@ -94,5 +99,4 @@ public final class OsgiContextBuilder {
     public @NotNull OsgiContext build() {
         return new OsgiContext(plugins);
     }
-
 }

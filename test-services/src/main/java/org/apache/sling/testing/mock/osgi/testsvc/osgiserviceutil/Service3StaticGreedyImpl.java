@@ -33,30 +33,55 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-@Component(service= Service3StaticGreedy.class,
-        reference = { @Reference(name = "reference2", service = ServiceInterface2.class, cardinality = ReferenceCardinality.AT_LEAST_ONE,
-        policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY,
-        bind="bindReference2", unbind="unbindReference2") })
+@Component(
+        service = Service3StaticGreedy.class,
+        reference = {
+            @Reference(
+                    name = "reference2",
+                    service = ServiceInterface2.class,
+                    cardinality = ReferenceCardinality.AT_LEAST_ONE,
+                    policy = ReferencePolicy.STATIC,
+                    policyOption = ReferencePolicyOption.GREEDY,
+                    bind = "bindReference2",
+                    unbind = "unbindReference2")
+        })
 public class Service3StaticGreedyImpl implements Service3StaticGreedy {
 
-    @Reference(bind="bindReference1", unbind="unbindReference1",
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            bind = "bindReference1",
+            unbind = "unbindReference1",
+            policy = ReferencePolicy.STATIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private ServiceInterface1 reference1;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, bind="bindReference1Optional", unbind="unbindReference1Optional",
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL,
+            bind = "bindReference1Optional",
+            unbind = "unbindReference1Optional",
+            policy = ReferencePolicy.STATIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private ServiceInterface1Optional reference1Optional;
 
     private List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
 
-    @Reference(name = "reference3", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY,
-            bind="bindReference3", unbind="unbindReference3")
+    @Reference(
+            name = "reference3",
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.STATIC,
+            policyOption = ReferencePolicyOption.GREEDY,
+            bind = "bindReference3",
+            unbind = "unbindReference3")
     private List<ServiceSuperInterface3> references3 = new ArrayList<>();
+
     private List<Map<String, Object>> reference3Configs = new ArrayList<>();
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE, target="(prop1=abc)",
-            policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            target = "(prop1=abc)",
+            policy = ReferencePolicy.STATIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private List<ServiceSuperInterface3> references3Filtered;
 
     private ComponentContext componentContext;
@@ -74,7 +99,7 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
     }
 
     @Modified
-    private void modified(Map<String,Object> newConfig) {
+    private void modified(Map<String, Object> newConfig) {
         this.config = newConfig;
     }
 
@@ -92,7 +117,7 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
     public List<ServiceInterface2> getReferences2() {
         List<ServiceInterface2> services = new ArrayList<>();
         for (ServiceReference<?> serviceReference : references2) {
-            services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
+            services.add((ServiceInterface2) componentContext.getBundleContext().getService(serviceReference));
         }
         return services;
     }
@@ -153,5 +178,4 @@ public class Service3StaticGreedyImpl implements Service3StaticGreedy {
         references3.remove(service);
         reference3Configs.remove(serviceConfig);
     }
-
 }

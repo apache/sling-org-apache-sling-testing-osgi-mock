@@ -31,18 +31,28 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-@Component(reference = {
-    @Reference(name = "reference1", bind = "bindReference1", unbind = "unbindReference1", service = ServiceInterface1.class,
-            cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
-})
+@Component(
+        reference = {
+            @Reference(
+                    name = "reference1",
+                    bind = "bindReference1",
+                    unbind = "unbindReference1",
+                    service = ServiceInterface1.class,
+                    cardinality = ReferenceCardinality.MULTIPLE,
+                    policy = ReferencePolicy.DYNAMIC,
+                    policyOption = ReferencePolicyOption.GREEDY)
+        })
 public class Service5 {
 
     private List<ServiceInterface1> instances = new ArrayList<>();
     private List<ServiceReference<ServiceInterface1>> references = new ArrayList<>();
-    private List<Map<String,Object>> configs = new ArrayList<>();
+    private List<Map<String, Object>> configs = new ArrayList<>();
 
-    void bindReference1(ServiceInterface1 instance, ServiceReference<ServiceInterface1> reference,
-            ComponentServiceObjects<ServiceInterface1> serviceObjects, Map<String,Object> config) {
+    void bindReference1(
+            ServiceInterface1 instance,
+            ServiceReference<ServiceInterface1> reference,
+            ComponentServiceObjects<ServiceInterface1> serviceObjects,
+            Map<String, Object> config) {
         assert serviceObjects.getService() == instance;
         assert serviceObjects.getServiceReference() == reference;
         instances.add(instance);
@@ -50,8 +60,11 @@ public class Service5 {
         configs.add(config);
     }
 
-    void unbindReference1(ComponentServiceObjects<ServiceInterface1> serviceObjects, Map<String,Object> config,
-            ServiceInterface1 instance, ServiceReference<ServiceInterface1> reference) {
+    void unbindReference1(
+            ComponentServiceObjects<ServiceInterface1> serviceObjects,
+            Map<String, Object> config,
+            ServiceInterface1 instance,
+            ServiceReference<ServiceInterface1> reference) {
         assert serviceObjects.getService() == instance;
         assert serviceObjects.getServiceReference() == reference;
         instances.remove(instance);
@@ -67,8 +80,7 @@ public class Service5 {
         return references;
     }
 
-    public List<Map<String,Object>> getConfigs() {
+    public List<Map<String, Object>> getConfigs() {
         return configs;
     }
-
 }

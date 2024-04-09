@@ -95,12 +95,12 @@ public class ConfigCollector implements TestRule, ConfigCollection {
      * @param component   an optional component type as configuration pid to apply
      * @param pid         specify a non-empty configuration pid
      */
-    @SuppressWarnings({ "rawtypes", "null" })
-    public ConfigCollector(@NotNull final OsgiContextImpl osgiContext,
-                           @Nullable final Class component,
-                           @Nullable final String pid) {
+    @SuppressWarnings({"rawtypes", "null"})
+    public ConfigCollector(
+            @NotNull final OsgiContextImpl osgiContext, @Nullable final Class component, @Nullable final String pid) {
         this.configTypeContext = new ConfigTypeContext(osgiContext);
-        this.applyPid = configTypeContext.getConfigurationPid(
+        this.applyPid = configTypeContext
+                .getConfigurationPid(
                         Optional.ofNullable(pid).orElse(Component.NAME),
                         Optional.ofNullable(component).orElse(Void.class))
                 .orElse(null);
@@ -128,7 +128,8 @@ public class ConfigCollector implements TestRule, ConfigCollection {
     }
 
     void processSetConfigAnnotations(@NotNull final Description description) {
-        final List<Annotation> updateAnnotations = new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
+        final List<Annotation> updateAnnotations =
+                new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
         updateAnnotations.addAll(description.getAnnotations());
         ConfigAnnotationUtil.findUpdateConfigAnnotations(updateAnnotations)
                 .forEachOrdered(configTypeContext::updateConfiguration);
@@ -141,15 +142,20 @@ public class ConfigCollector implements TestRule, ConfigCollection {
                 .orElse(null);
 
         if (autoPid != null) {
-            final List<Annotation> unboundConfigTypes = new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
+            final List<Annotation> unboundConfigTypes =
+                    new ArrayList<>(Arrays.asList(description.getTestClass().getAnnotations()));
             unboundConfigTypes.addAll(description.getAnnotations());
             final Map<String, Object> accumulator = new HashMap<>();
-            ConfigAnnotationUtil.findConfigTypeAnnotations(unboundConfigTypes, DEFAULT_CONFIG_TYPE_PREDICATE.and(
-                            // only include explicit config annotations or @ConfigType without pids
-                            (annotation, configType) -> annotation.map(some ->
-                                    configTypeContext.getConfigurationPid(some.pid(), some.component())).isEmpty())
-                            ::test)
-                    .map(annotation -> configTypeContext.newTypedConfig(annotation).getConfigMap())
+            ConfigAnnotationUtil.findConfigTypeAnnotations(
+                            unboundConfigTypes,
+                            DEFAULT_CONFIG_TYPE_PREDICATE.and(
+                                    // only include explicit config annotations or @ConfigType without pids
+                                    (annotation, configType) -> annotation
+                                            .map(some ->
+                                                    configTypeContext.getConfigurationPid(some.pid(), some.component()))
+                                            .isEmpty())::test)
+                    .map(annotation ->
+                            configTypeContext.newTypedConfig(annotation).getConfigMap())
                     .forEachOrdered(accumulator::putAll);
             configTypeContext.updateConfiguration(autoPid, accumulator);
         }

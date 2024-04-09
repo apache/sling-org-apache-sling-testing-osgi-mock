@@ -95,8 +95,8 @@ final class OsgiServiceUtil {
         }
 
         // try to find matching activate/deactivate method and execute it
-        if (invokeLifecycleMethod(target, targetClass, methodName, !activate,
-                componentContext, componentContext.getPropertiesAsMap())) {
+        if (invokeLifecycleMethod(
+                target, targetClass, methodName, !activate, componentContext, componentContext.getPropertiesAsMap())) {
             return true;
         }
 
@@ -104,8 +104,8 @@ final class OsgiServiceUtil {
             return false;
         }
 
-        throw new RuntimeException("No matching " + (activate ? "activation" : "deactivation") + " method with name '" + methodName + "' "
-                + " found in class " + targetClass.getName());
+        throw new RuntimeException("No matching " + (activate ? "activation" : "deactivation") + " method with name '"
+                + methodName + "' " + " found in class " + targetClass.getName());
     }
 
     /**
@@ -114,7 +114,8 @@ final class OsgiServiceUtil {
      * @param properties Updated configuration
      * @return true if modified method was called. False if it failed.
      */
-    public static boolean modified(Object target, MockComponentContext componentContext, Map<String,Object> properties) {
+    public static boolean modified(
+            Object target, MockComponentContext componentContext, Map<String, Object> properties) {
         Class<?> targetClass = target.getClass();
 
         // get method name for activation/deactivation from osgi metadata
@@ -132,8 +133,8 @@ final class OsgiServiceUtil {
             return true;
         }
 
-        throw new RuntimeException("No matching modified method with name '" + methodName + "' "
-                + " found in class " + targetClass.getName());
+        throw new RuntimeException("No matching modified method with name '" + methodName + "' " + " found in class "
+                + targetClass.getName());
     }
 
     /**
@@ -175,82 +176,96 @@ final class OsgiServiceUtil {
      * @param properties Component properties
      * @return true if a method was found and invoked
      */
-    private static boolean invokeLifecycleMethod(Object target, Class<?> targetClass,
-            String methodName, boolean allowIntegerArgument,
-            MockComponentContext componentContext, Map<String,Object> properties) {
+    private static boolean invokeLifecycleMethod(
+            Object target,
+            Class<?> targetClass,
+            String methodName,
+            boolean allowIntegerArgument,
+            MockComponentContext componentContext,
+            Map<String, Object> properties) {
 
         return findAndInvokeNearestMethod(targetClass, candidateClass -> {
             // 1. componentContext
-            Method method = getMethod(candidateClass, methodName, new Class<?>[] { ComponentContext.class });
+            Method method = getMethod(candidateClass, methodName, new Class<?>[] {ComponentContext.class});
             if (method != null) {
-                invokeMethod(target, method, new Object[] { componentContext });
+                invokeMethod(target, method, new Object[] {componentContext});
                 return true;
             }
 
             // 2. bundleContext
-            method = getMethod(candidateClass, methodName, new Class<?>[] { BundleContext.class });
+            method = getMethod(candidateClass, methodName, new Class<?>[] {BundleContext.class});
             if (method != null) {
-                invokeMethod(target, method, new Object[] { componentContext.getBundleContext() });
+                invokeMethod(target, method, new Object[] {componentContext.getBundleContext()});
                 return true;
             }
 
             // 3. map
-            method = getMethod(candidateClass, methodName, new Class<?>[] { Map.class });
+            method = getMethod(candidateClass, methodName, new Class<?>[] {Map.class});
             if (method != null) {
-                invokeMethod(target, method, new Object[] { componentContext.getPropertiesAsMap() });
+                invokeMethod(target, method, new Object[] {componentContext.getPropertiesAsMap()});
                 return true;
             }
 
             // 4. Component property type (annotation lass)
-            method = getMethod(candidateClass, methodName, new Class<?>[] { Annotation.class });
+            method = getMethod(candidateClass, methodName, new Class<?>[] {Annotation.class});
             if (method != null) {
-                invokeMethod(target, method, new Object[] { Annotations.toObject(method.getParameterTypes()[0],
-                        componentContext.getPropertiesAsMap(),
-                        componentContext.getBundleContext().getBundle(), false) });
+                invokeMethod(target, method, new Object[] {
+                    Annotations.toObject(
+                            method.getParameterTypes()[0],
+                            componentContext.getPropertiesAsMap(),
+                            componentContext.getBundleContext().getBundle(),
+                            false)
+                });
                 return true;
             }
 
             // 5. int (deactivation only)
             if (allowIntegerArgument) {
-                method = getMethod(candidateClass, methodName, new Class<?>[] { int.class });
+                method = getMethod(candidateClass, methodName, new Class<?>[] {int.class});
                 if (method != null) {
-                    invokeMethod(target, method, new Object[] { 0 });
+                    invokeMethod(target, method, new Object[] {0});
                     return true;
                 }
             }
 
             // 6. Integer (deactivation only)
             if (allowIntegerArgument) {
-                method = getMethod(candidateClass, methodName, new Class<?>[] { Integer.class });
+                method = getMethod(candidateClass, methodName, new Class<?>[] {Integer.class});
                 if (method != null) {
-                    invokeMethod(target, method, new Object[] { 0 });
+                    invokeMethod(target, method, new Object[] {0});
                     return true;
                 }
             }
 
             // 7. mixed arguments
-            Class<?>[] mixedArgsAllowed = allowIntegerArgument ?
-                    new Class<?>[] { ComponentContext.class, BundleContext.class, Map.class, Annotation.class, int.class, Integer.class }
-                    : new Class<?>[] { ComponentContext.class, BundleContext.class, Map.class, Annotation.class };
+            Class<?>[] mixedArgsAllowed = allowIntegerArgument
+                    ? new Class<?>[] {
+                        ComponentContext.class,
+                        BundleContext.class,
+                        Map.class,
+                        Annotation.class,
+                        int.class,
+                        Integer.class
+                    }
+                    : new Class<?>[] {ComponentContext.class, BundleContext.class, Map.class, Annotation.class};
             method = getMethodWithAnyCombinationArgs(candidateClass, methodName, mixedArgsAllowed);
             if (method != null) {
                 Object[] args = new Object[method.getParameterTypes().length];
-                for (int i=0; i<args.length; i++) {
+                for (int i = 0; i < args.length; i++) {
                     if (method.getParameterTypes()[i] == ComponentContext.class) {
                         args[i] = componentContext;
-                    }
-                    else if (method.getParameterTypes()[i] == BundleContext.class) {
+                    } else if (method.getParameterTypes()[i] == BundleContext.class) {
                         args[i] = componentContext.getBundleContext();
-                    }
-                    else if (method.getParameterTypes()[i] == Map.class) {
+                    } else if (method.getParameterTypes()[i] == Map.class) {
                         args[i] = componentContext.getPropertiesAsMap();
-                    }
-                    else if (method.getParameterTypes()[i].isAnnotation()) {
-                        args[i] = Annotations.toObject(method.getParameterTypes()[i],
+                    } else if (method.getParameterTypes()[i].isAnnotation()) {
+                        args[i] = Annotations.toObject(
+                                method.getParameterTypes()[i],
                                 componentContext.getPropertiesAsMap(),
-                                componentContext.getBundleContext().getBundle(), false);
-                    }
-                    else if (method.getParameterTypes()[i] == int.class || method.getParameterTypes()[i] == Integer.class) {
+                                componentContext.getBundleContext().getBundle(),
+                                false);
+                    } else if (method.getParameterTypes()[i] == int.class
+                            || method.getParameterTypes()[i] == Integer.class) {
                         args[i] = 0;
                     }
                 }
@@ -273,11 +288,11 @@ final class OsgiServiceUtil {
     private static Method getMethod(Class clazz, String methodName, Class<?>[] types) {
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (StringUtils.equals(method.getName(), methodName) && method.getParameterTypes().length==types.length) {
+            if (StringUtils.equals(method.getName(), methodName) && method.getParameterTypes().length == types.length) {
                 boolean foundMismatch = false;
-                for (int i=0; i<types.length; i++) {
-                    if (!((method.getParameterTypes()[i]==types[i])
-                            || (types[i]==Annotation.class && method.getParameterTypes()[i].isAnnotation()))) {
+                for (int i = 0; i < types.length; i++) {
+                    if (!((method.getParameterTypes()[i] == types[i])
+                            || (types[i] == Annotation.class && method.getParameterTypes()[i].isAnnotation()))) {
                         foundMismatch = true;
                         break;
                     }
@@ -293,9 +308,9 @@ final class OsgiServiceUtil {
     private static Method getMethodWithAssignableTypes(Class clazz, String methodName, Class<?>[] types) {
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (StringUtils.equals(method.getName(), methodName) && method.getParameterTypes().length==types.length) {
+            if (StringUtils.equals(method.getName(), methodName) && method.getParameterTypes().length == types.length) {
                 boolean foundMismatch = false;
-                for (int i=0; i<types.length; i++) {
+                for (int i = 0; i < types.length; i++) {
                     if (!method.getParameterTypes()[i].isAssignableFrom(types[i])) {
                         foundMismatch = true;
                         break;
@@ -317,22 +332,24 @@ final class OsgiServiceUtil {
                 boolean foundMismatch = false;
                 for (Class<?> parameterType : method.getParameterTypes()) {
                     boolean foundAnyMatch = false;
-                    for (int i=0; i<types.length; i++) {
+                    for (int i = 0; i < types.length; i++) {
                         if (types[i] == Annotation.class) {
                             if (parameterType.isAnnotation()) {
                                 foundAnyMatch = true;
                                 break;
                             }
-                        }
-                        else if (types[i] == ComponentContext.class || types[i] == BundleContext.class
-                                || types[i] == ServiceReference.class || types[i] == ComponentServiceObjects.class
-                                || types[i] == Map.class || types[i] == int.class || types[i] == Integer.class) {
+                        } else if (types[i] == ComponentContext.class
+                                || types[i] == BundleContext.class
+                                || types[i] == ServiceReference.class
+                                || types[i] == ComponentServiceObjects.class
+                                || types[i] == Map.class
+                                || types[i] == int.class
+                                || types[i] == Integer.class) {
                             if (parameterType == types[i]) {
                                 foundAnyMatch = true;
                                 break;
                             }
-                        }
-                        else if (parameterType.isAssignableFrom(types[i])) {
+                        } else if (parameterType.isAssignableFrom(types[i])) {
                             foundAnyMatch = true;
                             break;
                         }
@@ -356,21 +373,28 @@ final class OsgiServiceUtil {
             method.setAccessible(true);
             method.invoke(target, args);
         } catch (IllegalAccessException ex) {
-            throw new RuntimeException("Unable to invoke method '" + method.getName() + "' for class "
-                    + target.getClass().getName(), ex);
+            throw new RuntimeException(
+                    "Unable to invoke method '" + method.getName() + "' for class "
+                            + target.getClass().getName(),
+                    ex);
         } catch (IllegalArgumentException ex) {
-            throw new RuntimeException("Unable to invoke method '" + method.getName() + "' for class "
-                    + target.getClass().getName(), ex);
+            throw new RuntimeException(
+                    "Unable to invoke method '" + method.getName() + "' for class "
+                            + target.getClass().getName(),
+                    ex);
         } catch (InvocationTargetException ex) {
-            throw new RuntimeException("Unable to invoke method '" + method.getName() + "' for class "
-                    + target.getClass().getName(), ex.getCause());
+            throw new RuntimeException(
+                    "Unable to invoke method '" + method.getName() + "' for class "
+                            + target.getClass().getName(),
+                    ex.getCause());
         }
     }
 
     private static Field getField(Class clazz, String fieldName, Class<?> type) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (StringUtils.equals(field.getName(), fieldName) && field.getType().equals(type)) {
+            if (StringUtils.equals(field.getName(), fieldName)
+                    && field.getType().equals(type)) {
                 return field;
             }
         }
@@ -385,7 +409,8 @@ final class OsgiServiceUtil {
     private static Field getFieldWithAssignableType(Class clazz, String fieldName, Class<?> type) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (StringUtils.equals(field.getName(), fieldName) && field.getType().isAssignableFrom(type)) {
+            if (StringUtils.equals(field.getName(), fieldName)
+                    && field.getType().isAssignableFrom(type)) {
                 return field;
             }
         }
@@ -417,11 +442,15 @@ final class OsgiServiceUtil {
             field.setAccessible(true);
             field.set(target, value);
         } catch (IllegalAccessException ex) {
-            throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
-                    + target.getClass().getName(), ex);
+            throw new RuntimeException(
+                    "Unable to set field '" + field.getName() + "' for class "
+                            + target.getClass().getName(),
+                    ex);
         } catch (IllegalArgumentException ex) {
-            throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
-                    + target.getClass().getName(), ex);
+            throw new RuntimeException(
+                    "Unable to set field '" + field.getName() + "' for class "
+                            + target.getClass().getName(),
+                    ex);
         }
     }
 
@@ -452,7 +481,7 @@ final class OsgiServiceUtil {
                 // Look for a target override
                 Object o = properties.get(reference.getName() + ".target");
                 if (o instanceof String) {
-                    reference = new DynamicReference(reference,(String)o);
+                    reference = new DynamicReference(reference, (String) o);
                 }
             }
             injectServiceReference(reference, target, bundleContext);
@@ -477,9 +506,9 @@ final class OsgiServiceUtil {
             if (target == null) {
                 target = targetClass.newInstance();
             }
-        }
-        catch (IllegalAccessException | InstantiationException | InvocationTargetException ex) {
-            throw new RuntimeException("Error creating instance of " + targetClass.getName() + ": " + ex.getMessage(), ex);
+        } catch (IllegalAccessException | InstantiationException | InvocationTargetException ex) {
+            throw new RuntimeException(
+                    "Error creating instance of " + targetClass.getName() + ": " + ex.getMessage(), ex);
         }
 
         // check if there are additional references outside constructor, inject them as well
@@ -492,7 +521,8 @@ final class OsgiServiceUtil {
     }
 
     @SuppressWarnings("unchecked")
-    private static @Nullable <T> T instantiateServiceWithActivateInject(Class<T> targetClass, MockComponentContext componentContext)
+    private static @Nullable <T> T instantiateServiceWithActivateInject(
+            Class<T> targetClass, MockComponentContext componentContext)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(targetClass);
         if (metadata == null) {
@@ -508,9 +538,9 @@ final class OsgiServiceUtil {
         // go through all constructors and try to find a matching one
         Constructor<T> matchingConstructor = null;
         List<Object> constructorParamValues = null;
-        for (Constructor<T> constructor : (Constructor<T>[])targetClass.getConstructors()) {
-            Optional<List<Object>> values = buildConstructorInjectionValues(targetClass, constructor,
-                    componentContext, constructorInjectionReferences);
+        for (Constructor<T> constructor : (Constructor<T>[]) targetClass.getConstructors()) {
+            Optional<List<Object>> values = buildConstructorInjectionValues(
+                    targetClass, constructor, componentContext, constructorInjectionReferences);
             if (values.isPresent()) {
                 matchingConstructor = constructor;
                 constructorParamValues = values.get();
@@ -519,14 +549,16 @@ final class OsgiServiceUtil {
         }
         if (matchingConstructor != null && constructorParamValues != null) {
             return matchingConstructor.newInstance(constructorParamValues.toArray(new Object[0]));
-        }
-        else {
+        } else {
             return null;
         }
     }
 
-    private static <T> Optional<List<Object>> buildConstructorInjectionValues(Class<T> targetClass, Constructor<T> constructor,
-            MockComponentContext componentContext, List<Reference> constructorInjectionReferences)
+    private static <T> Optional<List<Object>> buildConstructorInjectionValues(
+            Class<T> targetClass,
+            Constructor<T> constructor,
+            MockComponentContext componentContext,
+            List<Reference> constructorInjectionReferences)
             throws InstantiationException, IllegalAccessException {
         Iterator<Reference> referenceIterator = constructorInjectionReferences.iterator();
         List<Object> values = new ArrayList<>();
@@ -535,31 +567,29 @@ final class OsgiServiceUtil {
             // check for well-known parameter types first
             if (parameter.getType() == ComponentContext.class) {
                 values.add(componentContext);
-            }
-            else if (parameter.getType() == BundleContext.class) {
+            } else if (parameter.getType() == BundleContext.class) {
                 values.add(componentContext.getBundleContext());
-            }
-            else if (parameter.getType() == Map.class) {
+            } else if (parameter.getType() == Map.class) {
                 values.add(componentContext.getPropertiesAsMap());
-            }
-            else if (parameter.getType().isAnnotation()) {
-                values.add(Annotations.toObject(parameter.getType(),
+            } else if (parameter.getType().isAnnotation()) {
+                values.add(Annotations.toObject(
+                        parameter.getType(),
                         componentContext.getPropertiesAsMap(),
-                        componentContext.getBundleContext().getBundle(), false));
+                        componentContext.getBundleContext().getBundle(),
+                        false));
             }
             // check for reference injection
             else if (referenceIterator.hasNext()) {
                 Reference reference = referenceIterator.next();
-                Optional<?> referenceValue = buildConstructorInjectionValue(targetClass, parameter.getType(), reference, componentContext, parameterIndex++);
+                Optional<?> referenceValue = buildConstructorInjectionValue(
+                        targetClass, parameter.getType(), reference, componentContext, parameterIndex++);
                 if (referenceValue != null) {
                     values.add(referenceValue.isPresent() ? referenceValue.get() : null);
-                }
-                else {
+                } else {
                     // reference not found, constructor is invalid
                     return Optional.empty();
                 }
-            }
-            else {
+            } else {
                 // parameter does not match, constructor is invalid
                 return Optional.empty();
             }
@@ -579,15 +609,22 @@ final class OsgiServiceUtil {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    private static <T> @Nullable Optional<?> buildConstructorInjectionValue(Class<?> targetClass, Class<T> parameterType, Reference reference,
-            MockComponentContext componentContext, int parameterIndex) throws InstantiationException, IllegalAccessException {
+    private static <T> @Nullable Optional<?> buildConstructorInjectionValue(
+            Class<?> targetClass,
+            Class<T> parameterType,
+            Reference reference,
+            MockComponentContext componentContext,
+            int parameterIndex)
+            throws InstantiationException, IllegalAccessException {
         Class<?> type = reference.getInterfaceTypeAsClass();
         // get matching service references
-        List<ServiceInfo<?>> matchingServices = getMatchingServices(type,
-                componentContext.getBundleContext(), reference.getTarget());
+        List<ServiceInfo<?>> matchingServices =
+                getMatchingServices(type, componentContext.getBundleContext(), reference.getTarget());
 
         if (matchingServices.isEmpty() && !reference.isCardinalityOptional()) {
-            throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' (" + type.getName() +  ") into constructor parameter " + parameterIndex + " for class " + targetClass.getName() + " : no matching services were found.");
+            throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' ("
+                    + type.getName() + ") into constructor parameter " + parameterIndex + " for class "
+                    + targetClass.getName() + " : no matching services were found.");
         }
 
         // check for field with list/collection reference
@@ -595,28 +632,28 @@ final class OsgiServiceUtil {
             Collection<Object> collection = newCollectionInstance(parameterType);
             switch (reference.getFieldCollectionType()) {
                 case SERVICE:
-                    matchingServices.stream()
-                        .map(ServiceInfo::getService)
-                        .forEach(collection::add);
+                    matchingServices.stream().map(ServiceInfo::getService).forEach(collection::add);
                     break;
                 case REFERENCE:
                     matchingServices.stream()
-                        .map(ServiceInfo::getServiceReference)
-                        .forEach(collection::add);
+                            .map(ServiceInfo::getServiceReference)
+                            .forEach(collection::add);
                     break;
                 case SERVICEOBJECTS:
                     collection.addAll(matchingServices);
                     break;
                 default:
-                    throw new RuntimeException("Field collection type '" + reference.getFieldCollectionType() + "' not supported "
-                            + "for reference '" + reference.getName()  + "' (" + type.getName() +  ") into constructor parameter " + parameterIndex + " for class " +  targetClass.getName());
+                    throw new RuntimeException("Field collection type '" + reference.getFieldCollectionType()
+                            + "' not supported " + "for reference '" + reference.getName() + "' (" + type.getName()
+                            + ") into constructor parameter " + parameterIndex + " for class " + targetClass.getName());
             }
             return Optional.of(collection);
         }
 
         // check for single field reference
         else {
-            Optional<ServiceInfo<?>> firstServiceInfo = matchingServices.stream().findFirst();
+            Optional<ServiceInfo<?>> firstServiceInfo =
+                    matchingServices.stream().findFirst();
 
             // 1. assignable from service instance
             if (parameterType.isAssignableFrom(reference.getInterfaceTypeAsClass())) {
@@ -650,7 +687,9 @@ final class OsgiServiceUtil {
         // no references found? check if reference was optional
         if (matchingServices.isEmpty()) {
             if (!reference.isCardinalityOptional()) {
-                throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName() + "' (" + type.getName() +  ") for class " + targetClass.getName() + " : no matching services were found. bundleContext=" + bundleContext);
+                throw new ReferenceViolationException("Unable to inject mandatory reference '" + reference.getName()
+                        + "' (" + type.getName() + ") for class " + targetClass.getName()
+                        + " : no matching services were found. bundleContext=" + bundleContext);
             }
 
             // make sure at least empty array or empty Optional is set
@@ -669,14 +708,14 @@ final class OsgiServiceUtil {
             matchingServices.sort(Comparator.comparing(ServiceInfo::getServiceReference));
         }
 
-
         // try to invoke bind method
         for (ServiceInfo<?> matchingService : matchingServices) {
             invokeBindUnbindMethod(reference, target, matchingService, true);
         }
     }
 
-    private static void invokeBindUnbindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo, boolean bind) {
+    private static void invokeBindUnbindMethod(
+            Reference reference, Object target, ServiceInfo<?> serviceInfo, boolean bind) {
         Class<?> targetClass = target.getClass();
 
         // try to invoke bind method
@@ -687,50 +726,49 @@ final class OsgiServiceUtil {
 
             boolean found = findAndInvokeNearestMethod(targetClass, candidateClass -> {
                 // 1. ServiceReference
-                Method method = getMethod(candidateClass, methodName, new Class<?>[] { ServiceReference.class });
+                Method method = getMethod(candidateClass, methodName, new Class<?>[] {ServiceReference.class});
                 if (method != null) {
-                    invokeMethod(target, method, new Object[] { serviceInfo.getServiceReference() });
+                    invokeMethod(target, method, new Object[] {serviceInfo.getServiceReference()});
                     return true;
                 }
 
                 // 2. ComponentServiceObjects
-                method = getMethod(candidateClass, methodName, new Class<?>[] { ComponentServiceObjects.class });
+                method = getMethod(candidateClass, methodName, new Class<?>[] {ComponentServiceObjects.class});
                 if (method != null) {
-                    invokeMethod(target, method, new Object[] { serviceInfo });
+                    invokeMethod(target, method, new Object[] {serviceInfo});
                     return true;
                 }
 
                 // 3. assignable from service instance
                 Class<?> interfaceType = reference.getInterfaceTypeAsClass();
-                method = getMethodWithAssignableTypes(candidateClass, methodName, new Class<?>[] { interfaceType });
+                method = getMethodWithAssignableTypes(candidateClass, methodName, new Class<?>[] {interfaceType});
                 if (method != null) {
-                    invokeMethod(target, method, new Object[] { serviceInfo.getService() });
+                    invokeMethod(target, method, new Object[] {serviceInfo.getService()});
                     return true;
                 }
 
                 // 4. Map
-                method = getMethod(candidateClass, methodName, new Class<?>[] { Map.class });
+                method = getMethod(candidateClass, methodName, new Class<?>[] {Map.class});
                 if (method != null) {
-                    invokeMethod(target, method, new Object[] { serviceInfo.getServiceConfig() });
+                    invokeMethod(target, method, new Object[] {serviceInfo.getServiceConfig()});
                     return true;
                 }
 
                 // 5. mixed arguments
-                Class<?>[] mixedArgsAllowed = new Class<?>[] { ServiceReference.class, ComponentServiceObjects.class, interfaceType, Map.class };
+                Class<?>[] mixedArgsAllowed =
+                        new Class<?>[] {ServiceReference.class, ComponentServiceObjects.class, interfaceType, Map.class
+                        };
                 method = getMethodWithAnyCombinationArgs(candidateClass, methodName, mixedArgsAllowed);
                 if (method != null) {
                     Object[] args = new Object[method.getParameterTypes().length];
-                    for (int i=0; i<args.length; i++) {
+                    for (int i = 0; i < args.length; i++) {
                         if (method.getParameterTypes()[i] == ServiceReference.class) {
                             args[i] = serviceInfo.getServiceReference();
-                        }
-                        else if (method.getParameterTypes()[i] == ComponentServiceObjects.class) {
+                        } else if (method.getParameterTypes()[i] == ComponentServiceObjects.class) {
                             args[i] = serviceInfo;
-                        }
-                        else if (method.getParameterTypes()[i].isAssignableFrom(interfaceType)) {
+                        } else if (method.getParameterTypes()[i].isAssignableFrom(interfaceType)) {
                             args[i] = serviceInfo.getService();
-                        }
-                        else if (method.getParameterTypes()[i] == Map.class) {
+                        } else if (method.getParameterTypes()[i] == Map.class) {
                             args[i] = serviceInfo.getServiceConfig();
                         }
                     }
@@ -742,8 +780,9 @@ final class OsgiServiceUtil {
             });
 
             if (!found) {
-                throw new RuntimeException((bind ? "Bind" : "Unbind") + " method with name " + methodName + " not found "
-                        + "for reference '" + reference.getName() + "' for class " +  targetClass.getName());
+                throw new RuntimeException(
+                        (bind ? "Bind" : "Unbind") + " method with name " + methodName + " not found "
+                                + "for reference '" + reference.getName() + "' for class " + targetClass.getName());
             }
         }
 
@@ -761,8 +800,7 @@ final class OsgiServiceUtil {
                             item = serviceInfo.getService();
                             if (reference.getFieldCollectionType() == FieldCollectionType.REFERENCE) {
                                 item = serviceInfo.getServiceReference();
-                            }
-                            else if (reference.getFieldCollectionType() == FieldCollectionType.SERVICEOBJECTS) {
+                            } else if (reference.getFieldCollectionType() == FieldCollectionType.SERVICEOBJECTS) {
                                 item = serviceInfo;
                             }
                         }
@@ -770,16 +808,17 @@ final class OsgiServiceUtil {
                         if (field != null) {
                             if (bind) {
                                 addToCollection(target, field, item);
-                            }
-                            else {
+                            } else {
                                 removeFromCollection(target, field, item);
                             }
                             return;
                         }
                         break;
                     default:
-                        throw new RuntimeException("Field collection type '" + reference.getFieldCollectionType() + "' not supported "
-                                + "for reference '" + reference.getName() + "' (" + reference.getInterfaceTypeAsClass().getName() +  ") for class " +  targetClass.getName());
+                        throw new RuntimeException("Field collection type '" + reference.getFieldCollectionType()
+                                + "' not supported " + "for reference '" + reference.getName() + "' ("
+                                + reference.getInterfaceTypeAsClass().getName() + ") for class "
+                                + targetClass.getName());
                 }
             }
 
@@ -816,14 +855,13 @@ final class OsgiServiceUtil {
                 }
             }
         }
-
     }
 
     @SuppressWarnings("unchecked")
     private static void addToCollection(Object target, Field field, Object item) {
         try {
             field.setAccessible(true);
-            Collection<Object> collection = (Collection<Object>)field.get(target);
+            Collection<Object> collection = (Collection<Object>) field.get(target);
             if (collection == null) {
                 collection = newCollectionInstance(field.getType());
             }
@@ -833,8 +871,10 @@ final class OsgiServiceUtil {
             field.set(target, collection);
 
         } catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
-            throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
-                    + target.getClass().getName(), ex);
+            throw new RuntimeException(
+                    "Unable to set field '" + field.getName() + "' for class "
+                            + target.getClass().getName(),
+                    ex);
         }
     }
 
@@ -842,7 +882,7 @@ final class OsgiServiceUtil {
     private static void removeFromCollection(Object target, Field field, Object item) {
         try {
             field.setAccessible(true);
-            Collection<Object> collection = (Collection<Object>)field.get(target);
+            Collection<Object> collection = (Collection<Object>) field.get(target);
             if (collection == null) {
                 collection = newCollectionInstance(field.getType());
             }
@@ -852,12 +892,14 @@ final class OsgiServiceUtil {
             field.set(target, collection);
 
         } catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
-            throw new RuntimeException("Unable to set field '" + field.getName() + "' for class "
-                    + target.getClass().getName(), ex);
+            throw new RuntimeException(
+                    "Unable to set field '" + field.getName() + "' for class "
+                            + target.getClass().getName(),
+                    ex);
         }
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     private static @NotNull Collection<Object> newCollectionInstance(Class<?> collectionType)
             throws InstantiationException, IllegalAccessException {
         if (collectionType == List.class || collectionType == Collection.class) {
@@ -869,7 +911,7 @@ final class OsgiServiceUtil {
         if (collectionType == SortedSet.class) {
             return new TreeSet<>();
         }
-        return (Collection)collectionType.newInstance();
+        return (Collection) collectionType.newInstance();
     }
 
     /**
@@ -880,7 +922,7 @@ final class OsgiServiceUtil {
      * @param bundleContext Bundle context
      */
     public static void invokeBindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo) {
-        invokeBindUnbindMethod(reference,  target, serviceInfo, true);
+        invokeBindUnbindMethod(reference, target, serviceInfo, true);
     }
 
     /**
@@ -891,7 +933,7 @@ final class OsgiServiceUtil {
      * @param bundleContext Bundle context
      */
     public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo) {
-        invokeBindUnbindMethod(reference,  target, serviceInfo, false);
+        invokeBindUnbindMethod(reference, target, serviceInfo, false);
     }
 
     @SuppressWarnings("unchecked")
@@ -924,12 +966,13 @@ final class OsgiServiceUtil {
      * @return List of references
      */
     @SuppressWarnings("unchecked")
-    public static List<ReferenceInfo<?>> getMatchingDynamicReferences(SortedSet<MockServiceRegistration> registeredServices,
-            MockServiceRegistration<?> registration) {
+    public static List<ReferenceInfo<?>> getMatchingDynamicReferences(
+            SortedSet<MockServiceRegistration> registeredServices, MockServiceRegistration<?> registration) {
         List<ReferenceInfo<?>> references = new ArrayList<>();
         for (MockServiceRegistration<?> existingRegistration : registeredServices) {
             @SuppressWarnings("null")
-            OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(existingRegistration.getService().getClass());
+            OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(
+                    existingRegistration.getService().getClass());
             if (metadata != null) {
                 for (Reference reference : metadata.getReferences()) {
                     if (reference.isConstructorParameter()) {
@@ -955,15 +998,17 @@ final class OsgiServiceUtil {
      * @param registration Service registration
      * @return List of references
      */
-    @SuppressWarnings({ "unchecked", "null" })
-    public static List<ReferenceInfo<?>> getMatchingStaticGreedyReferences(SortedSet<MockServiceRegistration> registeredServices,
-            MockServiceRegistration<?> registration) {
+    @SuppressWarnings({"unchecked", "null"})
+    public static List<ReferenceInfo<?>> getMatchingStaticGreedyReferences(
+            SortedSet<MockServiceRegistration> registeredServices, MockServiceRegistration<?> registration) {
         List<ReferenceInfo<?>> references = new ArrayList<>();
         for (MockServiceRegistration<?> existingRegistration : registeredServices) {
-            OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(existingRegistration.getService().getClass());
+            OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(
+                    existingRegistration.getService().getClass());
             if (metadata != null) {
                 for (Reference reference : metadata.getReferences()) {
-                    if (reference.getPolicy() == ReferencePolicy.STATIC && reference.getPolicyOption() == ReferencePolicyOption.GREEDY) {
+                    if (reference.getPolicy() == ReferencePolicy.STATIC
+                            && reference.getPolicyOption() == ReferencePolicyOption.GREEDY) {
                         for (String serviceInterface : registration.getClasses()) {
                             if (StringUtils.equals(serviceInterface, reference.getInterfaceType())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
@@ -1021,11 +1066,10 @@ final class OsgiServiceUtil {
         @SuppressWarnings("null")
         public boolean equals(Object obj) {
             if (obj instanceof ServiceInfo) {
-                return serviceInstance.equals(((ServiceInfo)obj).serviceInstance);
+                return serviceInstance.equals(((ServiceInfo) obj).serviceInstance);
             }
             return false;
         }
-
     }
 
     static class ReferenceInfo<T> {
@@ -1045,7 +1089,5 @@ final class OsgiServiceUtil {
         public Reference getReference() {
             return reference;
         }
-
     }
-
 }

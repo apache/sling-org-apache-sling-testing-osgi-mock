@@ -40,5 +40,4 @@ public class Service5Constructor {
     public boolean isActivated() {
         return activated;
     }
-
 }

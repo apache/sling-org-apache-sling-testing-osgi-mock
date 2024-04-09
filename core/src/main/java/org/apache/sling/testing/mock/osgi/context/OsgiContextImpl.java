@@ -92,7 +92,7 @@ public class OsgiContextImpl {
      * @return Registered service instance
      */
     public final @NotNull <T> T registerService(@NotNull final T service) {
-        return registerService(null, service, (Map<String,Object>)null);
+        return registerService(null, service, (Map<String, Object>) null);
     }
 
     /**
@@ -103,7 +103,7 @@ public class OsgiContextImpl {
      * @return Registered service instance
      */
     public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service) {
-        return registerService(serviceClass, service, (Map<String,Object>)null);
+        return registerService(serviceClass, service, (Map<String, Object>) null);
     }
 
     /**
@@ -114,9 +114,13 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @Nullable final Map<String, Object> properties) {
+    public final @NotNull <T> T registerService(
+            @Nullable final Class<T> serviceClass,
+            @NotNull final T service,
+            @Nullable final Map<String, Object> properties) {
         Dictionary<String, Object> serviceProperties = MapUtil.toDictionary(properties);
-        bundleContext().registerService(serviceClass != null ? serviceClass.getName() : null, service, serviceProperties);
+        bundleContext()
+                .registerService(serviceClass != null ? serviceClass.getName() : null, service, serviceProperties);
         return service;
     }
 
@@ -128,7 +132,10 @@ public class OsgiContextImpl {
      * @param properties Service properties (optional)
      * @return Registered service instance
      */
-    public final @NotNull <T> T registerService(@Nullable final Class<T> serviceClass, @NotNull final T service, @NotNull final Object @NotNull ... properties) {
+    public final @NotNull <T> T registerService(
+            @Nullable final Class<T> serviceClass,
+            @NotNull final T service,
+            @NotNull final Object @NotNull ... properties) {
         return registerService(serviceClass, service, MapUtil.toMap(properties));
     }
 
@@ -140,7 +147,7 @@ public class OsgiContextImpl {
      * @return the DS component instance
      */
     public final @NotNull <T> T registerInjectActivateService(@NotNull final T component) {
-        return registerInjectActivateService(component, (Map<String,Object>)null);
+        return registerInjectActivateService(component, (Map<String, Object>) null);
     }
 
     /**
@@ -151,7 +158,8 @@ public class OsgiContextImpl {
      * @param properties component properties (optional)
      * @return the DS component instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull final T component, @Nullable final Map<String, Object> properties) {
+    public final @NotNull <T> T registerInjectActivateService(
+            @NotNull final T component, @Nullable final Map<String, Object> properties) {
         MockOsgi.registerInjectActivateService(component, bundleContext(), properties);
         return component;
     }
@@ -164,7 +172,8 @@ public class OsgiContextImpl {
      * @param properties component properties (optional)
      * @return the DS component instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull final T component, @NotNull final Object @NotNull ... properties) {
+    public final @NotNull <T> T registerInjectActivateService(
+            @NotNull final T component, @NotNull final Object @NotNull ... properties) {
         return registerInjectActivateService(component, MapUtil.toMap(properties));
     }
 
@@ -176,7 +185,7 @@ public class OsgiContextImpl {
      * @return the DS component instance
      */
     public final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> componentClass) {
-        return registerInjectActivateService(componentClass, (Map<String,Object>)null);
+        return registerInjectActivateService(componentClass, (Map<String, Object>) null);
     }
 
     /**
@@ -187,7 +196,8 @@ public class OsgiContextImpl {
      * @param properties component properties (optional)
      * @return the DS component instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> componentClass, @Nullable final Map<String, Object> properties) {
+    public final @NotNull <T> T registerInjectActivateService(
+            @NotNull Class<T> componentClass, @Nullable final Map<String, Object> properties) {
         return MockOsgi.registerInjectActivateService(componentClass, bundleContext(), properties);
     }
 
@@ -198,7 +208,8 @@ public class OsgiContextImpl {
      * @param properties component properties (optional)
      * @return the DS component instance
      */
-    public final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> componentClass, @NotNull final Object @NotNull ... properties) {
+    public final @NotNull <T> T registerInjectActivateService(
+            @NotNull Class<T> componentClass, @NotNull final Object @NotNull ... properties) {
         return registerInjectActivateService(componentClass, MapUtil.toMap(properties));
     }
 
@@ -212,7 +223,7 @@ public class OsgiContextImpl {
     public final @Nullable <ServiceType> ServiceType getService(@NotNull final Class<ServiceType> serviceType) {
         ServiceReference serviceReference = bundleContext().getServiceReference(serviceType.getName());
         if (serviceReference != null) {
-            return (ServiceType)bundleContext().getService(serviceReference);
+            return (ServiceType) bundleContext().getService(serviceReference);
         } else {
             return null;
         }
@@ -227,21 +238,21 @@ public class OsgiContextImpl {
      * @throws RuntimeException If the <code>filter</code> string is not a valid OSGi service filter string.
      */
     @SuppressWarnings("unchecked")
-    public final @NotNull <ServiceType> ServiceType @NotNull [] getServices(@NotNull final Class<ServiceType> serviceType, @Nullable final String filter) {
+    public final @NotNull <ServiceType> ServiceType @NotNull [] getServices(
+            @NotNull final Class<ServiceType> serviceType, @Nullable final String filter) {
         try {
             ServiceReference[] serviceReferences = bundleContext().getServiceReferences(serviceType.getName(), filter);
             if (serviceReferences != null) {
-                ServiceType[] services = (ServiceType[])Array.newInstance(serviceType, serviceReferences.length);
+                ServiceType[] services = (ServiceType[]) Array.newInstance(serviceType, serviceReferences.length);
                 for (int i = 0; i < serviceReferences.length; i++) {
-                    services[i] = (ServiceType)bundleContext().getService(serviceReferences[i]);
+                    services[i] = (ServiceType) bundleContext().getService(serviceReferences[i]);
                 }
                 return services;
             } else {
-                return (ServiceType[])Array.newInstance(serviceType, 0);
+                return (ServiceType[]) Array.newInstance(serviceType, 0);
             }
         } catch (InvalidSyntaxException ex) {
             throw new RuntimeException("Invalid filter syntax: " + filter, ex);
         }
     }
-
 }

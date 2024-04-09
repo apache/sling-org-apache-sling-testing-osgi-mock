@@ -73,7 +73,6 @@ public final class ComponentContextBuilder {
         if (properties == null) {
             properties = new Hashtable<>();
         }
-        return new MockComponentContext((MockBundleContext)bundleContext, properties, usingBundle);
+        return new MockComponentContext((MockBundleContext) bundleContext, properties, usingBundle);
     }
-
 }

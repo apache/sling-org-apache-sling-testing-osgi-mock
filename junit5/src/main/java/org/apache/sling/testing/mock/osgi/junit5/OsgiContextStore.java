@@ -76,7 +76,8 @@ final class OsgiContextStore {
      * @param testInstance Test instance
      * @param osgiContext OSGi context
      */
-    public static void storeOsgiContext(ExtensionContext extensionContext, Object testInstance, OsgiContext osgiContext) {
+    public static void storeOsgiContext(
+            ExtensionContext extensionContext, Object testInstance, OsgiContext osgiContext) {
         getStore(extensionContext).put(testInstance, osgiContext);
     }
 
@@ -89,5 +90,4 @@ final class OsgiContextStore {
         osgiContext.setUpContext();
         return osgiContext;
     }
-
 }

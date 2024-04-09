@@ -18,7 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-
 import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
 
@@ -40,10 +39,11 @@ final class ConfigCollectionImpl implements ConfigCollection {
     private final ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate;
     private final String applyPid;
 
-    ConfigCollectionImpl(@NotNull ExtensionContext extensionContext,
-                         @NotNull ConfigTypeContext configTypeContext,
-                         @Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate,
-                         @Nullable String applyPid) {
+    ConfigCollectionImpl(
+            @NotNull ExtensionContext extensionContext,
+            @NotNull ConfigTypeContext configTypeContext,
+            @Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate,
+            @Nullable String applyPid) {
         this.extensionContext = extensionContext;
         this.configTypeContext = configTypeContext;
         this.configTypePredicate = configTypePredicate;
@@ -59,22 +59,23 @@ final class ConfigCollectionImpl implements ConfigCollection {
     Stream<Annotation> streamConfigTypeAnnotations() {
         return Stream.concat(
                 extensionContext.getElement().stream()
-                        .flatMap(element -> ConfigAnnotationUtil.findConfigTypeAnnotations(element, configTypePredicate)),
-                extensionContext.getParent().stream()
-                        .flatMap(parentContext -> ConfigCollectionImpl
-                                .collect(parentContext, configTypeContext, configTypePredicate, applyPid)
-                                .streamConfigTypeAnnotations()));
+                        .flatMap(element ->
+                                ConfigAnnotationUtil.findConfigTypeAnnotations(element, configTypePredicate)),
+                extensionContext.getParent().stream().flatMap(parentContext -> ConfigCollectionImpl.collect(
+                                parentContext, configTypeContext, configTypePredicate, applyPid)
+                        .streamConfigTypeAnnotations()));
     }
 
-    static ConfigCollectionImpl collect(@NotNull ExtensionContext extensionContext,
-                                        @NotNull ConfigTypeContext configTypeContext) {
+    static ConfigCollectionImpl collect(
+            @NotNull ExtensionContext extensionContext, @NotNull ConfigTypeContext configTypeContext) {
         return collect(extensionContext, configTypeContext, null, null);
     }
 
-    static ConfigCollectionImpl collect(@NotNull ExtensionContext extensionContext,
-                                        @NotNull ConfigTypeContext configTypeContext,
-                                        @Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate,
-                                        @Nullable String applyPid) {
+    static ConfigCollectionImpl collect(
+            @NotNull ExtensionContext extensionContext,
+            @NotNull ConfigTypeContext configTypeContext,
+            @Nullable ConfigAnnotationUtil.ConfigTypePredicate configTypePredicate,
+            @Nullable String applyPid) {
         return new ConfigCollectionImpl(extensionContext, configTypeContext, configTypePredicate, applyPid);
     }
 }

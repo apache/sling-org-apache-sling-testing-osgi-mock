@@ -18,12 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.osgi.service.component.annotations.Component;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Annotate a {@link org.apache.sling.testing.mock.osgi.config.annotations.ConfigCollection} test parameter to only

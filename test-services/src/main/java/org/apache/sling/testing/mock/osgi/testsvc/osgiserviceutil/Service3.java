@@ -36,28 +36,49 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-@Component(reference = { @Reference(name = "reference2", service = ServiceInterface2.class, cardinality = ReferenceCardinality.AT_LEAST_ONE,
-        policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
-        bind="bindReference2", unbind="unbindReference2") })
+@Component(
+        reference = {
+            @Reference(
+                    name = "reference2",
+                    service = ServiceInterface2.class,
+                    cardinality = ReferenceCardinality.AT_LEAST_ONE,
+                    policy = ReferencePolicy.DYNAMIC,
+                    policyOption = ReferencePolicyOption.GREEDY,
+                    bind = "bindReference2",
+                    unbind = "unbindReference2")
+        })
 public class Service3 implements ServiceInterface2 {
 
-    @Reference(bind="bindReference1", unbind="unbindReference1", policy = ReferencePolicy.DYNAMIC)
+    @Reference(bind = "bindReference1", unbind = "unbindReference1", policy = ReferencePolicy.DYNAMIC)
     private volatile ServiceInterface1 reference1;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC,
-            bind="bindReference1Optional", unbind="unbindReference1Optional")
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "bindReference1Optional",
+            unbind = "unbindReference1Optional")
     private volatile ServiceInterface1Optional reference1Optional;
 
     private List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
 
-    @Reference(name = "reference3", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
-            bind="bindReference3", unbind="unbindReference3")
+    @Reference(
+            name = "reference3",
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY,
+            bind = "bindReference3",
+            unbind = "unbindReference3")
     private volatile List<ServiceSuperInterface3> references3 = new ArrayList<>();
+
     private List<Map<String, Object>> reference3Configs = new ArrayList<>();
 
-    @Reference(name = "references3Set", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
+    @Reference(
+            name = "references3Set",
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY,
             fieldOption = FieldOption.UPDATE)
     private volatile Set<ServiceSuperInterface3> references3Set = new HashSet<>();
 
@@ -76,7 +97,7 @@ public class Service3 implements ServiceInterface2 {
     }
 
     @Modified
-    private void modified(Map<String,Object> newConfig) {
+    private void modified(Map<String, Object> newConfig) {
         this.config = newConfig;
     }
 
@@ -91,7 +112,7 @@ public class Service3 implements ServiceInterface2 {
     public List<ServiceInterface2> getReferences2() {
         List<ServiceInterface2> services = new ArrayList<>();
         for (ServiceReference<?> serviceReference : references2) {
-            services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
+            services.add((ServiceInterface2) componentContext.getBundleContext().getService(serviceReference));
         }
         return services;
     }
@@ -150,7 +171,6 @@ public class Service3 implements ServiceInterface2 {
         reference3Configs.remove(serviceConfig);
     }
 
-
     void bindReference3Set(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
         references3Set.add(service);
     }
@@ -158,5 +178,4 @@ public class Service3 implements ServiceInterface2 {
     void unbindReference3Set(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
         references3Set.remove(service);
     }
-
 }

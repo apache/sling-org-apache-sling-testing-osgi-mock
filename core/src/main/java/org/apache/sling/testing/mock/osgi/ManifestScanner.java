@@ -59,7 +59,7 @@ public final class ManifestScanner {
             Enumeration<URL> resEnum = ManifestScanner.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
             while (resEnum.hasMoreElements()) {
                 try {
-                    URL url = (URL)resEnum.nextElement();
+                    URL url = (URL) resEnum.nextElement();
                     InputStream is = url.openStream();
                     if (is != null) {
                         try {
@@ -74,21 +74,17 @@ public final class ManifestScanner {
                                     }
                                 }
                             }
-                        }
-                        finally {
+                        } finally {
                             is.close();
                         }
                     }
-                }
-                catch (Throwable ex) {
+                } catch (Throwable ex) {
                     log.warn("Unable to read JAR manifest.", ex);
                 }
             }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             log.warn("Unable to read JAR manifests.", ex);
         }
         return values;
     }
-
 }

@@ -18,10 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import java.util.Arrays;
 import java.util.Hashtable;
 
@@ -37,6 +33,10 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * Test the service-ranking based sorting of mock service references
@@ -95,36 +95,46 @@ public class MockServiceReferencesSortTest {
     @Test
     public void testVolatileCollectionReference() {
         RankedService rankedServiceTen = new RankedServiceTen();
-        bundleContext.registerService(RankedService.class.getName(), rankedServiceTen , null);
+        bundleContext.registerService(RankedService.class.getName(), rankedServiceTen, null);
         MockOsgi.activate(rankedServiceTen, bundleContext);
 
         RankedService rankedServiceFive = new RankedServiceFive();
         bundleContext.registerService(RankedService.class.getName(), rankedServiceFive, null);
         MockOsgi.activate(rankedServiceFive, bundleContext);
 
-        Service6VolatileMultipleReferences service6VolatileMultipleReferences = new Service6VolatileMultipleReferences();
-        bundleContext.registerService(Service6VolatileMultipleReferences.class.getName(), service6VolatileMultipleReferences, null);
+        Service6VolatileMultipleReferences service6VolatileMultipleReferences =
+                new Service6VolatileMultipleReferences();
+        bundleContext.registerService(
+                Service6VolatileMultipleReferences.class.getName(), service6VolatileMultipleReferences, null);
         MockOsgi.injectServices(service6VolatileMultipleReferences, bundleContext);
 
-        assertEquals("Should get highest when getting one service", rankedServiceTen, bundleContext.getService(bundleContext.getServiceReference(RankedService.class)));
-        assertEquals("Should have order from lowest to highest on sorted ranked services", "RankedServiceFive=5RankedServiceTen=10", getSortedRankedServices());
-        assertEquals("Should have order from lowest to highest on volatile reference list", "RankedServiceFive=5RankedServiceTen=10", service6VolatileMultipleReferences.getRanks());
+        assertEquals(
+                "Should get highest when getting one service",
+                rankedServiceTen,
+                bundleContext.getService(bundleContext.getServiceReference(RankedService.class)));
+        assertEquals(
+                "Should have order from lowest to highest on sorted ranked services",
+                "RankedServiceFive=5RankedServiceTen=10",
+                getSortedRankedServices());
+        assertEquals(
+                "Should have order from lowest to highest on volatile reference list",
+                "RankedServiceFive=5RankedServiceTen=10",
+                service6VolatileMultipleReferences.getRanks());
     }
 
     private String getSortedRankedServices() {
         ServiceReference<?>[] refs = null;
         try {
             refs = bundleContext.getServiceReferences(RankedService.class.getName(), null);
-        }
-        catch (InvalidSyntaxException ise) {
+        } catch (InvalidSyntaxException ise) {
             fail("Unexpected InvalidSyntaxException");
         }
         assertNotNull("Expecting our service references", refs);
         Arrays.sort(refs);
 
         final StringBuilder sb = new StringBuilder();
-        for(ServiceReference<?> ref : refs) {
-            RankedService rankedService = (RankedService)bundleContext.getService(ref);
+        for (ServiceReference<?> ref : refs) {
+            RankedService rankedService = (RankedService) bundleContext.getService(ref);
             sb.append(rankedService.getClass().getSimpleName()).append("=").append(rankedService.getRanking());
             bundleContext.ungetService(ref);
         }
@@ -150,20 +160,18 @@ public class MockServiceReferencesSortTest {
         ServiceReference<?>[] refs = null;
         try {
             refs = bundleContext.getServiceReferences(String.class.getName(), null);
-        }
-        catch (InvalidSyntaxException ise) {
+        } catch (InvalidSyntaxException ise) {
             fail("Unexpected InvalidSyntaxException");
         }
         assertNotNull("Expecting our service references", refs);
         Arrays.sort(refs);
 
         final StringBuilder sb = new StringBuilder();
-        for(ServiceReference<?> ref : refs) {
+        for (ServiceReference<?> ref : refs) {
             sb.append(bundleContext.getService(ref).toString());
             bundleContext.ungetService(ref);
         }
 
         return sb.toString();
     }
-
 }

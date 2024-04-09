@@ -34,5 +34,4 @@ public interface Service3StaticGreedy {
     List<Map<String, Object>> getReference3Configs();
 
     List<ServiceSuperInterface3> getReferences3Filtered();
-
 }

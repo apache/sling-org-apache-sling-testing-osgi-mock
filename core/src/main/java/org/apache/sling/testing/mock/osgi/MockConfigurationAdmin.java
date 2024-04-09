@@ -55,9 +55,7 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
     @SuppressWarnings("squid:S1168")
     public Configuration[] listConfigurations(final String filter) throws IOException, InvalidSyntaxException {
         final Filter filterObject = bundleContext.createFilter(filter);
-        final Configuration[] filtered = configs
-                .values()
-                .stream()
+        final Configuration[] filtered = configs.values().stream()
                 .filter(configuration -> filterObject.match(configuration.getProperties()))
                 .toArray(Configuration[]::new);
         if (filtered.length != 0) {
@@ -79,7 +77,8 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
     }
 
     @Override
-    public Configuration getFactoryConfiguration(final String factoryPid, final String name, final String location) throws IOException {
+    public Configuration getFactoryConfiguration(final String factoryPid, final String name, final String location)
+            throws IOException {
         throw new UnsupportedOperationException();
     }
 
@@ -87,5 +86,4 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
     public Configuration getFactoryConfiguration(final String factoryPid, final String name) throws IOException {
         throw new UnsupportedOperationException();
     }
-
 }

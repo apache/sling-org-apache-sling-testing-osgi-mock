@@ -18,29 +18,32 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 @RunWith(MockitoJUnitRunner.class)
-@SuppressWarnings({"unchecked","null"})
+@SuppressWarnings({"unchecked", "null"})
 public class ContextPluginsTest {
 
     private OsgiContext context = new OsgiContext();
 
     @Mock
     private ContextPlugin plugin1;
+
     @Mock
     private ContextPlugin plugin2;
+
     @Mock
     private ContextCallback callback1;
+
     @Mock
     private ContextCallback callback2;
 
@@ -171,5 +174,4 @@ public class ContextPluginsTest {
         verify(callback1, times(1)).execute(context);
         verify(callback2, times(1)).execute(context);
     }
-
 }

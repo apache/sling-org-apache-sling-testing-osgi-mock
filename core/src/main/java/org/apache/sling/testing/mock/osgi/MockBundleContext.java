@@ -72,7 +72,8 @@ import org.slf4j.LoggerFactory;
 class MockBundleContext implements BundleContext {
 
     private final MockBundle bundle;
-    private final SortedSet<MockServiceRegistration> registeredServices = new ConcurrentSkipListSet<MockServiceRegistration>();
+    private final SortedSet<MockServiceRegistration> registeredServices =
+            new ConcurrentSkipListSet<MockServiceRegistration>();
     private final Map<ServiceListener, Filter> serviceListeners = new ConcurrentHashMap<ServiceListener, Filter>();
     private final Queue<BundleListener> bundleListeners = new ConcurrentLinkedQueue<BundleListener>();
     private final ConfigurationAdmin configAdmin = new MockConfigurationAdmin(this);
@@ -82,13 +83,14 @@ class MockBundleContext implements BundleContext {
 
     private static final Logger log = LoggerFactory.getLogger(MockBundleContext.class);
 
-    private static final Comparator<ServiceReference> SR_COMPARATOR_HIGHEST_RANKING_FIRST = new Comparator<ServiceReference>() {
-        @Override
-        public int compare(ServiceReference o1, ServiceReference o2) {
-            // reverse sort order to get highest ranking first
-            return o2.compareTo(o1);
-        }
-    };
+    private static final Comparator<ServiceReference> SR_COMPARATOR_HIGHEST_RANKING_FIRST =
+            new Comparator<ServiceReference>() {
+                @Override
+                public int compare(ServiceReference o1, ServiceReference o2) {
+                    // reverse sort order to get highest ranking first
+                    return o2.compareTo(o1);
+                }
+            };
 
     public MockBundleContext() {
         log.debug("Creating MockBundleContext, bundleContext={}", this);
@@ -109,8 +111,7 @@ class MockBundleContext implements BundleContext {
     public Filter createFilter(final String s) throws InvalidSyntaxException {
         if (s == null) {
             return new MatchAllFilter();
-        }
-        else {
+        } else {
             return new FilterImpl(s);
         }
     }
@@ -122,7 +123,7 @@ class MockBundleContext implements BundleContext {
         if (StringUtils.isBlank(clazz)) {
             clazzes = new String[0];
         } else {
-            clazzes = new String[] { clazz };
+            clazzes = new String[] {clazz};
         }
         return registerService(clazzes, service, properties);
     }
@@ -135,12 +136,18 @@ class MockBundleContext implements BundleContext {
 
     @SuppressWarnings("unchecked")
     @Override
-    public ServiceRegistration registerService(final String[] clazzes, final Object service, final Dictionary properties) {
+    public ServiceRegistration registerService(
+            final String[] clazzes, final Object service, final Dictionary properties) {
         if (log.isDebugEnabled()) {
-            log.debug("Register {} ({}), bundleContext={}", service.getClass().getName(), StringUtils.join(clazzes, ","), this);
+            log.debug(
+                    "Register {} ({}), bundleContext={}",
+                    service.getClass().getName(),
+                    StringUtils.join(clazzes, ","),
+                    this);
         }
 
-        MockServiceRegistration<?> registration = new MockServiceRegistration<>(this.bundle, clazzes, service, properties, this);
+        MockServiceRegistration<?> registration =
+                new MockServiceRegistration<>(this.bundle, clazzes, service, properties, this);
         this.registeredServices.add(registration);
         handleRefsUpdateOnRegister(registration);
         notifyServiceListeners(ServiceEvent.REGISTERED, registration.getReference());
@@ -149,7 +156,8 @@ class MockBundleContext implements BundleContext {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S> ServiceRegistration<S> registerService(Class<S> clazz, ServiceFactory<S> factory, Dictionary<String, ?> properties) {
+    public <S> ServiceRegistration<S> registerService(
+            Class<S> clazz, ServiceFactory<S> factory, Dictionary<String, ?> properties) {
         return registerService(clazz.getName(), factory, properties);
     }
 
@@ -163,47 +171,55 @@ class MockBundleContext implements BundleContext {
     private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
-        List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
+        List<ReferenceInfo<?>> affectedDynamicReferences =
+                OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
         for (ReferenceInfo<?> referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
             // Look for a target override
-            Object o = referenceInfo.getServiceRegistration().getProperties().get(reference.getName() + ComponentConstants.REFERENCE_TARGET_SUFFIX);
+            Object o = referenceInfo
+                    .getServiceRegistration()
+                    .getProperties()
+                    .get(reference.getName() + ComponentConstants.REFERENCE_TARGET_SUFFIX);
             if (o instanceof String) {
-                reference = new DynamicReference(reference,(String)o);
+                reference = new DynamicReference(reference, (String) o);
             }
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
-                case MANDATORY_UNARY:
-                    // nothing to do - reference is already set
-                    break;
-                case MANDATORY_MULTIPLE:
-                case OPTIONAL_MULTIPLE:
-                case OPTIONAL_UNARY:
-                    OsgiServiceUtil.invokeBindMethod(reference, referenceInfo.getServiceRegistration().getService(), new ServiceInfo(registration));
-                    break;
-                default:
-                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                    case MANDATORY_UNARY:
+                        // nothing to do - reference is already set
+                        break;
+                    case MANDATORY_MULTIPLE:
+                    case OPTIONAL_MULTIPLE:
+                    case OPTIONAL_UNARY:
+                        OsgiServiceUtil.invokeBindMethod(
+                                reference,
+                                referenceInfo.getServiceRegistration().getService(),
+                                new ServiceInfo(registration));
+                        break;
+                    default:
+                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
                 }
             }
         }
 
         // handle STATIC+GREEDY references to this registration
-        List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        List<ReferenceInfo<?>> affectedStaticGreedyReferences =
+                OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
         Set<MockServiceRegistration<?>> servicesToRestart = new HashSet<>();
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
-                case MANDATORY_UNARY:
-                    // nothing to do - reference is already set
-                    break;
-                case MANDATORY_MULTIPLE:
-                case OPTIONAL_MULTIPLE:
-                case OPTIONAL_UNARY:
-                    servicesToRestart.add(referenceInfo.getServiceRegistration());
-                    break;
-                default:
-                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                    case MANDATORY_UNARY:
+                        // nothing to do - reference is already set
+                        break;
+                    case MANDATORY_MULTIPLE:
+                    case OPTIONAL_MULTIPLE:
+                    case OPTIONAL_UNARY:
+                        servicesToRestart.add(referenceInfo.getServiceRegistration());
+                        break;
+                    default:
+                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
                 }
             }
         }
@@ -213,8 +229,11 @@ class MockBundleContext implements BundleContext {
     void unregisterService(MockServiceRegistration<?> registration) {
         if (log.isDebugEnabled()) {
             Object componentInstance = registration.getService();
-            log.debug("Unregister {} ({}), bundleContext={}", componentInstance != null ? componentInstance.getClass() : "",
-                    StringUtils.join(registration.getClasses(), ","), this);
+            log.debug(
+                    "Unregister {} ({}), bundleContext={}",
+                    componentInstance != null ? componentInstance.getClass() : "",
+                    StringUtils.join(registration.getClasses(), ","),
+                    this);
         }
 
         boolean wasRemoved = this.registeredServices.remove(registration);
@@ -230,7 +249,7 @@ class MockBundleContext implements BundleContext {
     void restartService(@NotNull MockServiceRegistration<?> registration) {
         // get current service properties
         Class<?> serviceClass = registration.getService().getClass();
-        Map<String,Object> properties = registration.getPropertiesAsMap();
+        Map<String, Object> properties = registration.getPropertiesAsMap();
 
         // deactivate & unregister service
         MockOsgi.deactivate(registration.getService(), this);
@@ -239,7 +258,9 @@ class MockBundleContext implements BundleContext {
         // newly create and register service
         Object newService = MockOsgi.activateInjectServices(serviceClass, this, properties);
 
-        String[] serviceInterfaces = registration.getClasses().toArray(new String[registration.getClasses().size()]);
+        String[] serviceInterfaces = registration
+                .getClasses()
+                .toArray(new String[registration.getClasses().size()]);
         registerService(serviceInterfaces, newService, MapUtil.toDictionary(properties));
     }
 
@@ -253,39 +274,45 @@ class MockBundleContext implements BundleContext {
     private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
-        List<ReferenceInfo<?>> affectedDynamicReferences = OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
+        List<ReferenceInfo<?>> affectedDynamicReferences =
+                OsgiServiceUtil.getMatchingDynamicReferences(registeredServices, registration);
         for (ReferenceInfo<?> referenceInfo : affectedDynamicReferences) {
             Reference reference = referenceInfo.getReference();
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
-                case MANDATORY_UNARY:
-                case MANDATORY_MULTIPLE:
-                case OPTIONAL_MULTIPLE:
-                case OPTIONAL_UNARY:
-                    // it is currently not checked if for a MANDATORY_UNARY or MANDATORY_MULTIPLE reference the last reference is removed
-                    OsgiServiceUtil.invokeUnbindMethod(reference, referenceInfo.getServiceRegistration().getService(), new ServiceInfo(registration));
-                    break;
-                default:
-                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                    case MANDATORY_UNARY:
+                    case MANDATORY_MULTIPLE:
+                    case OPTIONAL_MULTIPLE:
+                    case OPTIONAL_UNARY:
+                        // it is currently not checked if for a MANDATORY_UNARY or MANDATORY_MULTIPLE reference the last
+                        // reference is removed
+                        OsgiServiceUtil.invokeUnbindMethod(
+                                reference,
+                                referenceInfo.getServiceRegistration().getService(),
+                                new ServiceInfo(registration));
+                        break;
+                    default:
+                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
                 }
             }
         }
 
         // handle STATIC+GREEDY references to this registration
-        List<ReferenceInfo<?>> affectedStaticGreedyReferences = OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
+        List<ReferenceInfo<?>> affectedStaticGreedyReferences =
+                OsgiServiceUtil.getMatchingStaticGreedyReferences(registeredServices, registration);
         Set<MockServiceRegistration<?>> servicesToRestart = new HashSet<>();
         for (ReferenceInfo<?> referenceInfo : affectedStaticGreedyReferences) {
             Reference reference = referenceInfo.getReference();
             if (reference.matchesTargetFilter(registration.getReference())) {
                 switch (reference.getCardinality()) {
-                case MANDATORY_UNARY:
-                case MANDATORY_MULTIPLE:
-                case OPTIONAL_MULTIPLE:
-                case OPTIONAL_UNARY:
-                    servicesToRestart.add(referenceInfo.getServiceRegistration());
-                    break;
-                default:
-                    throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                    case MANDATORY_UNARY:
+                    case MANDATORY_MULTIPLE:
+                    case OPTIONAL_MULTIPLE:
+                    case OPTIONAL_UNARY:
+                        servicesToRestart.add(referenceInfo.getServiceRegistration());
+                        break;
+                    default:
+                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
                 }
             }
         }
@@ -300,8 +327,7 @@ class MockBundleContext implements BundleContext {
             if (serviceRefs != null && serviceRefs.length > 0) {
                 return serviceRefs[0];
             }
-        }
-        catch (InvalidSyntaxException ex) {
+        } catch (InvalidSyntaxException ex) {
             // should not happen
         }
         return null;
@@ -315,7 +341,8 @@ class MockBundleContext implements BundleContext {
 
     @SuppressWarnings("unchecked")
     @Override
-    public ServiceReference[] getServiceReferences(final String clazz, final String filter) throws InvalidSyntaxException {
+    public ServiceReference[] getServiceReferences(final String clazz, final String filter)
+            throws InvalidSyntaxException {
         /*
          * Please note that the OSGi spec does not declare any ordering for the getServiceReferences method
          * https://docs.osgi.org/specification/osgi.core/7.0.0/framework.api.html#org.osgi.framework.BundleContext.getServiceReferences-String-String-
@@ -336,26 +363,27 @@ class MockBundleContext implements BundleContext {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter) throws InvalidSyntaxException {
+    public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter)
+            throws InvalidSyntaxException {
         ServiceReference<S>[] result = getServiceReferences(clazz.getName(), filter);
         if (result == null) {
             return Collections.emptyList();
-        }
-        else {
+        } else {
             return Arrays.asList(result);
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public ServiceReference[] getAllServiceReferences(final String clazz, final String filter) throws InvalidSyntaxException {
+    public ServiceReference[] getAllServiceReferences(final String clazz, final String filter)
+            throws InvalidSyntaxException {
         // for now just do the same as getServiceReferences
         return getServiceReferences(clazz, filter);
     }
 
     @Override
     public <S> S getService(final ServiceReference<S> serviceReference) {
-        return ((MockServiceReference<S>)serviceReference).getService();
+        return ((MockServiceReference<S>) serviceReference).getService();
     }
 
     @Override
@@ -368,14 +396,14 @@ class MockBundleContext implements BundleContext {
     public void addServiceListener(final ServiceListener serviceListener) {
         try {
             addServiceListener(serviceListener, null);
-        }
-        catch (InvalidSyntaxException ex) {
+        } catch (InvalidSyntaxException ex) {
             throw new RuntimeException(ex);
         }
     }
 
     @Override
-    public void addServiceListener(final ServiceListener serviceListener, final String filter) throws InvalidSyntaxException {
+    public void addServiceListener(final ServiceListener serviceListener, final String filter)
+            throws InvalidSyntaxException {
         serviceListeners.put(serviceListener, createFilter(filter));
     }
 
@@ -386,8 +414,8 @@ class MockBundleContext implements BundleContext {
 
     void notifyServiceListeners(int eventType, ServiceReference serviceReference) {
         final ServiceEvent event = new ServiceEvent(eventType, serviceReference);
-        for ( Map.Entry<ServiceListener, Filter> entry : serviceListeners.entrySet()) {
-            if ( entry.getValue() == null || entry.getValue().match(serviceReference)) {
+        for (Map.Entry<ServiceListener, Filter> entry : serviceListeners.entrySet()) {
+            if (entry.getValue() == null || entry.getValue().match(serviceReference)) {
                 entry.getKey().serviceChanged(event);
             }
         }
@@ -421,11 +449,11 @@ class MockBundleContext implements BundleContext {
         // accept method, but ignore it
     }
 
-    @SuppressWarnings({ "unchecked", "null" })
+    @SuppressWarnings({"unchecked", "null"})
     <S> S locateService(final String name, final ServiceReference<S> reference) {
         for (MockServiceRegistration<?> serviceRegistration : this.registeredServices) {
             if (serviceRegistration.getReference() == reference) {
-                return (S)serviceRegistration.getService();
+                return (S) serviceRegistration.getService();
             }
         }
         return null;
@@ -459,8 +487,7 @@ class MockBundleContext implements BundleContext {
         }
         if (path.isEmpty()) {
             return dataFileBaseDir;
-        }
-        else {
+        } else {
             return new File(dataFileBaseDir, path);
         }
     }
@@ -482,8 +509,7 @@ class MockBundleContext implements BundleContext {
             }
             try {
                 MockOsgi.deactivate(componentInstance, this, serviceRegistration.getProperties());
-            }
-            catch (NoScrMetadataException ex) {
+            } catch (NoScrMetadataException ex) {
                 // ignore, no deactivate method is available then
             }
             deactivatedComponents.add(componentInstance);
@@ -522,17 +548,18 @@ class MockBundleContext implements BundleContext {
             public S getService() {
                 return MockBundleContext.this.getService(reference);
             }
+
             @Override
             public void ungetService(S service) {
                 MockBundleContext.this.ungetService(reference);
             }
+
             @Override
             public ServiceReference<S> getServiceReference() {
                 return reference;
             }
         };
     }
-
 
     // --- unsupported operations ---
     @Override
@@ -544,5 +571,4 @@ class MockBundleContext implements BundleContext {
     public Bundle installBundle(final String s, final InputStream inputStream) {
         throw new UnsupportedOperationException();
     }
-
 }

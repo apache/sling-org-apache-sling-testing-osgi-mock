@@ -18,9 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -38,14 +35,15 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
-@SetConfig(pid = "common-config", property = {
-        "service.ranking:Integer=42",
-        "service.vendor=Acme Software Foundation"
-})
-@SetConfig(component = Object.class, property = {
-        "service.ranking:Integer=55",
-        "service.vendor=Eclipse"
-})
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+@SetConfig(
+        pid = "common-config",
+        property = {"service.ranking:Integer=42", "service.vendor=Acme Software Foundation"})
+@SetConfig(
+        component = Object.class,
+        property = {"service.ranking:Integer=55", "service.vendor=Eclipse"})
 @AutoConfig(List.class)
 @ConfigType(type = ServiceRanking.class, property = "service.ranking:Integer=10")
 @RunWith(MockitoJUnitRunner.class)
@@ -73,7 +71,8 @@ public class ConfigCollectorTest {
         assertNull(configCollector.firstConfigMap(ServiceVendor.class).get("service.vendor"));
 
         assertEquals(42, commonConfigs.firstConfig(ServiceRanking.class).value());
-        assertEquals("Acme Software Foundation",
+        assertEquals(
+                "Acme Software Foundation",
                 commonConfigs.firstConfig(ServiceVendor.class).value());
 
         assertEquals(42, commonConfigs.firstConfigMap(ServiceRanking.class).get("service.ranking"));
@@ -84,7 +83,6 @@ public class ConfigCollectorTest {
 
         assertEquals(55, objectConfigs.firstConfigMap(ServiceRanking.class).get("service.ranking"));
         assertNull(objectConfigs.firstConfigMap(ServiceVendor.class).get("Eclipse"));
-
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -99,8 +97,11 @@ public class ConfigCollectorTest {
     @SuppressWarnings("null")
     public void autoConfig1() throws Exception {
         ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
-        assertEquals(Map.of("size", 10, "reverse", false, "service.pid", List.class.getName()),
-                MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
+        assertEquals(
+                Map.of("size", 10, "reverse", false, "service.pid", List.class.getName()),
+                MapUtil.toMap(configurationAdmin
+                        .getConfiguration(List.class.getName())
+                        .getProperties()));
     }
 
     @Test
@@ -108,8 +109,11 @@ public class ConfigCollectorTest {
     @SuppressWarnings("null")
     public void autoConfig2() throws Exception {
         ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
-        assertEquals(Map.of("size", 12, "reverse", true, "service.pid", List.class.getName()),
-                MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
+        assertEquals(
+                Map.of("size", 12, "reverse", true, "service.pid", List.class.getName()),
+                MapUtil.toMap(configurationAdmin
+                        .getConfiguration(List.class.getName())
+                        .getProperties()));
     }
 
     @Test
@@ -118,6 +122,7 @@ public class ConfigCollectorTest {
     @SuppressWarnings("null")
     public void autoConfigVoid() throws Exception {
         ConfigurationAdmin configurationAdmin = osgiContext.getService(ConfigurationAdmin.class);
-        assertNull(MapUtil.toMap(configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
+        assertNull(MapUtil.toMap(
+                configurationAdmin.getConfiguration(List.class.getName()).getProperties()));
     }
 }

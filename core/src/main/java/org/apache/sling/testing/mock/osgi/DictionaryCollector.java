@@ -29,29 +29,35 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-public class DictionaryCollector<K, V> implements Collector<Entry<K,V>, Hashtable<K,V>, Dictionary<K,V>> {
+public class DictionaryCollector<K, V> implements Collector<Entry<K, V>, Hashtable<K, V>, Dictionary<K, V>> {
 
-    private final Function<? super Entry<K,V>, ? extends K> keyMapper;
-    private final Function<? super Entry<K,V>, ? extends V> valueMapper;
-    
-    public DictionaryCollector(Function<? super Entry<K,V>, ? extends K> keyMapper, Function<? super Entry<K,V>, ? extends V> valueMapper) {
+    private final Function<? super Entry<K, V>, ? extends K> keyMapper;
+    private final Function<? super Entry<K, V>, ? extends V> valueMapper;
+
+    public DictionaryCollector(
+            Function<? super Entry<K, V>, ? extends K> keyMapper,
+            Function<? super Entry<K, V>, ? extends V> valueMapper) {
         super();
         this.keyMapper = keyMapper;
         this.valueMapper = valueMapper;
     }
 
     @Override
-    public Supplier<Hashtable<K,V>> supplier() {
+    public Supplier<Hashtable<K, V>> supplier() {
         return Hashtable::new;
     }
 
     @Override
-    public BiConsumer<Hashtable<K,V>, Entry<K,V>> accumulator() {
-        return (hashTable, entry) -> { if (valueMapper.apply(entry) != null) { hashTable.put(keyMapper.apply(entry), valueMapper.apply(entry)); } };
+    public BiConsumer<Hashtable<K, V>, Entry<K, V>> accumulator() {
+        return (hashTable, entry) -> {
+            if (valueMapper.apply(entry) != null) {
+                hashTable.put(keyMapper.apply(entry), valueMapper.apply(entry));
+            }
+        };
     }
 
     @Override
-    public BinaryOperator<Hashtable<K,V>> combiner() {
+    public BinaryOperator<Hashtable<K, V>> combiner() {
         return (dictionary1, dictionary2) -> {
             dictionary1.putAll(dictionary2);
             return dictionary1;
@@ -59,7 +65,7 @@ public class DictionaryCollector<K, V> implements Collector<Entry<K,V>, Hashtabl
     }
 
     @Override
-    public Function<Hashtable<K,V>, Dictionary<K,V>> finisher() {
+    public Function<Hashtable<K, V>, Dictionary<K, V>> finisher() {
         return table -> table;
     }
 
@@ -67,5 +73,4 @@ public class DictionaryCollector<K, V> implements Collector<Entry<K,V>, Hashtabl
     public Set<Characteristics> characteristics() {
         return Collections.singleton(Characteristics.UNORDERED);
     }
-
 }

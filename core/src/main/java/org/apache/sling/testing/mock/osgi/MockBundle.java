@@ -59,7 +59,8 @@ public final class MockBundle implements Bundle {
     MockBundle(BundleContext bundleContext, long bundleId) {
         this.bundleId = bundleId;
         this.bundleContext = bundleContext;
-        this.symbolicName = (bundleId == Constants.SYSTEM_BUNDLE_ID ? Constants.SYSTEM_BUNDLE_SYMBOLICNAME : "mock-bundle");
+        this.symbolicName =
+                (bundleId == Constants.SYSTEM_BUNDLE_ID ? Constants.SYSTEM_BUNDLE_SYMBOLICNAME : "mock-bundle");
     }
 
     /**
@@ -144,7 +145,7 @@ public final class MockBundle implements Bundle {
         String queryPath = path.startsWith("/") ? path : "/" + path;
 
         URL res = getClass().getResource(queryPath);
-        if ( res == null ) {
+        if (res == null) {
             return null;
         }
 
@@ -152,17 +153,17 @@ public final class MockBundle implements Bundle {
 
         try {
             File file = new File(res.toURI());
-            if ( file.isDirectory()) {
-                for ( File entry : file.listFiles() ) {
+            if (file.isDirectory()) {
+                for (File entry : file.listFiles()) {
                     String name = entry.isDirectory() ? entry.getName() + "/" : entry.getName();
                     matching.add(relativeWithTrailingSlash(queryPath.substring(1, queryPath.length())) + name);
                 }
             }
         } catch (URISyntaxException | RuntimeException e) {
-            throw new RuntimeException("Failed opening file from " + res , e);
+            throw new RuntimeException("Failed opening file from " + res, e);
         }
 
-        if ( matching.isEmpty() ) {
+        if (matching.isEmpty()) {
             return null;
         }
 
@@ -172,13 +173,13 @@ public final class MockBundle implements Bundle {
     private String relativeWithTrailingSlash(String queryPath) {
 
         // make relative
-        if ( queryPath.startsWith("/")) {
+        if (queryPath.startsWith("/")) {
             queryPath = queryPath.substring(1, queryPath.length());
         }
 
         // remove trailing slash
-        if ( !queryPath.isEmpty() && !queryPath.endsWith("/") ) {
-            queryPath = queryPath +"/";
+        if (!queryPath.isEmpty() && !queryPath.endsWith("/")) {
+            queryPath = queryPath + "/";
         }
 
         return queryPath;
@@ -188,8 +189,7 @@ public final class MockBundle implements Bundle {
     public String getLocation() {
         if (bundleId == Constants.SYSTEM_BUNDLE_ID) {
             return Constants.SYSTEM_BUNDLE_LOCATION;
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -307,5 +307,4 @@ public final class MockBundle implements Bundle {
     public File getDataFile(String filename) {
         throw new UnsupportedOperationException();
     }
-
 }

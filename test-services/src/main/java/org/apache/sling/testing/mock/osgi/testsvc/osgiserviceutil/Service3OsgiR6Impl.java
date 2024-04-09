@@ -45,30 +45,47 @@ public class Service3OsgiR6Impl implements Service3OsgiR6 {
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     private volatile ServiceInterface1Optional reference1Optional;
 
-    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            cardinality = ReferenceCardinality.AT_LEAST_ONE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ServiceSuperInterface3> references3;
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE, target="(prop1=abc)",
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            target = "(prop1=abc)",
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ServiceSuperInterface3> references3Filtered;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY,
             name = "reference3DynamicFiltered")
     private volatile ServiceSuperInterface3 reference3DynamicFiltered;
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY,
             fieldOption = FieldOption.UPDATE)
     private volatile Set<ServiceSuperInterface3> references3Set;
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile Collection<ServiceSuperInterface3> references3Collection;
 
     private ComponentContext componentContext;
@@ -86,7 +103,7 @@ public class Service3OsgiR6Impl implements Service3OsgiR6 {
     }
 
     @Modified
-    private void modified(Map<String,Object> newConfig) {
+    private void modified(Map<String, Object> newConfig) {
         this.config = newConfig;
     }
 
@@ -101,7 +118,7 @@ public class Service3OsgiR6Impl implements Service3OsgiR6 {
     public List<ServiceInterface2> getReferences2() {
         List<ServiceInterface2> services = new ArrayList<>();
         for (ServiceReference<?> serviceReference : references2) {
-            services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
+            services.add((ServiceInterface2) componentContext.getBundleContext().getService(serviceReference));
         }
         return services;
     }
@@ -133,5 +150,4 @@ public class Service3OsgiR6Impl implements Service3OsgiR6 {
     public Map<String, Object> getConfig() {
         return config;
     }
-
 }

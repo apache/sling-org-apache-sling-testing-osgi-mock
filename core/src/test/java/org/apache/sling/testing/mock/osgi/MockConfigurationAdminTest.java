@@ -18,13 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -42,12 +35,16 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 public class MockConfigurationAdminTest {
 
-    private static final String[] TEST_ADAPTABLES = new String[] {
-        "adaptable1",
-        "adaptable2"
-    };
+    private static final String[] TEST_ADAPTABLES = new String[] {"adaptable1", "adaptable2"};
 
     @Rule
     public OsgiContext context = new OsgiContext();
@@ -61,14 +58,18 @@ public class MockConfigurationAdminTest {
 
     @Test
     public void testGetConfigurationString() throws IOException {
-        MockOsgi.setConfigForPid(context.bundleContext(), "org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata",
-                Constants.SERVICE_RANKING, 3000,
-                "adaptables", TEST_ADAPTABLES,
-                "prop2", 2);
+        MockOsgi.setConfigForPid(
+                context.bundleContext(),
+                "org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata",
+                Constants.SERVICE_RANKING,
+                3000,
+                "adaptables",
+                TEST_ADAPTABLES,
+                "prop2",
+                2);
 
-        context.registerInjectActivateService(new ServiceWithMetadata(), Map.<String, Object>of(
-                Constants.SERVICE_RANKING, 4000,
-                "prop1", 1));
+        context.registerInjectActivateService(
+                new ServiceWithMetadata(), Map.<String, Object>of(Constants.SERVICE_RANKING, 4000, "prop1", 1));
 
         ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
 
@@ -77,21 +78,22 @@ public class MockConfigurationAdminTest {
         assertEquals(1, reference.getProperty("prop1"));
 
         // values set in config admin has 2ndmost highest precedence
-        assertArrayEquals(TEST_ADAPTABLES, (String[])reference.getProperty("adaptables"));
+        assertArrayEquals(TEST_ADAPTABLES, (String[]) reference.getProperty("adaptables"));
         assertEquals(2, reference.getProperty("prop2"));
 
         // values set in OSGi SCR metadata
         assertEquals("The Apache Software Foundation", reference.getProperty(Constants.SERVICE_VENDOR));
-        assertEquals("org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata", reference.getProperty(Constants.SERVICE_PID));
+        assertEquals(
+                "org.apache.sling.testing.mock.osgi.OsgiMetadataUtilTest$ServiceWithMetadata",
+                reference.getProperty(Constants.SERVICE_PID));
     }
 
     @Test
     public void testConfigurationPID() throws IOException {
-        MockOsgi.setConfigForPid(context.bundleContext(), ServiceWithConfigurationPID.class.getSimpleName(),
-                "prop1", 1);
+        MockOsgi.setConfigForPid(
+                context.bundleContext(), ServiceWithConfigurationPID.class.getSimpleName(), "prop1", 1);
 
-        context.registerInjectActivateService(new ServiceWithConfigurationPID(), Map.<String, Object>of(
-                "prop2", 2));
+        context.registerInjectActivateService(new ServiceWithConfigurationPID(), Map.<String, Object>of("prop2", 2));
 
         ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
 
@@ -101,13 +103,11 @@ public class MockConfigurationAdminTest {
 
     @Test
     public void testMultipleConfigurationPID() throws IOException {
-        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration1",
-                "prop1", 1);
-        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration2",
-                "prop1", 2);
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration1", "prop1", 1);
+        MockOsgi.setConfigForPid(context.bundleContext(), "Configuration2", "prop1", 2);
 
-        context.registerInjectActivateService(new ServiceWithMultipleConfigurationPID(), Map.<String, Object>of(
-                "prop2", 2));
+        context.registerInjectActivateService(
+                new ServiceWithMultipleConfigurationPID(), Map.<String, Object>of("prop2", 2));
 
         ServiceReference reference = context.bundleContext().getServiceReference(Comparable.class.getName());
 
@@ -126,7 +126,8 @@ public class MockConfigurationAdminTest {
         final Configuration[] prop2AConfigurations = underTest.listConfigurations("(prop2=A)");
         assertEquals(2, prop2AConfigurations.length);
         final Configuration[] searchForAllConfigurations = underTest.listConfigurations(null);
-        assertTrue(searchForAllConfigurations.length >= 3); // Other configurations could be registered outside this method as well
+        assertTrue(searchForAllConfigurations.length
+                >= 3); // Other configurations could be registered outside this method as well
         final Configuration[] noConfigurations = underTest.listConfigurations("(nonexistingprop=nonexistingvalue)");
         assertNull(noConfigurations);
     }
@@ -159,7 +160,7 @@ public class MockConfigurationAdminTest {
 
     @Test
     public void testGetUpdateDeleteGetConfiguration() throws IOException {
-        Configuration configurationNew  = underTest.getConfiguration("new-pid");
+        Configuration configurationNew = underTest.getConfiguration("new-pid");
         assertNull(configurationNew.getProperties());
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("key", "value");
@@ -170,13 +171,13 @@ public class MockConfigurationAdminTest {
         assertNotNull(configurationExisting.getProperties().get(Constants.SERVICE_PID));
         configurationExisting.delete();
 
-        Configuration configurationDeleted  = underTest.getConfiguration("new-pid");
+        Configuration configurationDeleted = underTest.getConfiguration("new-pid");
         assertNull(configurationDeleted.getProperties());
     }
 
     @Test
     public void testUpdateIfDifferent() throws IOException {
-        Configuration configurationNew  = underTest.getConfiguration("new-pid");
+        Configuration configurationNew = underTest.getConfiguration("new-pid");
         assertNull(configurationNew.getProperties());
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
         properties.put("key", "value");

@@ -71,9 +71,7 @@ public final class ContextPlugins {
      */
     @SafeVarargs
     public final void addPlugin(@NotNull ContextPlugin<? extends OsgiContextImpl> @NotNull ... plugin) {
-        Stream.of(plugin)
-            .filter(Objects::nonNull)
-            .forEach(plugins::add);
+        Stream.of(plugin).filter(Objects::nonNull).forEach(plugins::add);
     }
 
     /**
@@ -82,10 +80,9 @@ public final class ContextPlugins {
      */
     @SuppressWarnings("null")
     @SafeVarargs
-    public final void addBeforeSetUpCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeSetUpCallback) {
-        Stream.of(beforeSetUpCallback)
-            .filter(Objects::nonNull)
-            .forEach(this::addBeforeSetUpCallbackItem);
+    public final void addBeforeSetUpCallback(
+            @NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeSetUpCallback) {
+        Stream.of(beforeSetUpCallback).filter(Objects::nonNull).forEach(this::addBeforeSetUpCallbackItem);
     }
 
     private final <T extends OsgiContextImpl> void addBeforeSetUpCallbackItem(@NotNull final ContextCallback<T> item) {
@@ -94,6 +91,7 @@ public final class ContextPlugins {
             public void beforeSetUp(@NotNull T context) throws Exception {
                 item.execute(context);
             }
+
             @Override
             public String toString() {
                 return item.toString();
@@ -107,10 +105,9 @@ public final class ContextPlugins {
      */
     @SuppressWarnings("null")
     @SafeVarargs
-    public final void addAfterSetUpCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... afterSetUpCallback) {
-        Stream.of(afterSetUpCallback)
-            .filter(Objects::nonNull)
-            .forEach(this::addAfterSetUpCallbackItem);
+    public final void addAfterSetUpCallback(
+            @NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... afterSetUpCallback) {
+        Stream.of(afterSetUpCallback).filter(Objects::nonNull).forEach(this::addAfterSetUpCallbackItem);
     }
 
     private final <T extends OsgiContextImpl> void addAfterSetUpCallbackItem(@NotNull final ContextCallback<T> item) {
@@ -119,6 +116,7 @@ public final class ContextPlugins {
             public void afterSetUp(@NotNull T context) throws Exception {
                 item.execute(context);
             }
+
             @Override
             public String toString() {
                 return item.toString();
@@ -126,25 +124,25 @@ public final class ContextPlugins {
         });
     }
 
-
     /**
      * Add callback
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
     @SuppressWarnings("null")
     @SafeVarargs
-    public final void addBeforeTearDownCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeTearDownCallback) {
-        Stream.of(beforeTearDownCallback)
-            .filter(Objects::nonNull)
-            .forEach(this::addBeforeTearDownCallbackItem);
+    public final void addBeforeTearDownCallback(
+            @NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeTearDownCallback) {
+        Stream.of(beforeTearDownCallback).filter(Objects::nonNull).forEach(this::addBeforeTearDownCallbackItem);
     }
 
-    private final <T extends OsgiContextImpl> void addBeforeTearDownCallbackItem(@NotNull final ContextCallback<T> item) {
+    private final <T extends OsgiContextImpl> void addBeforeTearDownCallbackItem(
+            @NotNull final ContextCallback<T> item) {
         plugins.add(new AbstractContextPlugin<T>() {
             @Override
             public void beforeTearDown(@NotNull T context) throws Exception {
                 item.execute(context);
             }
+
             @Override
             public String toString() {
                 return item.toString();
@@ -158,18 +156,19 @@ public final class ContextPlugins {
      */
     @SuppressWarnings("null")
     @SafeVarargs
-    public final void addAfterTearDownCallback(@NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... afterTearDownCallback) {
-        Stream.of(afterTearDownCallback)
-            .filter(Objects::nonNull)
-            .forEach(this::addAfterTearDownCallbackItem);
+    public final void addAfterTearDownCallback(
+            @NotNull final ContextCallback<? extends OsgiContextImpl> @NotNull ... afterTearDownCallback) {
+        Stream.of(afterTearDownCallback).filter(Objects::nonNull).forEach(this::addAfterTearDownCallbackItem);
     }
 
-    private final <T extends OsgiContextImpl> void addAfterTearDownCallbackItem(@NotNull final ContextCallback<T> item) {
+    private final <T extends OsgiContextImpl> void addAfterTearDownCallbackItem(
+            @NotNull final ContextCallback<T> item) {
         plugins.add(new AbstractContextPlugin<T>() {
             @Override
             public void afterTearDown(@NotNull T context) throws Exception {
                 item.execute(context);
             }
+
             @Override
             public String toString() {
                 return item.toString();
@@ -194,8 +193,7 @@ public final class ContextPlugins {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.beforeSetUp(context);
-            }
-            catch (Throwable ex) {
+            } catch (Throwable ex) {
                 throw new RuntimeException("Before setup failed (" + plugin.toString() + "): " + ex.getMessage(), ex);
             }
         }
@@ -211,8 +209,7 @@ public final class ContextPlugins {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.afterSetUp(context);
-            }
-            catch (Throwable ex) {
+            } catch (Throwable ex) {
                 throw new RuntimeException("After setup failed (" + plugin.toString() + "): " + ex.getMessage(), ex);
             }
         }
@@ -228,9 +225,9 @@ public final class ContextPlugins {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.beforeTearDown(context);
-            }
-            catch (Throwable ex) {
-                throw new RuntimeException("Before teardown failed (" + plugin.toString() + "): " + ex.getMessage(), ex);
+            } catch (Throwable ex) {
+                throw new RuntimeException(
+                        "Before teardown failed (" + plugin.toString() + "): " + ex.getMessage(), ex);
             }
         }
     }
@@ -245,11 +242,9 @@ public final class ContextPlugins {
         for (ContextPlugin plugin : plugins) {
             try {
                 plugin.afterTearDown(context);
-            }
-            catch (Throwable ex) {
+            } catch (Throwable ex) {
                 throw new RuntimeException("After teardown failed (" + plugin.toString() + "): " + ex.getMessage(), ex);
             }
         }
     }
-
 }

@@ -27,18 +27,37 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-@Component(reference = {
-        @Reference(name = "interfaceBindList", bind="bindInterface", unbind="unbindInterface", service = ServiceInterface3.class,
-                cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY),
-        @Reference(name = "superInterfaceBindList", bind="bindSuperInterface", unbind="unbindSuperInterface", service = ServiceSuperInterface3.class,
-        cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
-})
+@Component(
+        reference = {
+            @Reference(
+                    name = "interfaceBindList",
+                    bind = "bindInterface",
+                    unbind = "unbindInterface",
+                    service = ServiceInterface3.class,
+                    cardinality = ReferenceCardinality.MULTIPLE,
+                    policy = ReferencePolicy.DYNAMIC,
+                    policyOption = ReferencePolicyOption.GREEDY),
+            @Reference(
+                    name = "superInterfaceBindList",
+                    bind = "bindSuperInterface",
+                    unbind = "unbindSuperInterface",
+                    service = ServiceSuperInterface3.class,
+                    cardinality = ReferenceCardinality.MULTIPLE,
+                    policy = ReferencePolicy.DYNAMIC,
+                    policyOption = ReferencePolicyOption.GREEDY)
+        })
 public class Service7ServiceVsSuperInterface {
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ServiceInterface3> interfaceDirectList;
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ServiceSuperInterface3> superInterfaceDirectList;
 
     private volatile List<ServiceInterface3> interfaceBindList = new ArrayList<>();
@@ -75,5 +94,4 @@ public class Service7ServiceVsSuperInterface {
     public List<ServiceSuperInterface3> getSuperInterfaceBindList() {
         return superInterfaceBindList;
     }
-
 }

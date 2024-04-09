@@ -18,11 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
-import org.jetbrains.annotations.NotNull;
-import org.osgi.annotation.versioning.ProviderType;
-
 import java.util.Map;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.NotNull;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * A heterogeneously typed collection of OSGi Config objects for injection as a test parameter.
@@ -85,5 +85,4 @@ public interface ConfigCollection {
     default <T> Map<String, Object> firstConfigMap(@NotNull Class<T> configType) {
         return stream(configType).findFirst().orElseThrow().getConfigMap();
     }
-
 }

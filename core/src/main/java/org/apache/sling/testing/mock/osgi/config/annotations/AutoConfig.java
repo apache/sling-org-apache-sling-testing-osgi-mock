@@ -18,10 +18,10 @@
  */
 package org.apache.sling.testing.mock.osgi.config.annotations;
 
-import org.osgi.service.component.annotations.Component;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import org.osgi.service.component.annotations.Component;
 
 /**
  * Declares a component configuration pid for which all non-configured component property type annotations in scope

@@ -21,7 +21,13 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-@Component(reference = @Reference(service = ServiceInterface1.class, name = "customName", bind = "customBind", unbind = "customUnbind"))
+@Component(
+        reference =
+                @Reference(
+                        service = ServiceInterface1.class,
+                        name = "customName",
+                        bind = "customBind",
+                        unbind = "customUnbind"))
 public class Service4 {
 
     private ServiceInterface1 reference1;
@@ -37,5 +43,4 @@ public class Service4 {
     protected void customUnbind(ServiceInterface1 service) {
         reference1 = null;
     }
-
 }

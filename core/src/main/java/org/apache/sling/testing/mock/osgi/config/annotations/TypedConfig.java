@@ -88,5 +88,4 @@ public interface TypedConfig<T> {
     default <U> Stream<U> configStream(@NotNull Class<U> otherType) {
         return stream(otherType).map(TypedConfig::getConfig);
     }
-
 }

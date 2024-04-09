@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -31,10 +31,8 @@
     <packaging>jar</packaging>
 
     <name>Apache Sling Testing OSGi Mock Test Services</name>
-    <description>
-      This module is only used in the unit tests of osgi-mock.core.
-      The sample OSGi components and services are not part of the osgi-mock test source to allow bnd plugin to auto-generate the metadata for them.
-    </description>
+    <description>This module is only used in the unit tests of osgi-mock.core.
+      The sample OSGi components and services are not part of the osgi-mock test source to allow bnd plugin to auto-generate the metadata for them.</description>
 
     <properties>
         <!-- Skip sonarqube analysis for this test services project - it's only used for unit tests -->
@@ -64,7 +62,7 @@
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-baseline-maven-plugin</artifactId>
                 <configuration>
-                  <skip>true</skip>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

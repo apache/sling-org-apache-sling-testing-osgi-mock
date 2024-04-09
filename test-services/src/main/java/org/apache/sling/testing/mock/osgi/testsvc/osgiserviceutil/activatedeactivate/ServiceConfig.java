@@ -25,5 +25,4 @@ public @interface ServiceConfig {
     String prop2_with_periods();
 
     String prop3$_$with$_$hyphens();
-
 }

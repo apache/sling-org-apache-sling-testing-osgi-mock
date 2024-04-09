@@ -18,8 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import static org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser.isSupportedConfigTypeValueType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 import org.osgi.annotation.versioning.ProviderType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.sling.testing.mock.osgi.config.ComponentPropertyParser.isSupportedConfigTypeValueType;
 
 /**
  * Base config type reflection provider class.
@@ -70,13 +70,13 @@ abstract class AbstractConfigTypeReflectionProvider {
     abstract String getPropertyName(@NotNull Method method);
 
     boolean isValidConfigType() {
-        return Arrays.stream(getMethods()).allMatch(method ->
-                method.getParameterCount() == 0 && isSupportedConfigTypeValueType(method.getReturnType()));
+        return Arrays.stream(getMethods())
+                .allMatch(method ->
+                        method.getParameterCount() == 0 && isSupportedConfigTypeValueType(method.getReturnType()));
     }
 
-    boolean addSingleDefault(@NotNull String propertyName,
-                             @NotNull Object value,
-                             @NotNull Map<String, Object> defaults) {
+    boolean addSingleDefault(
+            @NotNull String propertyName, @NotNull Object value, @NotNull Map<String, Object> defaults) {
         final Object propertyValue = attributeValueToPropertyValue(value);
         if (propertyValue != null) {
             defaults.put(propertyName, propertyValue);
@@ -127,7 +127,9 @@ abstract class AbstractConfigTypeReflectionProvider {
         try {
             return method.invoke(config, (Object[]) null);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            log.error("Failed to invoke config type " + getConfigType() + " method " + method + " on object " + config, e);
+            log.error(
+                    "Failed to invoke config type " + getConfigType() + " method " + method + " on object " + config,
+                    e);
             return null;
         }
     }

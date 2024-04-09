@@ -69,22 +69,20 @@ public final class AnnotationTypedConfig<T> implements TypedConfig<T> {
      * @return a new instance
      */
     @SuppressWarnings("null")
-    public static <T> AnnotationTypedConfig<T> newInstance(@NotNull Class<T> type,
-                                                           @NotNull Object config,
-                                                           @NotNull Annotation annotation) {
+    public static <T> AnnotationTypedConfig<T> newInstance(
+            @NotNull Class<T> type, @NotNull Object config, @NotNull Annotation annotation) {
         if (!type.isInstance(config)) {
-            throw new IllegalArgumentException("config " + config + " must be instance of type " +
-                    type + " from annotation " + annotation);
+            throw new IllegalArgumentException(
+                    "config " + config + " must be instance of type " + type + " from annotation " + annotation);
         }
         if (annotation instanceof ConfigType) {
             if (!((ConfigType) annotation).type().isAssignableFrom(type)) {
-                throw new IllegalArgumentException("type " + type +
-                        " must match config type from annotation " + annotation);
+                throw new IllegalArgumentException(
+                        "type " + type + " must match config type from annotation " + annotation);
             }
         } else if (!annotation.annotationType().isAssignableFrom(type)) {
             throw new IllegalArgumentException("type " + type + " must match annotation type " + annotation);
         }
         return new AnnotationTypedConfig<>(type, type.cast(config));
     }
-
 }

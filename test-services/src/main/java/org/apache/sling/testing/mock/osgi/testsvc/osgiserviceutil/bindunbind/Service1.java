@@ -31,8 +31,14 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 @Component
 public class Service1 {
 
-    @Reference(name = "reference1", bind = "bindReference1", unbind = "unbindReference1", service = ServiceInterface1.class,
-            cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            name = "reference1",
+            bind = "bindReference1",
+            unbind = "unbindReference1",
+            service = ServiceInterface1.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ServiceInterface1> instances = new ArrayList<>();
 
     void bindReference1(ServiceInterface1 reference) {
@@ -46,5 +52,4 @@ public class Service1 {
     public List<ServiceInterface1> getInstances() {
         return instances;
     }
-
 }

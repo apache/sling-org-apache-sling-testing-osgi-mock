@@ -18,8 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.util.Collection;
 
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface3;
@@ -33,6 +31,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * Test cases for SLING-10616
  */
@@ -40,6 +40,7 @@ import org.osgi.framework.ServiceReference;
 public class MockBundleContextStaticGreedySelfReferenceTest {
 
     private BundleContext bundleContext;
+
     @Before
     public void setUp() {
         bundleContext = MockOsgi.newBundleContext();
@@ -66,9 +67,10 @@ public class MockBundleContextStaticGreedySelfReferenceTest {
      */
     @SuppressWarnings("null")
     private ServiceInterface3 getDefaultImplFromReference() throws InvalidSyntaxException {
-        Collection<ServiceReference<ServiceInterface3>> references = bundleContext.getServiceReferences(ServiceInterface3.class, "(!(prop1=abc))");
-        ServiceInterface3 service = bundleContext.getService(references.iterator().next());
-        return ((ServiceInterface3ImplSelfReferencing)service).getDefaultImplementation();
+        Collection<ServiceReference<ServiceInterface3>> references =
+                bundleContext.getServiceReferences(ServiceInterface3.class, "(!(prop1=abc))");
+        ServiceInterface3 service =
+                bundleContext.getService(references.iterator().next());
+        return ((ServiceInterface3ImplSelfReferencing) service).getDefaultImplementation();
     }
-
 }

@@ -29,5 +29,4 @@ public final class NoScrMetadataException extends RuntimeException {
     public NoScrMetadataException(@NotNull Class<?> type) {
         super("No OSGi SCR metadata found for class " + OsgiMetadataUtil.cleanupClassName(type.getName()));
     }
-
 }

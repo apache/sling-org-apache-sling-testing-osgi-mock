@@ -18,8 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +38,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * Test different variants of bind/unbind methods with varying signatures.
  */
@@ -50,14 +50,16 @@ public class OsgiServiceUtilBindUnbindTest {
 
     private ServiceRegistration<ServiceInterface1> reg1a;
     private ServiceRegistration<ServiceInterface1> reg1b;
-    private Map<String,Object> props1a = MapUtil.toMap("prop1", "1a");
-    private Map<String,Object> props1b = MapUtil.toMap("prop1", "1b");
-    private Map<String,Object> props1c = MapUtil.toMap("prop1", "1c");
+    private Map<String, Object> props1a = MapUtil.toMap("prop1", "1a");
+    private Map<String, Object> props1b = MapUtil.toMap("prop1", "1b");
+    private Map<String, Object> props1c = MapUtil.toMap("prop1", "1c");
 
     @Mock
     private ServiceInterface1 instance1a;
+
     @Mock
     private ServiceInterface1 instance1b;
+
     @Mock
     private ServiceInterface1 instance1c;
 
@@ -137,7 +139,6 @@ public class OsgiServiceUtilBindUnbindTest {
         assertMaps(service.getConfigs(), props1b, props1c);
     }
 
-
     @SuppressWarnings("null")
     private <T> T registerInjectService(T service) {
         MockOsgi.registerInjectActivateService(service, bundleContext);
@@ -145,7 +146,8 @@ public class OsgiServiceUtilBindUnbindTest {
     }
 
     @SuppressWarnings("null")
-    private <T extends ServiceInterface1> ServiceRegistration<ServiceInterface1> registerReference(T instance, Map<String,Object> props) {
+    private <T extends ServiceInterface1> ServiceRegistration<ServiceInterface1> registerReference(
+            T instance, Map<String, Object> props) {
         return bundleContext.registerService(ServiceInterface1.class, instance, MapUtil.toDictionary(props));
     }
 
@@ -155,15 +157,14 @@ public class OsgiServiceUtilBindUnbindTest {
     }
 
     @SafeVarargs
-    private final <T> void assertMaps(List<Map<String,Object>> actual, Map<String,Object>... expected) {
-        List<Map<String,Object>> actualFiltered = actual.stream()
+    private final <T> void assertMaps(List<Map<String, Object>> actual, Map<String, Object>... expected) {
+        List<Map<String, Object>> actualFiltered = actual.stream()
                 .map(actualItem -> actualItem.entrySet().stream()
                         .filter(entry -> entry.getKey().equals("prop1"))
                         .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue())))
                 .collect(Collectors.toList());
         assertItems(actualFiltered, expected);
     }
-
 
     /**
      * SLING-11860 verify OsgiServiceUtil#invokeBindUnbindMethod invokes the correct bind and unbind methods
@@ -176,5 +177,4 @@ public class OsgiServiceUtilBindUnbindTest {
         reg1a.unregister();
         assertEquals(Service9.class, service9.getUnbindSvc1FromClass());
     }
-
 }

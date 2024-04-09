@@ -18,14 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
-
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -39,6 +31,13 @@ import org.junit.Test;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
 
 @ConfigType(type = ServiceRanking.class, lenient = true)
 public class AnnotationTypedConfigTest {
@@ -73,8 +72,8 @@ public class AnnotationTypedConfigTest {
     public void testNewInstance() {
         final ConfigType annotation = getClass().getAnnotation(ConfigType.class);
         final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
-        final TypedConfig<ServiceRanking> typedConfig = AnnotationTypedConfig.newInstance(ServiceRanking.class,
-                config, annotation);
+        final TypedConfig<ServiceRanking> typedConfig =
+                AnnotationTypedConfig.newInstance(ServiceRanking.class, config, annotation);
         assertSame(ServiceRanking.class, typedConfig.getType());
         assertSame(config, typedConfig.getConfig());
         assertEquals(0, typedConfig.stream(ServiceVendor.class).count());
@@ -84,8 +83,8 @@ public class AnnotationTypedConfigTest {
     public void testNewInstanceUsingConfigAsAnnotation() {
         final ConfigType annotation = getClass().getAnnotation(ConfigType.class);
         final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
-        final TypedConfig<ServiceRanking> typedConfig = AnnotationTypedConfig.newInstance(ServiceRanking.class,
-                config, config);
+        final TypedConfig<ServiceRanking> typedConfig =
+                AnnotationTypedConfig.newInstance(ServiceRanking.class, config, config);
         assertSame(ServiceRanking.class, typedConfig.getType());
         assertSame(config, typedConfig.getConfig());
         assertEquals(0, typedConfig.stream(ServiceVendor.class).count());
@@ -111,7 +110,8 @@ public class AnnotationTypedConfigTest {
         ConfigType annotation = getClass().getAnnotation(ConfigType.class);
         final ServiceRanking config = (ServiceRanking) configTypeContext.constructConfigType(annotation);
         ConfigType wrongAnnotation = TestOsgiContext.class.getAnnotation(ConfigType.class);
-        final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
+        final ServiceVendor wrongAnnotationConfig =
+                (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
         AnnotationTypedConfig.newInstance(ServiceRanking.class, config, wrongAnnotationConfig);
     }
 
@@ -119,11 +119,15 @@ public class AnnotationTypedConfigTest {
     @SuppressWarnings("unchecked")
     public void testGetConfigMap() {
         ConfigType annotation = getClass().getAnnotation(ConfigType.class);
-        assertEquals(Map.of("service.ranking", 0),
+        assertEquals(
+                Map.of("service.ranking", 0),
                 configTypeContext.newTypedConfig(annotation).getConfigMap());
         ConfigType wrongAnnotation = TestOsgiContext.class.getAnnotation(ConfigType.class);
-        final ServiceVendor wrongAnnotationConfig = (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
-        assertTrue(AbstractConfigTypeReflectionProvider.getInstance(annotation.type()).getPropertyMap(wrongAnnotationConfig).isEmpty());
+        final ServiceVendor wrongAnnotationConfig =
+                (ServiceVendor) configTypeContext.constructConfigType(wrongAnnotation);
+        assertTrue(AbstractConfigTypeReflectionProvider.getInstance(annotation.type())
+                .getPropertyMap(wrongAnnotationConfig)
+                .isEmpty());
 
         ConfigCollection collection = mock(ConfigCollection.class);
         doCallRealMethod().when(collection).stream(any(Class.class));

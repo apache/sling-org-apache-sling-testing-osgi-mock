@@ -18,20 +18,20 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 final class SingleElementAnnotationReflectionProvider extends AbstractConfigTypeReflectionProvider {
     private static final String ATTR_VALUE = "value";
     private final Class<? extends Annotation> annotationType;
     private final String prefix;
 
-    public SingleElementAnnotationReflectionProvider(@NotNull Class<? extends Annotation> annotationType,
-                                                     @Nullable String prefix) {
+    public SingleElementAnnotationReflectionProvider(
+            @NotNull Class<? extends Annotation> annotationType, @Nullable String prefix) {
         this.annotationType = annotationType;
         this.prefix = prefix;
     }
@@ -51,7 +51,8 @@ final class SingleElementAnnotationReflectionProvider extends AbstractConfigType
         if (ATTR_VALUE.equals(method.getName())) {
             return ComponentPropertyParser.singleElementAnnotationKey(annotationType.getSimpleName(), prefix);
         } else {
-            throw new IllegalArgumentException("only the value method can be mapped to a config property: " + method.getName());
+            throw new IllegalArgumentException(
+                    "only the value method can be mapped to a config property: " + method.getName());
         }
     }
 }

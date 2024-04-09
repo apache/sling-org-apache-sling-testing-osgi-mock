@@ -21,5 +21,4 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 public interface RankedService {
 
     int getRanking();
-
 }

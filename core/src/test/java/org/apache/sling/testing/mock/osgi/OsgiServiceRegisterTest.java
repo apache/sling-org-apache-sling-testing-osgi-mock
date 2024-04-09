@@ -18,10 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.mock;
-
 import org.apache.sling.testing.mock.osgi.junit.OsgiContext;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service2;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
@@ -31,6 +27,10 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterfa
 import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.Constants;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.mock;
 
 public class OsgiServiceRegisterTest {
 
@@ -95,5 +95,4 @@ public class OsgiServiceRegisterTest {
         Service3 service3 = context.registerInjectActivateService(new Service3());
         assertSame(service1_ranking200, service3.getReference1());
     }
-
 }

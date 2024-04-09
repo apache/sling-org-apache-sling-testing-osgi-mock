@@ -48,5 +48,4 @@ public class Service1Constructor {
     public ComponentContext getComponentContext() {
         return componentContext;
     }
-
 }

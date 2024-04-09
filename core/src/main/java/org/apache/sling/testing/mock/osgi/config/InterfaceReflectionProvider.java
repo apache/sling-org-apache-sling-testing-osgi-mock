@@ -18,11 +18,11 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
 
 final class InterfaceReflectionProvider extends AbstractConfigTypeReflectionProvider {
     private final Class<?> configType;

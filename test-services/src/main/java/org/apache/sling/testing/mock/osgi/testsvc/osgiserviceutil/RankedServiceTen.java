@@ -33,12 +33,11 @@ public class RankedServiceTen implements RankedService {
 
     @Activate
     public void activate(Map<String, Object> properties) {
-        this.ranking = (Integer)properties.get(Constants.SERVICE_RANKING);
+        this.ranking = (Integer) properties.get(Constants.SERVICE_RANKING);
     }
 
     @Override
     public int getRanking() {
         return ranking;
     }
-
 }

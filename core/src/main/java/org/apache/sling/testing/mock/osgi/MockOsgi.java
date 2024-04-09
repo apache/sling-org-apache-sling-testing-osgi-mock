@@ -18,10 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.apache.sling.testing.mock.osgi.MapMergeUtil.propertiesMergeWithOsgiMetadata;
-import static org.apache.sling.testing.mock.osgi.MapUtil.toDictionary;
-import static org.apache.sling.testing.mock.osgi.MapUtil.toMap;
-
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
@@ -38,6 +34,10 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.log.LogService;
+
+import static org.apache.sling.testing.mock.osgi.MapMergeUtil.propertiesMergeWithOsgiMetadata;
+import static org.apache.sling.testing.mock.osgi.MapUtil.toDictionary;
+import static org.apache.sling.testing.mock.osgi.MapUtil.toMap;
 
 /**
  * Factory for mock OSGi objects.
@@ -101,9 +101,12 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static @NotNull ComponentContext newComponentContext(@NotNull BundleContext bundleContext,
-            @Nullable Dictionary<String, Object> properties) {
-        return componentContext().bundleContext(bundleContext).properties(properties).build();
+    public static @NotNull ComponentContext newComponentContext(
+            @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
+        return componentContext()
+                .bundleContext(bundleContext)
+                .properties(properties)
+                .build();
     }
 
     /**
@@ -111,9 +114,12 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static @NotNull ComponentContext newComponentContext(@NotNull BundleContext bundleContext,
-            @Nullable Map<String, Object> properties) {
-        return componentContext().bundleContext(bundleContext).properties(properties).build();
+    public static @NotNull ComponentContext newComponentContext(
+            @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
+        return componentContext()
+                .bundleContext(bundleContext)
+                .properties(properties)
+                .build();
     }
 
     /**
@@ -121,9 +127,12 @@ public final class MockOsgi {
      * @param properties Properties
      * @return Mocked {@link ComponentContext} instance
      */
-    public static @NotNull ComponentContext newComponentContext(@NotNull BundleContext bundleContext,
-            @NotNull Object @NotNull ... properties) {
-        return componentContext().bundleContext(bundleContext).properties(properties).build();
+    public static @NotNull ComponentContext newComponentContext(
+            @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
+        return componentContext()
+                .bundleContext(bundleContext)
+                .properties(properties)
+                .build();
     }
 
     /**
@@ -149,7 +158,7 @@ public final class MockOsgi {
      * @return true if all dependencies could be injected, false if the service has no dependencies.
      */
     public static boolean injectServices(@NotNull Object target, @NotNull BundleContext bundleContext) {
-        return MockOsgi.injectServices(target, bundleContext, (Map<String, Object>)null);
+        return MockOsgi.injectServices(target, bundleContext, (Map<String, Object>) null);
     }
 
     /**
@@ -160,7 +169,8 @@ public final class MockOsgi {
      * @param properties Service properties (used to resolve dynamic reference properties)
      * @return true if all dependencies could be injected, false if the service has no dependencies.
      */
-    public static boolean injectServices(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
+    public static boolean injectServices(
+            @NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         return OsgiServiceUtil.injectServices(target, bundleContext, properties);
     }
 
@@ -173,8 +183,9 @@ public final class MockOsgi {
      * @param <T> Target class type
      * @return Component/service instances with injected services
      */
-    public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext) {
-        return MockOsgi.activateInjectServices(targetClass, bundleContext, (Map<String, Object>)null);
+    public static @NotNull <T> T activateInjectServices(
+            @NotNull Class<T> targetClass, @NotNull BundleContext bundleContext) {
+        return MockOsgi.activateInjectServices(targetClass, bundleContext, (Map<String, Object>) null);
     }
 
     /**
@@ -187,10 +198,14 @@ public final class MockOsgi {
      * @param <T> Target class type
      * @return Component/service instances with injected services
      */
-    public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
-        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(targetClass, getConfigAdmin(bundleContext), properties);
+    public static @NotNull <T> T activateInjectServices(
+            @NotNull Class<T> targetClass,
+            @NotNull BundleContext bundleContext,
+            @Nullable Map<String, Object> properties) {
+        Map<String, Object> mergedProperties =
+                propertiesMergeWithOsgiMetadata(targetClass, getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
-        return OsgiServiceUtil.activateInjectServices(targetClass, (MockComponentContext)componentContext);
+        return OsgiServiceUtil.activateInjectServices(targetClass, (MockComponentContext) componentContext);
     }
 
     /**
@@ -203,7 +218,10 @@ public final class MockOsgi {
      * @param <T> Target class type
      * @return Component/service instances with injected services
      */
-    public static @NotNull <T> T activateInjectServices(@NotNull Class<T> targetClass, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
+    public static @NotNull <T> T activateInjectServices(
+            @NotNull Class<T> targetClass,
+            @NotNull BundleContext bundleContext,
+            @NotNull Object @NotNull ... properties) {
         return activateInjectServices(targetClass, bundleContext, MapUtil.toMap(properties));
     }
 
@@ -213,8 +231,9 @@ public final class MockOsgi {
      * @param component a DS component instance
      * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      */
-    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext) {
-        registerInjectActivateService(component, bundleContext, (Map<String,Object>)null);
+    public static final @NotNull <T> void registerInjectActivateService(
+            @NotNull final T component, @NotNull BundleContext bundleContext) {
+        registerInjectActivateService(component, bundleContext, (Map<String, Object>) null);
     }
 
     /**
@@ -224,11 +243,15 @@ public final class MockOsgi {
      * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      * @param properties component properties (optional)
      */
-    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
-        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(component.getClass(), getConfigAdmin(bundleContext), properties);
+    public static final @NotNull <T> void registerInjectActivateService(
+            @NotNull final T component,
+            @NotNull BundleContext bundleContext,
+            @Nullable final Map<String, Object> properties) {
+        Map<String, Object> mergedProperties =
+                propertiesMergeWithOsgiMetadata(component.getClass(), getConfigAdmin(bundleContext), properties);
         MockOsgi.injectServices(component, bundleContext, mergedProperties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
-        OsgiServiceUtil.activateDeactivate(component, (MockComponentContext)componentContext, true);
+        OsgiServiceUtil.activateDeactivate(component, (MockComponentContext) componentContext, true);
         registerDSComponent(component, bundleContext, mergedProperties);
     }
 
@@ -239,7 +262,10 @@ public final class MockOsgi {
      * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services.
      * @param properties component properties (optional)
      */
-    public static final @NotNull <T> void registerInjectActivateService(@NotNull final T component, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
+    public static final @NotNull <T> void registerInjectActivateService(
+            @NotNull final T component,
+            @NotNull BundleContext bundleContext,
+            @NotNull final Object @NotNull ... properties) {
         registerInjectActivateService(component, bundleContext, MapUtil.toMap(properties));
     }
 
@@ -250,8 +276,9 @@ public final class MockOsgi {
      * @param bundleContext Bundle context from which services are fetched to inject and which is used for registering new services
      * @return Registered component instance
      */
-    public static final @NotNull <T> T registerInjectActivateService(@NotNull final Class<T> dsComponentClass, @NotNull BundleContext bundleContext) {
-        return registerInjectActivateService(dsComponentClass, bundleContext, (Map<String,Object>)null);
+    public static final @NotNull <T> T registerInjectActivateService(
+            @NotNull final Class<T> dsComponentClass, @NotNull BundleContext bundleContext) {
+        return registerInjectActivateService(dsComponentClass, bundleContext, (Map<String, Object>) null);
     }
 
     /**
@@ -262,25 +289,33 @@ public final class MockOsgi {
      * @param properties component properties (optional)
      * @return Registered component instance
      */
-    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> dsComponentClass, @NotNull BundleContext bundleContext, @Nullable final Map<String, Object> properties) {
-        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(dsComponentClass, getConfigAdmin(bundleContext), properties);
+    public static final @NotNull <T> T registerInjectActivateService(
+            @NotNull Class<T> dsComponentClass,
+            @NotNull BundleContext bundleContext,
+            @Nullable final Map<String, Object> properties) {
+        Map<String, Object> mergedProperties =
+                propertiesMergeWithOsgiMetadata(dsComponentClass, getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
-        T component = OsgiServiceUtil.activateInjectServices(dsComponentClass, (MockComponentContext)componentContext);
+        T component = OsgiServiceUtil.activateInjectServices(dsComponentClass, (MockComponentContext) componentContext);
         registerDSComponent(component, bundleContext, mergedProperties);
         return component;
     }
 
-    private static <T> void registerDSComponent(@NotNull T component, @NotNull BundleContext bundleContext, Map<String, Object> mergedProperties) {
-        OsgiMetadata metadata = Objects.requireNonNull(OsgiMetadataUtil.getMetadata(component.getClass()),
-                "No metadata found for " + component.getClass());
+    private static <T> void registerDSComponent(
+            @NotNull T component, @NotNull BundleContext bundleContext, Map<String, Object> mergedProperties) {
+        OsgiMetadata metadata = Objects.requireNonNull(
+                OsgiMetadataUtil.getMetadata(component.getClass()), "No metadata found for " + component.getClass());
 
-        // convert component properties to service properties (http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-service.properties)
+        // convert component properties to service properties
+        // (http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-service.properties)
         Dictionary<String, Object> serviceProperties = mergedProperties.entrySet().stream()
                 .filter(e -> e.getKey() != null && !e.getKey().startsWith("."))
                 .collect(new DictionaryCollector<>(Entry::getKey, Entry::getValue));
 
-        // we also register DS Components that aren't services in order for bind/unbind to work - they are registered with no service interfaces
-        bundleContext.registerService(metadata.getServiceInterfaces().toArray(new String[0]), component, serviceProperties);
+        // we also register DS Components that aren't services in order for bind/unbind to work - they are registered
+        // with no service interfaces
+        bundleContext.registerService(
+                metadata.getServiceInterfaces().toArray(new String[0]), component, serviceProperties);
     }
 
     /**
@@ -291,7 +326,10 @@ public final class MockOsgi {
      * @param properties component properties (optional)
      * @return Registered component instance
      */
-    public static final @NotNull <T> T registerInjectActivateService(@NotNull Class<T> dsComponentClass, @NotNull BundleContext bundleContext, @NotNull final Object @NotNull ... properties) {
+    public static final @NotNull <T> T registerInjectActivateService(
+            @NotNull Class<T> dsComponentClass,
+            @NotNull BundleContext bundleContext,
+            @NotNull final Object @NotNull ... properties) {
         return registerInjectActivateService(dsComponentClass, bundleContext, MapUtil.toMap(properties));
     }
 
@@ -302,7 +340,7 @@ public final class MockOsgi {
      * @return true if activation method was called. False if no activate method is defined.
      */
     public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext) {
-        return MockOsgi.activate(target, bundleContext, (Dictionary<String, Object>)null);
+        return MockOsgi.activate(target, bundleContext, (Dictionary<String, Object>) null);
     }
 
     /**
@@ -312,10 +350,14 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
-        Dictionary<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
+    public static boolean activate(
+            @NotNull Object target,
+            @NotNull BundleContext bundleContext,
+            @Nullable Dictionary<String, Object> properties) {
+        Dictionary<String, Object> mergedProperties =
+                propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
-        return OsgiServiceUtil.activateDeactivate(target, (MockComponentContext)componentContext, true);
+        return OsgiServiceUtil.activateDeactivate(target, (MockComponentContext) componentContext, true);
     }
 
     /**
@@ -325,7 +367,8 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
+    public static boolean activate(
+            @NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         return activate(target, bundleContext, toDictionary(properties));
     }
 
@@ -336,7 +379,8 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if activation method was called. False if no activate method is defined.
      */
-    public static boolean activate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
+    public static boolean activate(
+            @NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return activate(target, bundleContext, toDictionary(properties));
     }
 
@@ -347,7 +391,7 @@ public final class MockOsgi {
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
     public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext) {
-        return MockOsgi.deactivate(target, bundleContext, (Dictionary<String, Object>)null);
+        return MockOsgi.deactivate(target, bundleContext, (Dictionary<String, Object>) null);
     }
 
     /**
@@ -357,10 +401,14 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
-        Dictionary<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
+    public static boolean deactivate(
+            @NotNull Object target,
+            @NotNull BundleContext bundleContext,
+            @Nullable Dictionary<String, Object> properties) {
+        Dictionary<String, Object> mergedProperties =
+                propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
-        return OsgiServiceUtil.activateDeactivate(target, (MockComponentContext)componentContext, false);
+        return OsgiServiceUtil.activateDeactivate(target, (MockComponentContext) componentContext, false);
     }
 
     /**
@@ -370,7 +418,8 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
+    public static boolean deactivate(
+            @NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
         return deactivate(target, bundleContext, toDictionary(properties));
     }
 
@@ -381,7 +430,8 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if deactivation method was called. False if no deactivate method is defined.
      */
-    public static boolean deactivate(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
+    public static boolean deactivate(
+            @NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return deactivate(target, bundleContext, toDictionary(properties));
     }
 
@@ -392,7 +442,10 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
      */
-    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Dictionary<String, Object> properties) {
+    public static boolean modified(
+            @NotNull Object target,
+            @NotNull BundleContext bundleContext,
+            @Nullable Dictionary<String, Object> properties) {
         return modified(target, bundleContext, toMap(properties));
     }
 
@@ -403,10 +456,12 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
      */
-    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
-        Map<String, Object> mergedProperties = propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
+    public static boolean modified(
+            @NotNull Object target, @NotNull BundleContext bundleContext, @Nullable Map<String, Object> properties) {
+        Map<String, Object> mergedProperties =
+                propertiesMergeWithOsgiMetadata(target.getClass(), getConfigAdmin(bundleContext), properties);
         ComponentContext componentContext = newComponentContext(bundleContext, mergedProperties);
-        return OsgiServiceUtil.modified(target, (MockComponentContext)componentContext, mergedProperties);
+        return OsgiServiceUtil.modified(target, (MockComponentContext) componentContext, mergedProperties);
     }
 
     /**
@@ -416,7 +471,8 @@ public final class MockOsgi {
      * @param properties Properties
      * @return true if modified method was called. False if no modified method is defined.
      */
-    public static boolean modified(@NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
+    public static boolean modified(
+            @NotNull Object target, @NotNull BundleContext bundleContext, @NotNull Object @NotNull ... properties) {
         return modified(target, bundleContext, toDictionary(properties));
     }
 
@@ -426,7 +482,8 @@ public final class MockOsgi {
      * @param pid PID
      * @param properties Configuration properties
      */
-    public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @Nullable Map<String,Object> properties) {
+    public static void setConfigForPid(
+            @NotNull BundleContext bundleContext, @NotNull String pid, @Nullable Map<String, Object> properties) {
         setConfigForPid(bundleContext, pid, toDictionary(properties));
     }
 
@@ -436,11 +493,15 @@ public final class MockOsgi {
      * @param pid PID
      * @param properties Configuration properties
      */
-    public static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @NotNull Object @NotNull ... properties) {
+    public static void setConfigForPid(
+            @NotNull BundleContext bundleContext, @NotNull String pid, @NotNull Object @NotNull ... properties) {
         setConfigForPid(bundleContext, pid, toDictionary(properties));
     }
 
-    private static void setConfigForPid(@NotNull BundleContext bundleContext, @NotNull String pid, @Nullable Dictionary<String, Object> properties) {
+    private static void setConfigForPid(
+            @NotNull BundleContext bundleContext,
+            @NotNull String pid,
+            @Nullable Dictionary<String, Object> properties) {
         ConfigurationAdmin configAdmin = getConfigAdmin(bundleContext);
         if (configAdmin == null) {
             throw new RuntimeException("ConfigurationAdmin service is not registered in bundle context.");
@@ -448,8 +509,7 @@ public final class MockOsgi {
         try {
             Configuration config = configAdmin.getConfiguration(pid);
             config.update(properties);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new RuntimeException("Unable to update configuration for pid '" + pid + "'.", ex);
         }
     }
@@ -459,7 +519,7 @@ public final class MockOsgi {
      * @param bundleContext Bundle context
      */
     public static void shutdown(@NotNull BundleContext bundleContext) {
-        ((MockBundleContext)bundleContext).shutdown();
+        ((MockBundleContext) bundleContext).shutdown();
     }
 
     /**
@@ -470,9 +530,8 @@ public final class MockOsgi {
     private static @Nullable ConfigurationAdmin getConfigAdmin(@NotNull BundleContext bundleContext) {
         ServiceReference<?> ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
         if (ref != null) {
-            return (ConfigurationAdmin)bundleContext.getService(ref);
+            return (ConfigurationAdmin) bundleContext.getService(ref);
         }
         return null;
     }
-
 }

@@ -24,11 +24,11 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MockBundleContextDynamicReferencesOsgiR6ComponentServiceObjectsTest extends MockBundleContextDynamicReferencesOsgiR6Test {
+public class MockBundleContextDynamicReferencesOsgiR6ComponentServiceObjectsTest
+        extends MockBundleContextDynamicReferencesOsgiR6Test {
 
     @Override
     protected Service3OsgiR6 newService3OsgiR6() {
         return new Service3OsgiR6ComponentServiceObjectsImpl();
     }
-
 }

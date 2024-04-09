@@ -74,5 +74,4 @@ public final class OsgiContext extends OsgiContextImpl {
     boolean isSetUp() {
         return this.isSetUp;
     }
-
 }

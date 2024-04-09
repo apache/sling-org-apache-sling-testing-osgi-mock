@@ -48,5 +48,4 @@ public class Service2 {
     public BundleContext getBundleContext() {
         return bundleContext;
     }
-
 }

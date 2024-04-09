@@ -37,40 +37,40 @@ class MockLogService implements LogService {
     @Override
     public void log(final int level, final String message) {
         switch (level) {
-        case LogService.LOG_ERROR:
-            this.log.error(message);
-            break;
-        case LogService.LOG_WARNING:
-            this.log.warn(message);
-            break;
-        case LogService.LOG_INFO:
-            this.log.info(message);
-            break;
-        case LogService.LOG_DEBUG:
-            this.log.debug(message);
-            break;
-        default:
-            throw new IllegalArgumentException("Invalid log level: " + level);
+            case LogService.LOG_ERROR:
+                this.log.error(message);
+                break;
+            case LogService.LOG_WARNING:
+                this.log.warn(message);
+                break;
+            case LogService.LOG_INFO:
+                this.log.info(message);
+                break;
+            case LogService.LOG_DEBUG:
+                this.log.debug(message);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid log level: " + level);
         }
     }
 
     @Override
     public void log(final int level, final String message, final Throwable exception) {
         switch (level) {
-        case LogService.LOG_ERROR:
-            this.log.error(message, exception);
-            break;
-        case LogService.LOG_WARNING:
-            this.log.warn(message, exception);
-            break;
-        case LogService.LOG_INFO:
-            this.log.info(message, exception);
-            break;
-        case LogService.LOG_DEBUG:
-            this.log.debug(message, exception);
-            break;
-        default:
-            throw new IllegalArgumentException("Invalid log level: " + level);
+            case LogService.LOG_ERROR:
+                this.log.error(message, exception);
+                break;
+            case LogService.LOG_WARNING:
+                this.log.warn(message, exception);
+                break;
+            case LogService.LOG_INFO:
+                this.log.info(message, exception);
+                break;
+            case LogService.LOG_DEBUG:
+                this.log.debug(message, exception);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid log level: " + level);
         }
     }
 
@@ -83,5 +83,4 @@ class MockLogService implements LogService {
     public void log(final ServiceReference sr, final int level, final String message, final Throwable exception) {
         log(level, message, exception);
     }
-
 }

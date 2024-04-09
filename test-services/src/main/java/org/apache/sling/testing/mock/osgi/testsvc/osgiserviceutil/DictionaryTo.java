@@ -29,8 +29,8 @@ final class DictionaryTo {
         // static methods only
     }
 
-    public static Map<String,Object> map(Dictionary<String,Object> dictionary) {
-        Map<String,Object> result = new HashMap<>();
+    public static Map<String, Object> map(Dictionary<String, Object> dictionary) {
+        Map<String, Object> result = new HashMap<>();
         Enumeration<String> keys = dictionary.keys();
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
@@ -38,5 +38,4 @@ final class DictionaryTo {
         }
         return result;
     }
-
 }
