@@ -56,7 +56,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final OsgiContextBuilder beforeSetUp(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeSetUpCallback) {
+    public final OsgiContextBuilder beforeSetUp(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeSetUpCallback) {
         plugins.addBeforeSetUpCallback(beforeSetUpCallback);
         return this;
     }
@@ -68,7 +69,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final OsgiContextBuilder afterSetUp(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterSetUpCallback) {
+    public final OsgiContextBuilder afterSetUp(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterSetUpCallback) {
         plugins.addAfterSetUpCallback(afterSetUpCallback);
         return this;
     }
@@ -80,7 +82,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final OsgiContextBuilder beforeTearDown(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeTearDownCallback) {
+    public final OsgiContextBuilder beforeTearDown(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... beforeTearDownCallback) {
         plugins.addBeforeTearDownCallback(beforeTearDownCallback);
         return this;
     }
@@ -92,7 +95,8 @@ public final class OsgiContextBuilder {
      * @return this
      */
     @SafeVarargs
-    public final OsgiContextBuilder afterTearDown(@NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterTearDownCallback) {
+    public final OsgiContextBuilder afterTearDown(
+            @NotNull ContextCallback<? extends OsgiContextImpl> @NotNull ... afterTearDownCallback) {
         plugins.addAfterTearDownCallback(afterTearDownCallback);
         return this;
     }
@@ -103,5 +107,4 @@ public final class OsgiContextBuilder {
     public @NotNull OsgiContext build() {
         return new OsgiContext(this.plugins);
     }
-
 }

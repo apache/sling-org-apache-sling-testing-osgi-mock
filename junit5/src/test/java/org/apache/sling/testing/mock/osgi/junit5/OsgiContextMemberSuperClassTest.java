@@ -18,10 +18,10 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test with OsgiContext member field in super class.
@@ -35,7 +35,6 @@ class OsgiContextMemberSuperClassTest extends OsgiContextMemberTest {
         context.registerService(Integer.class, Integer.valueOf(5));
 
         Integer service = context.getService(Integer.class);
-        assertEquals((Integer)5, service);
+        assertEquals((Integer) 5, service);
     }
-
 }

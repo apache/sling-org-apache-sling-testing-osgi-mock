@@ -48,5 +48,4 @@ class MatchAllFilter implements Filter {
     public boolean matches(Map<String, ?> map) {
         return true;
     }
-
 }

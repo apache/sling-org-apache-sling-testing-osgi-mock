@@ -18,18 +18,17 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 final class AnnotationReflectionProvider extends AbstractConfigTypeReflectionProvider {
     private final Class<? extends Annotation> annotationType;
     private final String prefix;
 
-    public AnnotationReflectionProvider(@NotNull Class<? extends Annotation> annotationType,
-                                        @Nullable String prefix) {
+    public AnnotationReflectionProvider(@NotNull Class<? extends Annotation> annotationType, @Nullable String prefix) {
         this.annotationType = annotationType;
         this.prefix = prefix;
     }

@@ -27,7 +27,8 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 @Component(service = ServiceInterface3.class)
 public class ServiceInterface3ImplSelfReferencing implements ServiceInterface3 {
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL,
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.STATIC,
             policyOption = ReferencePolicyOption.GREEDY,
             target = "(prop1=abc)")
@@ -36,5 +37,4 @@ public class ServiceInterface3ImplSelfReferencing implements ServiceInterface3 {
     public ServiceInterface3 getDefaultImplementation() {
         return defaultImplementation;
     }
-
 }

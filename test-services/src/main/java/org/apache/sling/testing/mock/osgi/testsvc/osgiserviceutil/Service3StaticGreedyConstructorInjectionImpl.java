@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-@Component(service= Service3StaticGreedy.class)
+@Component(service = Service3StaticGreedy.class)
 public class Service3StaticGreedyConstructorInjectionImpl implements Service3StaticGreedy {
 
     private final ServiceInterface1 reference1;
@@ -65,22 +65,25 @@ public class Service3StaticGreedyConstructorInjectionImpl implements Service3Sta
 
     @Activate
     public Service3StaticGreedyConstructorInjectionImpl(
-
             @Reference(policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            ServiceInterface1 reference1,
-
-            @Reference(cardinality = ReferenceCardinality.OPTIONAL,
-                    policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            ServiceInterface1Optional reference1Optional,
-
-            @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,
-                    policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            List<ServiceReference<ServiceInterface2>> references2,
-
-            @Reference(name = "reference3", service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-                    policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
-            List<ServiceSuperInterface3> references3,
-
+                    ServiceInterface1 reference1,
+            @Reference(
+                            cardinality = ReferenceCardinality.OPTIONAL,
+                            policy = ReferencePolicy.STATIC,
+                            policyOption = ReferencePolicyOption.GREEDY)
+                    ServiceInterface1Optional reference1Optional,
+            @Reference(
+                            cardinality = ReferenceCardinality.AT_LEAST_ONE,
+                            policy = ReferencePolicy.STATIC,
+                            policyOption = ReferencePolicyOption.GREEDY)
+                    List<ServiceReference<ServiceInterface2>> references2,
+            @Reference(
+                            name = "reference3",
+                            service = ServiceInterface3.class,
+                            cardinality = ReferenceCardinality.MULTIPLE,
+                            policy = ReferencePolicy.STATIC,
+                            policyOption = ReferencePolicyOption.GREEDY)
+                    List<ServiceSuperInterface3> references3,
             ComponentContext ctx,
             Map<String, Object> config) {
 
@@ -108,7 +111,7 @@ public class Service3StaticGreedyConstructorInjectionImpl implements Service3Sta
     public List<ServiceInterface2> getReferences2() {
         List<ServiceInterface2> services = new ArrayList<>();
         for (ServiceReference<?> serviceReference : references2) {
-            services.add((ServiceInterface2)componentContext.getBundleContext().getService(serviceReference));
+            services.add((ServiceInterface2) componentContext.getBundleContext().getService(serviceReference));
         }
         return services;
     }
@@ -135,5 +138,4 @@ public class Service3StaticGreedyConstructorInjectionImpl implements Service3Sta
     public Map<String, Object> getConfig() {
         return config;
     }
-
 }

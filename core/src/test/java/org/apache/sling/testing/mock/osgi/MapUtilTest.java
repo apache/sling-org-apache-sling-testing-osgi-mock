@@ -18,21 +18,21 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Dictionary;
 import java.util.Map;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 public class MapUtilTest {
 
     @Test
     public void testMapDictionary() {
-        Map<String,Object> map = Map.<String, Object>of("param1", "var1", "param2", 123, "param3", true);
+        Map<String, Object> map = Map.<String, Object>of("param1", "var1", "param2", 123, "param3", true);
 
         Dictionary<String, Object> dict = MapUtil.toDictionary(map);
-        Map<String,Object> convertedMap = MapUtil.toMap(dict);
+        Map<String, Object> convertedMap = MapUtil.toMap(dict);
 
         assertEquals(map, convertedMap);
     }
@@ -47,9 +47,8 @@ public class MapUtilTest {
     @Test
     public void testDictionaryObjectVarargs() {
         Dictionary<String, Object> dict = MapUtil.toDictionary("param1", "var1", "param2", 123, "param3", true);
-        Map<String,Object> convertedMap = MapUtil.toMap(dict);
+        Map<String, Object> convertedMap = MapUtil.toMap(dict);
 
         assertEquals(Map.<String, Object>of("param1", "var1", "param2", 123, "param3", true), convertedMap);
     }
-
 }

@@ -21,6 +21,4 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 import org.osgi.service.component.annotations.Component;
 
 @Component(service = ServiceFactory1.class, servicefactory = true)
-public class ServiceFactory1 {
-
-}
+public class ServiceFactory1 {}

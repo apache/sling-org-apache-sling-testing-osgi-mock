@@ -44,8 +44,8 @@ class MockServiceReference<T> implements ServiceReference<T> {
     }
 
     private Comparable<Object> buildComparable() {
-        Map<String,Object> props = serviceRegistration.getPropertiesAsMap();
-         // use ascending order as defined in ServiceReference#compareTo()
+        Map<String, Object> props = serviceRegistration.getPropertiesAsMap();
+        // use ascending order as defined in ServiceReference#compareTo()
         return ServiceUtil.getComparableForServiceRanking(props, Order.ASCENDING);
     }
 
@@ -90,7 +90,7 @@ class MockServiceReference<T> implements ServiceReference<T> {
         if (!(obj instanceof MockServiceReference)) {
             return false;
         }
-        return comparable.equals(((MockServiceReference)obj).comparable);
+        return comparable.equals(((MockServiceReference) obj).comparable);
     }
 
     @Override
@@ -98,7 +98,7 @@ class MockServiceReference<T> implements ServiceReference<T> {
         if (!(obj instanceof MockServiceReference)) {
             return 0;
         }
-        return comparable.compareTo(((MockServiceReference)obj).comparable);
+        return comparable.compareTo(((MockServiceReference) obj).comparable);
     }
 
     long getServiceId() {
@@ -133,5 +133,4 @@ class MockServiceReference<T> implements ServiceReference<T> {
     public boolean isAssignableTo(final Bundle otherBundle, final String className) {
         throw new UnsupportedOperationException();
     }
-
 }

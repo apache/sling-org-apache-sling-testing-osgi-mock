@@ -46,15 +46,20 @@ import org.slf4j.LoggerFactory;
  */
 public final class ComponentPropertyParser {
     private static final Logger log = LoggerFactory.getLogger(ComponentPropertyParser.class);
-    private static final Pattern IDENTIFIERTOPROPERTY = Pattern
-            .compile("(__)|(_)|(\\$_\\$)|(\\$\\$)|(\\$)");
+    private static final Pattern IDENTIFIERTOPROPERTY = Pattern.compile("(__)|(_)|(\\$_\\$)|(\\$\\$)|(\\$)");
     private static final Pattern PROPERTY_PATTERN = Pattern.compile(
             "\\s*(?<key>[^=\\s:]+)\\s*(?::\\s*(?<type>Boolean|Byte|Character|Short|Integer|Long|Float|Double|String)\\s*)?=(?<value>.*)");
     private static final String PROPERTY_PATTERN_CAPTURE_GROUP_VALUE = "value";
 
     private static final Set<Class<?>> BOXES = Stream.of(
-                    Boolean.class, Byte.class, Character.class, Short.class,
-                    Integer.class, Long.class, Float.class, Double.class)
+                    Boolean.class,
+                    Byte.class,
+                    Character.class,
+                    Short.class,
+                    Integer.class,
+                    Long.class,
+                    Float.class,
+                    Double.class)
             .collect(Collectors.toSet());
 
     private ComponentPropertyParser() {
@@ -82,9 +87,7 @@ public final class ComponentPropertyParser {
     static String identifierToPropertyName(@NotNull String name, @Nullable String prefix) {
         Matcher m = IDENTIFIERTOPROPERTY.matcher(name);
         if (!m.find()) {
-            return Optional.ofNullable(prefix)
-                    .map(pfx -> pfx.concat(name))
-                    .orElse(name);
+            return Optional.ofNullable(prefix).map(pfx -> pfx.concat(name)).orElse(name);
         }
         StringBuffer b = new StringBuffer();
         do {
@@ -92,14 +95,11 @@ public final class ComponentPropertyParser {
         } while (m.find());
         m.appendTail(b);
         final String propName = b.toString();
-        return Optional.ofNullable(prefix)
-                .map(pfx -> pfx.concat(propName))
-                .orElse(propName);
+        return Optional.ofNullable(prefix).map(pfx -> pfx.concat(propName)).orElse(propName);
     }
 
     @SuppressWarnings("java:S127")
-    static String singleElementAnnotationKey(@NotNull final String simpleName,
-                                             @Nullable final String prefix) {
+    static String singleElementAnnotationKey(@NotNull final String simpleName, @Nullable final String prefix) {
         int dollar = simpleName.lastIndexOf('$');
         StringBuilder sb = new StringBuilder(dollar <= 0 ? simpleName : simpleName.substring(dollar + 1));
         boolean lastLowerCase = false;
@@ -138,11 +138,12 @@ public final class ComponentPropertyParser {
         if (attributeType.isArray()) {
             return isSupportedConfigTypeValueType(attributeType.getComponentType());
         }
-        return isSupportedNonArraySimpleType(attributeType) || Class.class.equals(attributeType) || attributeType.isEnum();
+        return isSupportedNonArraySimpleType(attributeType)
+                || Class.class.equals(attributeType)
+                || attributeType.isEnum();
     }
 
-    static void getDefaults(@NotNull final Class<?> configType,
-                            @NotNull final Map<String, Object> values) {
+    static void getDefaults(@NotNull final Class<?> configType, @NotNull final Map<String, Object> values) {
 
         final AbstractConfigTypeReflectionProvider defaultsProvider =
                 AbstractConfigTypeReflectionProvider.getInstance(configType);
@@ -192,8 +193,12 @@ public final class ComponentPropertyParser {
         return returnProps;
     }
 
-    static <T> void putSingleOrMany(Map<String, Object> map, String key, List<String> values,
-                                    Function<? super String, ? extends T> mapper, IntFunction<T[]> generator) {
+    static <T> void putSingleOrMany(
+            Map<String, Object> map,
+            String key,
+            List<String> values,
+            Function<? super String, ? extends T> mapper,
+            IntFunction<T[]> generator) {
         if (values.size() == 1) {
             map.put(key, mapper.apply(values.get(0)));
         } else if (values.size() > 1) {
@@ -204,8 +209,7 @@ public final class ComponentPropertyParser {
     public static Map<String, Object> parse(@NotNull String[] properties) {
         final Map<String, String> propertyType = new HashMap<>();
         final Map<String, List<String>> map = new HashMap<>();
-        final Function<String, List<String>> getValues =
-                key -> map.computeIfAbsent(key, ignored -> new LinkedList<>());
+        final Function<String, List<String>> getValues = key -> map.computeIfAbsent(key, ignored -> new LinkedList<>());
 
         for (String p : properties) {
             Matcher m = PROPERTY_PATTERN.matcher(p);
@@ -239,7 +243,8 @@ public final class ComponentPropertyParser {
 
         Set<String> parsedProperties = new HashSet<>(props.keySet());
         Set<String> expectedProperties = Arrays.stream(defaultsProvider.getMethods())
-                .map(defaultsProvider::getPropertyName).collect(Collectors.toSet());
+                .map(defaultsProvider::getPropertyName)
+                .collect(Collectors.toSet());
         Set<String> defaults = defaultsProvider.getDefaults(props).keySet();
 
         List<String> missingExpected = new ArrayList<>(expectedProperties);
@@ -250,9 +255,9 @@ public final class ComponentPropertyParser {
         unexpectedParsed.removeAll(expectedProperties);
 
         if (!missingExpected.isEmpty() || !unexpectedParsed.isEmpty()) {
-            throw new ConfigTypeStrictnessViolation(
-                    String.format("Config type %s failed one-to-one mapping test (missing=%s unexpected=%s) with properties %s",
-                            configType, missingExpected, unexpectedParsed, parsedProperties));
+            throw new ConfigTypeStrictnessViolation(String.format(
+                    "Config type %s failed one-to-one mapping test (missing=%s unexpected=%s) with properties %s",
+                    configType, missingExpected, unexpectedParsed, parsedProperties));
         }
     }
 }

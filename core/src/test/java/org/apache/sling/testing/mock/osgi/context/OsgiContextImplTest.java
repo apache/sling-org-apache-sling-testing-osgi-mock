@@ -18,13 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.context;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +38,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("null")
 public class OsgiContextImplTest {
@@ -155,15 +155,18 @@ public class OsgiContextImplTest {
     public void testRegisterInjectActivateWithProperties_Class() throws InvalidSyntaxException {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        Service3 service = context.registerInjectActivateService(Service3.class, "prop1", "value3", ".privateProp", "privateValue");
+        Service3 service = context.registerInjectActivateService(
+                Service3.class, "prop1", "value3", ".privateProp", "privateValue");
         assertEquals("value3", service.getConfig().get("prop1"));
         // private key visible in component properties
         assertTrue(service.getConfig().containsKey(".privateProp"));
         assertEquals(Service3.class.getName(), service.getConfig().get("component.name"));
         assertNotNull(service.getConfig().get("component.id"));
-        Collection<ServiceReference<ServiceInterface2>> serviceReferences = context.bundleContext().getServiceReferences(ServiceInterface2.class, "(component.name="+Service3.class.getName()+")");
+        Collection<ServiceReference<ServiceInterface2>> serviceReferences = context.bundleContext()
+                .getServiceReferences(ServiceInterface2.class, "(component.name=" + Service3.class.getName() + ")");
         assertEquals("Expected only one service reference matching filter", 1, serviceReferences.size());
-        ServiceReference<ServiceInterface2> serviceReference = serviceReferences.iterator().next();
+        ServiceReference<ServiceInterface2> serviceReference =
+                serviceReferences.iterator().next();
         assertEquals("value3", serviceReference.getProperty("prop1"));
         // private key not visible in service properties
         assertNull(serviceReference.getProperty(".privateProp"));
@@ -173,11 +176,8 @@ public class OsgiContextImplTest {
     public void testRegisterInjectActivateWithPropertiesWithNulls() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        Service3 service = context.registerInjectActivateService(new Service3(),
-                "prop1", "value3",
-                "prop2", null,
-                null, "value4",
-                null, null);
+        Service3 service = context.registerInjectActivateService(
+                new Service3(), "prop1", "value3", "prop2", null, null, "value4", null, null);
         assertEquals("value3", service.getConfig().get("prop1"));
     }
 
@@ -185,7 +185,7 @@ public class OsgiContextImplTest {
     public void testRegisterInjectActivateWithPropertyMapNulls() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
-        Map<String,Object> props = new HashMap<>();
+        Map<String, Object> props = new HashMap<>();
         props.put("prop1", "value3");
         props.put("prop2", null);
         props.put(null, "value4");
@@ -201,22 +201,22 @@ public class OsgiContextImplTest {
         context.registerInjectActivateService(new Service8());
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void testRegisterInjectActivate_RefrenceMissing_Instance() {
         context.registerInjectActivateService(new Service3());
     }
 
-    @Test(expected=RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void testRegisterInjectActivate_RefrenceMissing_Class() {
         context.registerInjectActivateService(Service3.class);
     }
 
-    @Test(expected=NoScrMetadataException.class)
+    @Test(expected = NoScrMetadataException.class)
     public void testRegisterInjectActivateInvalid_Instance() {
         context.registerInjectActivateService(new Object());
     }
 
-    @Test(expected=NoScrMetadataException.class)
+    @Test(expected = NoScrMetadataException.class)
     public void testRegisterInjectActivateInvalid_Class() {
         context.registerInjectActivateService(Object.class);
     }
@@ -234,5 +234,4 @@ public class OsgiContextImplTest {
 
         tracker.close();
     }
-
 }

@@ -32,5 +32,4 @@ public class ServiceReferenceInConstructor {
     public ServiceReferenceInConstructor(@Reference Service1 service1) {
         this.service1 = service1;
     }
-
 }

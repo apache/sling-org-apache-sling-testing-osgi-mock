@@ -53,15 +53,18 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     private final MockBundleContext bundleContext;
 
     @SuppressWarnings("unchecked")
-    public MockServiceRegistration(final Bundle bundle, final String[] clazzes, final T service,
-            final Dictionary<String, Object> properties, MockBundleContext bundleContext) {
+    public MockServiceRegistration(
+            final Bundle bundle,
+            final String[] clazzes,
+            final T service,
+            final Dictionary<String, Object> properties,
+            MockBundleContext bundleContext) {
         this.serviceId = SERVICE_ID_COUNTER.incrementAndGet();
         this.clazzes = new HashSet<String>(Arrays.asList(clazzes));
 
         if (service instanceof ServiceFactory) {
-            this.service = ((ServiceFactory<T>)service).getService(bundleContext.getBundle(), this);
-        }
-        else {
+            this.service = ((ServiceFactory<T>) service).getService(bundleContext.getBundle(), this);
+        } else {
             this.service = service;
         }
 
@@ -75,9 +78,9 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
 
     private void updateProperties(final Dictionary<String, ?> newProps) {
         this.properties.clear();
-        if ( newProps != null ) {
+        if (newProps != null) {
             final Enumeration<String> names = newProps.keys();
-            while ( names.hasMoreElements() ) {
+            while (names.hasMoreElements()) {
                 final String key = names.nextElement();
                 this.properties.put(key, newProps.get(key));
             }
@@ -128,7 +131,7 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
         if (!(obj instanceof MockServiceRegistration)) {
             return false;
         }
-        return serviceId.equals(((MockServiceRegistration)obj).serviceId);
+        return serviceId.equals(((MockServiceRegistration) obj).serviceId);
     }
 
     @Override
@@ -152,7 +155,8 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
             return;
         }
 
-        // add service interfaces from OSGi metadata - but only if no explicit class(es) were given on service registration
+        // add service interfaces from OSGi metadata - but only if no explicit class(es) were given on service
+        // registration
         if (clazzes.isEmpty()) {
             clazzes.addAll(metadata.getServiceInterfaces());
         }
@@ -163,5 +167,4 @@ class MockServiceRegistration<T> implements ServiceRegistration<T>, Comparable<M
     public String toString() {
         return "#" + serviceId + " [" + StringUtils.join(clazzes, ",") + "]: " + service.toString();
     }
-
 }

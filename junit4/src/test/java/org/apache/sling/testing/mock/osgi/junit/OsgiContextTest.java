@@ -18,15 +18,15 @@
  */
 package org.apache.sling.testing.mock.osgi.junit;
 
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("null")
@@ -40,11 +40,11 @@ public class OsgiContextTest {
     // Run all unit tests for each resource resolver types listed here
     @Rule
     public OsgiContext context = new OsgiContextBuilder()
-        .beforeSetUp(contextBeforeSetup)
-        .afterSetUp(contextAfterSetup)
-        .beforeTearDown(contextBeforeTeardown)
-        .afterTearDown(contextAfterTeardown)
-        .build();
+            .beforeSetUp(contextBeforeSetup)
+            .afterSetUp(contextAfterSetup)
+            .beforeTearDown(contextBeforeTeardown)
+            .afterTearDown(contextAfterTeardown)
+            .build();
 
     @Before
     public void setUp() throws Exception {
@@ -56,5 +56,4 @@ public class OsgiContextTest {
     public void testBundleContext() {
         assertNotNull(context.bundleContext());
     }
-
 }

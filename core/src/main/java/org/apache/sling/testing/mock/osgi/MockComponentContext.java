@@ -37,16 +37,20 @@ class MockComponentContext implements ComponentContext {
     private final Map<String, Object> propertiesAsMap;
     private final Bundle usingBundle;
 
-    public MockComponentContext(final MockBundleContext mockBundleContext,
-            final Dictionary<String, Object> properties, final Bundle usingBundle) {
+    public MockComponentContext(
+            final MockBundleContext mockBundleContext,
+            final Dictionary<String, Object> properties,
+            final Bundle usingBundle) {
         this.bundleContext = mockBundleContext;
         this.properties = properties;
         this.propertiesAsMap = MapUtil.toMap(properties);
         this.usingBundle = usingBundle;
     }
 
-    public MockComponentContext(final MockBundleContext mockBundleContext,
-            final Map<String, Object> propertiesAsMap, final Bundle usingBundle) {
+    public MockComponentContext(
+            final MockBundleContext mockBundleContext,
+            final Map<String, Object> propertiesAsMap,
+            final Bundle usingBundle) {
         this.bundleContext = mockBundleContext;
         this.properties = MapUtil.toDictionary(propertiesAsMap);
         this.propertiesAsMap = propertiesAsMap;
@@ -107,5 +111,4 @@ class MockComponentContext implements ComponentContext {
     public Object[] locateServices(final String name) {
         throw new UnsupportedOperationException();
     }
-
 }

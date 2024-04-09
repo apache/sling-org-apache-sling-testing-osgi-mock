@@ -18,9 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.apache.sling.testing.mock.osgi.MapUtil.toDictionary;
-import static org.apache.sling.testing.mock.osgi.MapUtil.toMap;
-
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -31,6 +28,9 @@ import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.OsgiMetadata;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
+
+import static org.apache.sling.testing.mock.osgi.MapUtil.toDictionary;
+import static org.apache.sling.testing.mock.osgi.MapUtil.toMap;
 
 /**
  * Map util merge methods.
@@ -55,9 +55,8 @@ final class MapMergeUtil {
      * @return Merged properties
      * @see <a href="http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-component.properties">Component Properties</a>
      */
-    static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(Class<?> targetClass,
-            ConfigurationAdmin configAdmin,
-            Dictionary<String, Object> properties) {
+    static Dictionary<String, Object> propertiesMergeWithOsgiMetadata(
+            Class<?> targetClass, ConfigurationAdmin configAdmin, Dictionary<String, Object> properties) {
         return toDictionary(propertiesMergeWithOsgiMetadata(targetClass, configAdmin, toMap(properties)));
     }
 
@@ -73,14 +72,13 @@ final class MapMergeUtil {
      * @return Merged properties
      * @see <a href="http://docs.osgi.org/specification/osgi.cmpn/7.0.0/service.component.html#service.component-component.properties">Component Properties</a>
      */
-    static Map<String, Object> propertiesMergeWithOsgiMetadata(Class<?> targetClass,
-            ConfigurationAdmin configAdmin,
-            Map<String, Object> properties) {
+    static Map<String, Object> propertiesMergeWithOsgiMetadata(
+            Class<?> targetClass, ConfigurationAdmin configAdmin, Map<String, Object> properties) {
         Map<String, Object> mergedProperties = new HashMap<>();
 
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(targetClass);
         if (metadata != null) {
-            Map<String,Object> metadataProperties = metadata.getProperties();
+            Map<String, Object> metadataProperties = metadata.getProperties();
             if (metadataProperties != null) {
                 mergedProperties.putAll(metadataProperties);
 
@@ -94,8 +92,7 @@ final class MapMergeUtil {
                                 if (caProperties != null) {
                                     mergedProperties.putAll(toMap(caProperties));
                                 }
-                            }
-                            catch (IOException ex) {
+                            } catch (IOException ex) {
                                 throw new RuntimeException("Unable to read config for pid " + pid, ex);
                             }
                         }
@@ -114,5 +111,4 @@ final class MapMergeUtil {
         mergedProperties.put(ComponentConstants.COMPONENT_ID, COMPONENT_ID_COUNTER.getAndIncrement());
         return mergedProperties;
     }
-
 }

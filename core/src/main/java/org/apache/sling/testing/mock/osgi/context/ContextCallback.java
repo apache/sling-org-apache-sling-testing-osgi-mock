@@ -35,5 +35,4 @@ public interface ContextCallback<T extends OsgiContextImpl> {
      * @throws Exception exception
      */
     void execute(@NotNull T context) throws Exception;
-
 }

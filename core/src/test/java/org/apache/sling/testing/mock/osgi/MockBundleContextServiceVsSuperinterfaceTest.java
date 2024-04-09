@@ -18,8 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +32,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(MockitoJUnitRunner.class)
 public class MockBundleContextServiceVsSuperinterfaceTest {
 
@@ -41,10 +41,13 @@ public class MockBundleContextServiceVsSuperinterfaceTest {
 
     @Mock
     private ServiceInterface3 service1;
+
     @Mock
     private ServiceInterface3 service2;
+
     @Mock
     private ServiceSuperInterface3 superInterface1;
+
     @Mock
     private ServiceSuperInterface3 superInterface2;
 
@@ -59,8 +62,10 @@ public class MockBundleContextServiceVsSuperinterfaceTest {
      */
     @Test
     public void testServiceRegistration() {
-        ServiceRegistration<ServiceInterface3> regService1 = bundleContext.registerService(ServiceInterface3.class, service1, null);
-        ServiceRegistration<ServiceSuperInterface3> regSuperInterface1 = bundleContext.registerService(ServiceSuperInterface3.class, superInterface1, null);
+        ServiceRegistration<ServiceInterface3> regService1 =
+                bundleContext.registerService(ServiceInterface3.class, service1, null);
+        ServiceRegistration<ServiceSuperInterface3> regSuperInterface1 =
+                bundleContext.registerService(ServiceSuperInterface3.class, superInterface1, null);
 
         Service7ServiceVsSuperInterface service = new Service7ServiceVsSuperInterface();
         MockOsgi.injectServices(service, bundleContext);
@@ -87,12 +92,10 @@ public class MockBundleContextServiceVsSuperinterfaceTest {
         assertDeps(service.getInterfaceBindList(), service2);
         assertDeps(service.getSuperInterfaceDirectList(), superInterface2);
         assertDeps(service.getSuperInterfaceBindList(), superInterface2);
-
     }
 
     @SafeVarargs
     private static void assertDeps(List<?> actual, Object... expected) {
         assertEquals(Set.of(expected), Set.copyOf(actual));
     }
-
 }

@@ -18,9 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
@@ -39,6 +36,9 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 @SuppressWarnings("null")
 public class MockEventAdminTest {
     private static final Logger log = LoggerFactory.getLogger(MockEventAdminTest.class);
@@ -48,9 +48,9 @@ public class MockEventAdminTest {
     private static final String TOPIC_SAMPLE_ALL = "sample/*";
     private static final String TOPIC_OTHER_3 = "other/topic3";
 
-    private static final Event EVENT_SAMPLE_1 = new Event(TOPIC_SAMPLE_1, (Dictionary<String,?>)null);
-    private static final Event EVENT_SAMPLE_2 = new Event(TOPIC_SAMPLE_2, (Dictionary<String,?>)null);
-    private static final Event EVENT_OTHER_3 = new Event(TOPIC_OTHER_3, (Dictionary<String,?>)null);
+    private static final Event EVENT_SAMPLE_1 = new Event(TOPIC_SAMPLE_1, (Dictionary<String, ?>) null);
+    private static final Event EVENT_SAMPLE_2 = new Event(TOPIC_SAMPLE_2, (Dictionary<String, ?>) null);
+    private static final Event EVENT_OTHER_3 = new Event(TOPIC_OTHER_3, (Dictionary<String, ?>) null);
 
     @Rule
     public OsgiContext context = new OsgiContext();
@@ -62,13 +62,19 @@ public class MockEventAdminTest {
 
     @Before
     public void setUp() {
-        eventHandler1 = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler(),
+        eventHandler1 = (DummyEventHandler) context.registerService(
+                EventHandler.class,
+                new DummyEventHandler(),
                 Map.<String, Object>of(EventConstants.EVENT_TOPIC, TOPIC_SAMPLE_1));
-        eventHandler12 = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler(),
-                Map.<String, Object>of(EventConstants.EVENT_TOPIC, new String[] { TOPIC_SAMPLE_1, TOPIC_SAMPLE_2 }));
-        eventHandlerSampleAll = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler(),
+        eventHandler12 = (DummyEventHandler) context.registerService(
+                EventHandler.class,
+                new DummyEventHandler(),
+                Map.<String, Object>of(EventConstants.EVENT_TOPIC, new String[] {TOPIC_SAMPLE_1, TOPIC_SAMPLE_2}));
+        eventHandlerSampleAll = (DummyEventHandler) context.registerService(
+                EventHandler.class,
+                new DummyEventHandler(),
                 Map.<String, Object>of(EventConstants.EVENT_TOPIC, TOPIC_SAMPLE_ALL));
-        eventHandlerAll = (DummyEventHandler)context.registerService(EventHandler.class, new DummyEventHandler());
+        eventHandlerAll = (DummyEventHandler) context.registerService(EventHandler.class, new DummyEventHandler());
     }
 
     @Test
@@ -146,8 +152,10 @@ public class MockEventAdminTest {
 
         public boolean hasExpected() {
             List<Event> received = getReceivedEvents();
-            List<String> expecedEventTopics = expectedEvents.stream().map(Event::getTopic).collect(Collectors.toList());
-            List<String> receivedEventTopics = received.stream().map(Event::getTopic).collect(Collectors.toList());
+            List<String> expecedEventTopics =
+                    expectedEvents.stream().map(Event::getTopic).collect(Collectors.toList());
+            List<String> receivedEventTopics =
+                    received.stream().map(Event::getTopic).collect(Collectors.toList());
             if (expectedEvents != null && !Objects.equals(expecedEventTopics, receivedEventTopics)) {
                 log.error("missed expectations {} received {}", expecedEventTopics, receivedEventTopics);
                 return false;
@@ -155,5 +163,4 @@ public class MockEventAdminTest {
             return true;
         }
     }
-
 }

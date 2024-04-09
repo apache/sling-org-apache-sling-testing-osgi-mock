@@ -18,11 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -31,6 +26,11 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 public class MockServiceReferenceTest {
 
@@ -67,11 +67,12 @@ public class MockServiceReferenceTest {
         assertEquals("value1", this.serviceReference.getProperty("customProp1"));
         // mandatory properties set by the container
         assertNotNull(this.serviceReference.getProperty(Constants.SERVICE_ID));
-        assertArrayEquals((String[]) this.serviceReference.getProperty(Constants.OBJECTCLASS), new String[] { String.class.getName() });
+        assertArrayEquals(
+                (String[]) this.serviceReference.getProperty(Constants.OBJECTCLASS),
+                new String[] {String.class.getName()});
 
         // via dictionary
         assertEquals(3, this.serviceReference.getProperties().size());
         assertEquals("value1", this.serviceReference.getProperties().get("customProp1"));
     }
-
 }

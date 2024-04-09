@@ -24,11 +24,11 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MockBundleContextStaticGreedyConstructorInjectionComponentServiceObjectsReferencesTest  extends MockBundleContextStaticGreedyConstructorInjectionReferencesTest {
+public class MockBundleContextStaticGreedyConstructorInjectionComponentServiceObjectsReferencesTest
+        extends MockBundleContextStaticGreedyConstructorInjectionReferencesTest {
 
     @Override
     protected Class<? extends Service3StaticGreedy> getService3StaticGreedyClass() {
         return Service3StaticGreedyConstructorInjectionComponentServiceObjectsImpl.class;
     }
-
 }

@@ -18,13 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -33,6 +26,13 @@ import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class AbstractConfigTypeReflectionProviderTest {
 
@@ -53,8 +53,7 @@ public class AbstractConfigTypeReflectionProviderTest {
     }
 
     @AnnotationConfig(size = 10, name = "Fred")
-    @InvalidAnnotationConfig(size = 10, name = "Fred",
-            other_config = @AnnotationConfig(size = 2, name = "Willy"))
+    @InvalidAnnotationConfig(size = 10, name = "Fred", other_config = @AnnotationConfig(size = 2, name = "Willy"))
     public static class HasAnnotationConfig {
         @SuppressWarnings("unused")
         private String getInaccessibleValue() {
@@ -75,11 +74,11 @@ public class AbstractConfigTypeReflectionProviderTest {
 
         assertEquals(AnnotationConfig.class, provider.getConfigType());
 
-        assertEquals(Map.of("size", 10, "name", "Fred"),
+        assertEquals(
+                Map.of("size", 10, "name", "Fred"),
                 provider.getPropertyMap(HasAnnotationConfig.class.getAnnotation(AnnotationConfig.class)));
 
-        assertEquals(Map.of("size", 5, "name", "Dave"),
-                provider.getDefaults(Collections.emptyMap()));
+        assertEquals(Map.of("size", 5, "name", "Dave"), provider.getDefaults(Collections.emptyMap()));
 
         final Object config = new HasAnnotationConfig();
         final Method inaccessibleMethod = HasAnnotationConfig.class.getDeclaredMethod("getInaccessibleValue");
@@ -98,7 +97,8 @@ public class AbstractConfigTypeReflectionProviderTest {
 
         assertEquals(InvalidAnnotationConfig.class, provider.getConfigType());
 
-        assertEquals(Map.of("size", 10, "name", "Fred"),
+        assertEquals(
+                Map.of("size", 10, "name", "Fred"),
                 provider.getPropertyMap(HasAnnotationConfig.class.getAnnotation(InvalidAnnotationConfig.class)));
 
         // no defaults are provided when invalid
@@ -106,7 +106,9 @@ public class AbstractConfigTypeReflectionProviderTest {
 
         assertFalse(provider.addSingleDefault(
                 "other.config",
-                HasAnnotationConfig.class.getAnnotation(InvalidAnnotationConfig.class).other_config(),
+                HasAnnotationConfig.class
+                        .getAnnotation(InvalidAnnotationConfig.class)
+                        .other_config(),
                 Collections.emptyMap()));
     }
 
@@ -146,5 +148,4 @@ public class AbstractConfigTypeReflectionProviderTest {
 
         assertEquals(InvalidInterfaceConfig.class, invalidProvider.getConfigType());
     }
-
 }

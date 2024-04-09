@@ -18,13 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -56,6 +49,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 public class OsgiServiceUtilTest {
 
     private BundleContext bundleContext = MockOsgi.newBundleContext();
@@ -86,7 +86,9 @@ public class OsgiServiceUtilTest {
         assertTrue(MockOsgi.activate(service3, bundleContext, service3Config));
 
         assertNotNull(service3.getComponentContext());
-        assertEquals(service3Config.get("prop1"), service3.getComponentContext().getProperties().get("prop1"));
+        assertEquals(
+                service3Config.get("prop1"),
+                service3.getComponentContext().getProperties().get("prop1"));
 
         assertSame(service1, service3.getReference1());
 
@@ -127,7 +129,9 @@ public class OsgiServiceUtilTest {
         assertTrue(MockOsgi.activate(service3, bundleContext, service3Config));
 
         assertNotNull(service3.getComponentContext());
-        assertEquals(service3Config.get("prop1"), service3.getComponentContext().getProperties().get("prop1"));
+        assertEquals(
+                service3Config.get("prop1"),
+                service3.getComponentContext().getProperties().get("prop1"));
 
         assertSame(service1, service3.getReference1());
 
@@ -155,18 +159,18 @@ public class OsgiServiceUtilTest {
     public void testService3_Config() {
         BundleContext bundleContext = MockOsgi.newBundleContext();
 
-        Map<String,Object> initialProperites = Map.<String, Object>of("prop1", "value1");
+        Map<String, Object> initialProperites = Map.<String, Object>of("prop1", "value1");
 
         Service3 service3 = new Service3();
         MockOsgi.activate(service3, bundleContext, initialProperites);
         assertEquals(initialProperites.get("prop1"), service3.getConfig().get("prop1"));
 
-        Map<String,Object> newProperties = Map.<String, Object>of("prop2", "value2");
+        Map<String, Object> newProperties = Map.<String, Object>of("prop2", "value2");
         MockOsgi.modified(service3, bundleContext, newProperties);
         assertEquals(newProperties.get("prop2"), service3.getConfig().get("prop2"));
 
         newProperties = Map.<String, Object>of("prop3", "value3");
-        Dictionary<String,Object> newPropertiesDictonary = new Hashtable<String,Object>(newProperties);
+        Dictionary<String, Object> newPropertiesDictonary = new Hashtable<String, Object>(newProperties);
         MockOsgi.modified(service3, bundleContext, newPropertiesDictonary);
         assertEquals(newProperties.get("prop3"), service3.getConfig().get("prop3"));
 
@@ -198,24 +202,24 @@ public class OsgiServiceUtilTest {
         assertSame(service1, service4.getReference1());
     }
 
-    @Test(expected=NoScrMetadataException.class)
+    @Test(expected = NoScrMetadataException.class)
     public void testInjectServicesNoMetadata() {
         MockOsgi.injectServices(new Object(), MockOsgi.newBundleContext());
     }
 
-    @Test(expected=NoScrMetadataException.class)
+    @Test(expected = NoScrMetadataException.class)
     public void testActivateNoMetadata() {
         MockOsgi.activate(new Object(), bundleContext);
     }
 
-    @Test(expected=NoScrMetadataException.class)
+    @Test(expected = NoScrMetadataException.class)
     public void testDeactivateNoMetadata() {
         MockOsgi.deactivate(new Object(), bundleContext);
     }
 
-    @Test(expected=NoScrMetadataException.class)
+    @Test(expected = NoScrMetadataException.class)
     public void testModifiedNoMetadata() {
-        MockOsgi.modified(new Object(), MockOsgi.newBundleContext(), Map.<String,Object>of());
+        MockOsgi.modified(new Object(), MockOsgi.newBundleContext(), Map.<String, Object>of());
     }
 
     @Test
@@ -227,8 +231,9 @@ public class OsgiServiceUtilTest {
         MockOsgi.activate(service5, bundleContext, (Dictionary<String, Object>) null);
         bundleContext.registerService(ServiceInterface5.class.getName(), service5, null);
 
-        assertSame(service5, bundleContext.getService(
-                bundleContext.getServiceReference(ServiceInterface5.class.getName())));
+        assertSame(
+                service5,
+                bundleContext.getService(bundleContext.getServiceReference(ServiceInterface5.class.getName())));
         assertEquals(true, service5.doRemoteThing());
     }
 
@@ -240,27 +245,32 @@ public class OsgiServiceUtilTest {
         MockOsgi.activate(serviceFactory1, bundleContext, (Dictionary<String, Object>) null);
         bundleContext.registerService(ServiceFactory1.class.getName(), serviceFactory1, null);
 
-        assertSame(serviceFactory1, bundleContext.getService(
-                bundleContext.getServiceReference(ServiceFactory1.class.getName())));
+        assertSame(
+                serviceFactory1,
+                bundleContext.getService(bundleContext.getServiceReference(ServiceFactory1.class.getName())));
     }
 
     @Test
     public void testServiceFactoryViaManualRegistration() {
         final ServiceFactory1 serviceFactory1 = new ServiceFactory1();
 
-        bundleContext.registerService(ServiceFactory1.class.getName(), new ServiceFactory() {
-            @Override
-            public Object getService(Bundle bundle, ServiceRegistration registration) {
-                return serviceFactory1;
-            }
-            @Override
-            public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-                // nothing to do
-            }
-        }, null);
+        bundleContext.registerService(
+                ServiceFactory1.class.getName(),
+                new ServiceFactory() {
+                    @Override
+                    public Object getService(Bundle bundle, ServiceRegistration registration) {
+                        return serviceFactory1;
+                    }
 
-        assertSame(serviceFactory1, bundleContext.getService(
-                bundleContext.getServiceReference(ServiceFactory1.class.getName())));
+                    @Override
+                    public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
+                        // nothing to do
+                    }
+                },
+                null);
+
+        assertSame(
+                serviceFactory1,
+                bundleContext.getService(bundleContext.getServiceReference(ServiceFactory1.class.getName())));
     }
-
 }

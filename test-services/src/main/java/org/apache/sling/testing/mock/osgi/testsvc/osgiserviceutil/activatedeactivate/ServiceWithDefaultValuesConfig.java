@@ -21,7 +21,8 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeact
 public @interface ServiceWithDefaultValuesConfig {
 
     String value_string() default "value";
-    String empty_string() default "";
-    String null_string();
 
+    String empty_string() default "";
+
+    String null_string();
 }

@@ -99,24 +99,22 @@ public final class MapUtil {
         }
         if (args.length == 1) {
             if (args[0] instanceof Map) {
-                return (Map)args[0];
-            }
-            else if (args[0] instanceof Dictionary) {
-                return toMap((Dictionary)args[0]);
+                return (Map) args[0];
+            } else if (args[0] instanceof Dictionary) {
+                return toMap((Dictionary) args[0]);
             }
         }
         if (args.length % 2 != 0) {
             throw new IllegalArgumentException("args must be an even number of name/values:" + Arrays.asList(args));
         }
         final Map<String, Object> result = new HashMap<>();
-        for (int i=0 ; i < args.length; i+=2) {
+        for (int i = 0; i < args.length; i += 2) {
             Object key = args[i];
-            Object value = args[i+1];
+            Object value = args[i + 1];
             if (key != null && value != null) {
                 result.put(key.toString(), value);
             }
         }
         return result;
     }
-
 }

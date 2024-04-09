@@ -18,11 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi.config;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
-import org.osgi.service.component.propertytypes.ServiceRanking;
-import org.osgi.service.component.propertytypes.ServiceVendor;
-
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +29,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
+import org.junit.Test;
+import org.osgi.service.component.propertytypes.ServiceRanking;
+import org.osgi.service.component.propertytypes.ServiceVendor;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -43,7 +43,9 @@ import static org.junit.Assert.assertTrue;
 public class ComponentPropertyParserTest {
 
     enum ValueCardinality {
-        ABSENT, ONE, MANY
+        ABSENT,
+        ONE,
+        MANY
     }
 
     @Test
@@ -52,12 +54,11 @@ public class ComponentPropertyParserTest {
                 List.of(), ValueCardinality.ABSENT,
                 List.of("one"), ValueCardinality.ONE,
                 List.of("2"), ValueCardinality.ONE,
-                List.of("one", "2"), ValueCardinality.MANY
-        );
+                List.of("one", "2"), ValueCardinality.MANY);
         for (Map.Entry<List<String>, ValueCardinality> entry : expectations.entrySet()) {
             Map<String, Object> properties = new HashMap<>();
-            ComponentPropertyParser.putSingleOrMany(properties, "test",
-                    entry.getKey(), Function.identity(), String[]::new);
+            ComponentPropertyParser.putSingleOrMany(
+                    properties, "test", entry.getKey(), Function.identity(), String[]::new);
             switch (entry.getValue()) {
                 case ONE:
                     assertEquals(entry.getKey().get(0), properties.get("test"));
@@ -85,14 +86,16 @@ public class ComponentPropertyParserTest {
                 "prop$$name", "prop$name",
                 "prop$name", "propname",
                 "propName", "propName",
-                "two_period_name", "two.period.name"
-        );
+                "two_period_name", "two.period.name");
 
-        String[] prefixes = new String[]{null, "", "prefix-"};
+        String[] prefixes = new String[] {null, "", "prefix-"};
         for (String prefix : prefixes) {
             for (Map.Entry<String, String> entry : expectations.entrySet()) {
                 final String expected = entry.getValue();
-                assertEquals(Optional.ofNullable(prefix).map(pfx -> pfx.concat(expected)).orElse(expected),
+                assertEquals(
+                        Optional.ofNullable(prefix)
+                                .map(pfx -> pfx.concat(expected))
+                                .orElse(expected),
                         ComponentPropertyParser.identifierToPropertyName(entry.getKey(), prefix));
             }
         }
@@ -105,19 +108,27 @@ public class ComponentPropertyParserTest {
     @Test
     public void testSingleElementAnnotationKey() {
         Map<String, String> expectations = Map.of(
-                ServiceRanking.class.getSimpleName(), "service.ranking",
-                ServiceVendor.class.getSimpleName(), "service.vendor",
-                InnerAnnotation.class.getSimpleName(), "inner.annotation",
-                "$SomehowStartsWithDollar", "$somehow.starts.with.dollar",
-                "simpler", "simpler",
-                "endsWith$", ""
-        );
+                ServiceRanking.class.getSimpleName(),
+                "service.ranking",
+                ServiceVendor.class.getSimpleName(),
+                "service.vendor",
+                InnerAnnotation.class.getSimpleName(),
+                "inner.annotation",
+                "$SomehowStartsWithDollar",
+                "$somehow.starts.with.dollar",
+                "simpler",
+                "simpler",
+                "endsWith$",
+                "");
 
-        String[] prefixes = new String[]{null, "", "prefix-"};
+        String[] prefixes = new String[] {null, "", "prefix-"};
         for (String prefix : prefixes) {
             for (Map.Entry<String, String> entry : expectations.entrySet()) {
                 final String expected = entry.getValue();
-                assertEquals(Optional.ofNullable(prefix).map(pfx -> pfx.concat(expected)).orElse(expected),
+                assertEquals(
+                        Optional.ofNullable(prefix)
+                                .map(pfx -> pfx.concat(expected))
+                                .orElse(expected),
                         ComponentPropertyParser.singleElementAnnotationKey(entry.getKey(), prefix));
             }
         }
@@ -199,7 +210,7 @@ public class ComponentPropertyParserTest {
         } else if (array instanceof Object[]) {
             return toObjectArray((Object[]) array);
         }
-        return new Object[]{array};
+        return new Object[] {array};
     }
 
     public void assertMapDeepEquals(Map<String, Object> expected, Map<String, Object> actual) {
@@ -214,16 +225,17 @@ public class ComponentPropertyParserTest {
         }
     }
 
-    public void assertGetAnnotationDefaultsExpectations(@NotNull Map<Class<? extends Annotation>, Map<String, Object>> expectations) {
+    public void assertGetAnnotationDefaultsExpectations(
+            @NotNull Map<Class<? extends Annotation>, Map<String, Object>> expectations) {
         for (Map.Entry<Class<? extends Annotation>, Map<String, Object>> entry : expectations.entrySet()) {
             final Map<String, Object> expected = entry.getValue();
             final Map<String, Object> actual = new HashMap<>();
             ComponentPropertyParser.getDefaults(entry.getKey(), actual);
             assertMapDeepEquals(expected, actual);
             final Map<String, Object> expectedAllSet = expected.keySet().stream()
-                    .collect(Collectors.toMap(Function.identity(), (key) -> new String[]{"im set"}));
+                    .collect(Collectors.toMap(Function.identity(), (key) -> new String[] {"im set"}));
             final Map<String, Object> actualAllSet = expected.keySet().stream()
-                    .collect(Collectors.toMap(Function.identity(), (key) -> new String[]{"im set"}));
+                    .collect(Collectors.toMap(Function.identity(), (key) -> new String[] {"im set"}));
             ComponentPropertyParser.getDefaults(entry.getKey(), actualAllSet);
             assertMapDeepEquals(expectedAllSet, actualAllSet);
         }
@@ -264,26 +276,22 @@ public class ComponentPropertyParserTest {
         Map<Class<? extends Annotation>, Map<String, Object>> expectations = Map.of(
                 PropertyEscaped.class,
                 Map.of(
-                        "prop_name", new String[]{"prop__name default"},
-                        "prop.name", new String[]{"prop_name default"},
-                        "prop-name", new String[]{"prop$_$name default"},
-                        "prop$name", new String[]{"prop$$name default"},
-                        "propname", new String[]{"prop$name default"},
-                        "propName", new String[]{"propName default"}
-                ),
+                        "prop_name", new String[] {"prop__name default"},
+                        "prop.name", new String[] {"prop_name default"},
+                        "prop-name", new String[] {"prop$_$name default"},
+                        "prop$name", new String[] {"prop$$name default"},
+                        "propname", new String[] {"prop$name default"},
+                        "propName", new String[] {"propName default"}),
                 PrefixedPropertyEscaped.class,
                 Map.of(
-                        "prefix-prop_name", new String[]{"prop__name default"},
-                        "prefix-prop.name", new String[]{"prop_name default"},
-                        "prefix-prop-name", new String[]{"prop$_$name default"},
-                        "prefix-prop$name", new String[]{"prop$$name default"},
-                        "prefix-propname", new String[]{"prop$name default"},
-                        "prefix-propName", new String[]{"propName default"}
-                )
-        );
+                        "prefix-prop_name", new String[] {"prop__name default"},
+                        "prefix-prop.name", new String[] {"prop_name default"},
+                        "prefix-prop-name", new String[] {"prop$_$name default"},
+                        "prefix-prop$name", new String[] {"prop$$name default"},
+                        "prefix-propname", new String[] {"prop$name default"},
+                        "prefix-propName", new String[] {"propName default"}));
         assertGetAnnotationDefaultsExpectations(expectations);
     }
-
 
     public @interface SingleElementString {
         String value();
@@ -307,12 +315,11 @@ public class ComponentPropertyParserTest {
                 SingleElementString.class,
                 Collections.emptyMap(),
                 SingleElementStringDefault.class,
-                Map.of("single.element.string.default", new String[]{"defaultDefaults"}),
+                Map.of("single.element.string.default", new String[] {"defaultDefaults"}),
                 SingleElementStringArray.class,
                 Collections.emptyMap(),
                 SingleElementStringArrayDefault.class,
-                Map.of("single.element.string.array.default", new String[]{"arrayDefaultDefaults"})
-        );
+                Map.of("single.element.string.array.default", new String[] {"arrayDefaultDefaults"}));
         assertGetAnnotationDefaultsExpectations(expectations);
     }
 
@@ -338,15 +345,14 @@ public class ComponentPropertyParserTest {
                 SingleElementClass.class,
                 Collections.emptyMap(),
                 SingleElementClassDefault.class,
-                Map.of("single.element.class.default", new String[]{ComponentPropertyParser.class.getName()}),
+                Map.of("single.element.class.default", new String[] {ComponentPropertyParser.class.getName()}),
                 SingleElementClassArray.class,
                 Collections.emptyMap(),
                 SingleElementClassArrayDefault.class,
-                Map.of("single.element.class.array.default", new String[]{ComponentPropertyParserTest.class.getName()})
-        );
+                Map.of("single.element.class.array.default", new String[] {ComponentPropertyParserTest.class.getName()
+                }));
         assertGetAnnotationDefaultsExpectations(expectations);
     }
-
 
     public @interface SingleElementInteger {
         int value();
@@ -370,46 +376,51 @@ public class ComponentPropertyParserTest {
                 SingleElementInteger.class,
                 Collections.emptyMap(),
                 SingleElementIntegerDefault.class,
-                Map.of("single.element.integer.default", new int[]{-2}),
+                Map.of("single.element.integer.default", new int[] {-2}),
                 SingleElementIntegerArray.class,
                 Collections.emptyMap(),
                 SingleElementIntegerArrayDefault.class,
-                Map.of("single.element.integer.array.default", new int[]{-20})
-        );
+                Map.of("single.element.integer.array.default", new int[] {-20}));
         assertGetAnnotationDefaultsExpectations(expectations);
     }
 
     @Test
     public void testParsePrimitives() {
-        assertMapDeepEquals(Map.of(
+        assertMapDeepEquals(
+                Map.of(
                         "single.element.string.default",
-                        new String[]{"defaultDefaults"},
+                        new String[] {"defaultDefaults"},
                         "string.value",
-                        new String[]{"a string"},
+                        new String[] {"a string"},
                         "boolean.value",
-                        new Boolean[]{false, true},
+                        new Boolean[] {false, true},
                         "byte.value",
-                        new Byte[]{(byte) 20},
-                        "char.value", new Character[]{'a', 'x'},
-                        "short.value", new Short[]{1},
-                        "int.value", new Integer[]{10},
-                        "long.value", new Long[]{100L},
-                        "float.value", new Float[]{11.0f},
-                        "double.value", new Double[]{111.0}
-                ),
-                ComponentPropertyParser.parse(SingleElementStringDefault.class, new String[]{
-                        "ignore",
-                        "string.value=a string",
-                        "boolean.value:String=false",
-                        "boolean.value:Boolean=true",
-                        "byte.value:Byte=20",
-                        "char.value:Character=abc",
-                        "char.value=xyz",
-                        "short.value:Short=1",
-                        "int.value:Integer=10",
-                        "long.value:Long=100",
-                        "float.value:Float=11.0",
-                        "double.value:Double=111.0"
+                        new Byte[] {(byte) 20},
+                        "char.value",
+                        new Character[] {'a', 'x'},
+                        "short.value",
+                        new Short[] {1},
+                        "int.value",
+                        new Integer[] {10},
+                        "long.value",
+                        new Long[] {100L},
+                        "float.value",
+                        new Float[] {11.0f},
+                        "double.value",
+                        new Double[] {111.0}),
+                ComponentPropertyParser.parse(SingleElementStringDefault.class, new String[] {
+                    "ignore",
+                    "string.value=a string",
+                    "boolean.value:String=false",
+                    "boolean.value:Boolean=true",
+                    "byte.value:Byte=20",
+                    "char.value:Character=abc",
+                    "char.value=xyz",
+                    "short.value:Short=1",
+                    "int.value:Integer=10",
+                    "long.value:Long=100",
+                    "float.value:Float=11.0",
+                    "double.value:Double=111.0"
                 }));
     }
 
@@ -421,13 +432,10 @@ public class ComponentPropertyParserTest {
         String value();
     }
 
-
     @Test
     public void testParseInterface() {
-        Map<String, Object> props = ComponentPropertyParser.parse(AnInterface.class, new String[]{
-                "prefix-value=a value",
-                "prefix-anotherProperty=another value"
-        });
+        Map<String, Object> props = ComponentPropertyParser.parse(
+                AnInterface.class, new String[] {"prefix-value=a value", "prefix-anotherProperty=another value"});
 
         assertEquals(Map.of("prefix-value", "a value", "prefix-anotherProperty", "another value"), props);
     }
@@ -435,14 +443,38 @@ public class ComponentPropertyParserTest {
     @Test
     public void testIsSupportedPropertyMapValueType() {
         Stream.of(
-                        boolean.class, boolean[].class, Boolean.class, Boolean[].class,
-                        byte.class, byte[].class, Byte.class, Byte[].class,
-                        char.class, char[].class, Character.class, Character[].class,
-                        short.class, short[].class, Short.class, Short[].class,
-                        int.class, int[].class, Integer.class, Integer[].class,
-                        long.class, long[].class, Long.class, Long[].class,
-                        float.class, float[].class, Float.class, Float[].class,
-                        double.class, double[].class, Double.class, Double[].class)
+                        boolean.class,
+                        boolean[].class,
+                        Boolean.class,
+                        Boolean[].class,
+                        byte.class,
+                        byte[].class,
+                        Byte.class,
+                        Byte[].class,
+                        char.class,
+                        char[].class,
+                        Character.class,
+                        Character[].class,
+                        short.class,
+                        short[].class,
+                        Short.class,
+                        Short[].class,
+                        int.class,
+                        int[].class,
+                        Integer.class,
+                        Integer[].class,
+                        long.class,
+                        long[].class,
+                        Long.class,
+                        Long[].class,
+                        float.class,
+                        float[].class,
+                        Float.class,
+                        Float[].class,
+                        double.class,
+                        double[].class,
+                        Double.class,
+                        Double[].class)
                 .forEach(type -> assertTrue(ComponentPropertyParser.isSupportedPropertyMapValueType(type)));
 
         Stream.of(Class.class, Class[].class)
@@ -458,14 +490,38 @@ public class ComponentPropertyParserTest {
     @Test
     public void testIsSupportedConfigTypeValueType() {
         Stream.of(
-                        boolean.class, boolean[].class, Boolean.class, Boolean[].class,
-                        byte.class, byte[].class, Byte.class, Byte[].class,
-                        char.class, char[].class, Character.class, Character[].class,
-                        short.class, short[].class, Short.class, Short[].class,
-                        int.class, int[].class, Integer.class, Integer[].class,
-                        long.class, long[].class, Long.class, Long[].class,
-                        float.class, float[].class, Float.class, Float[].class,
-                        double.class, double[].class, Double.class, Double[].class)
+                        boolean.class,
+                        boolean[].class,
+                        Boolean.class,
+                        Boolean[].class,
+                        byte.class,
+                        byte[].class,
+                        Byte.class,
+                        Byte[].class,
+                        char.class,
+                        char[].class,
+                        Character.class,
+                        Character[].class,
+                        short.class,
+                        short[].class,
+                        Short.class,
+                        Short[].class,
+                        int.class,
+                        int[].class,
+                        Integer.class,
+                        Integer[].class,
+                        long.class,
+                        long[].class,
+                        Long.class,
+                        Long[].class,
+                        float.class,
+                        float[].class,
+                        Float.class,
+                        Float[].class,
+                        double.class,
+                        double[].class,
+                        Double.class,
+                        Double[].class)
                 .forEach(type -> assertTrue(ComponentPropertyParser.isSupportedConfigTypeValueType(type)));
 
         Stream.of(Class.class, Class[].class)
@@ -492,7 +548,8 @@ public class ComponentPropertyParserTest {
     }
 
     public enum YesOrNo {
-        YES, NO
+        YES,
+        NO
     }
 
     public @interface SingleElementEnum {
@@ -517,15 +574,13 @@ public class ComponentPropertyParserTest {
                 SingleElementEnum.class,
                 Collections.emptyMap(),
                 SingleElementEnumDefault.class,
-                Map.of("single.element.enum.default", new String[]{"NO"}),
+                Map.of("single.element.enum.default", new String[] {"NO"}),
                 SingleElementEnumArray.class,
                 Collections.emptyMap(),
                 SingleElementEnumArrayDefault.class,
-                Map.of("single.element.enum.array.default", new String[]{"YES"})
-        );
+                Map.of("single.element.enum.array.default", new String[] {"YES"}));
         assertGetAnnotationDefaultsExpectations(expectations);
     }
-
 
     public @interface PropertyEscapedNoDefaults {
         String prop__name();
@@ -561,26 +616,25 @@ public class ComponentPropertyParserTest {
     public void testAssertOneToOneMapping() {
         Map<Class<?>, String[]> expectations = Map.of(
                 SingleElementString.class,
-                new String[]{"single.element.string=value"},
+                new String[] {"single.element.string=value"},
                 PropertyEscapedNoDefaults.class,
-                new String[]{
-                        "prop_name=prop__name",
-                        "prop.name=prop_name",
-                        "prop-name=prop$_$name",
-                        "prop$name=prop$$name",
-                        "propname=prop$name",
-                        "propName=propName"
+                new String[] {
+                    "prop_name=prop__name",
+                    "prop.name=prop_name",
+                    "prop-name=prop$_$name",
+                    "prop$name=prop$$name",
+                    "propname=prop$name",
+                    "propName=propName"
                 },
                 PrefixedPropertyEscapedNoDefaults.class,
-                new String[]{
-                        "prefix-prop_name=prop__name",
-                        "prefix-prop.name=prop_name",
-                        "prefix-prop-name=prop$_$name",
-                        "prefix-prop$name=prop$$name",
-                        "prefix-propname=prop$name",
-                        "prefix-propName=propName"
-                }
-        );
+                new String[] {
+                    "prefix-prop_name=prop__name",
+                    "prefix-prop.name=prop_name",
+                    "prefix-prop-name=prop$_$name",
+                    "prefix-prop$name=prop$$name",
+                    "prefix-propname=prop$name",
+                    "prefix-propName=propName"
+                });
         for (Map.Entry<Class<?>, String[]> entry : expectations.entrySet()) {
             ComponentPropertyParser.assertOneToOneMapping(entry.getKey(), entry.getValue());
         }
@@ -593,9 +647,8 @@ public class ComponentPropertyParserTest {
 
     @Test(expected = ConfigTypeStrictnessViolation.class)
     public void testAssertOneToOneMappingUnexpectedParsed() {
-        ComponentPropertyParser.assertOneToOneMapping(SingleElementString.class, new String[]{
-                "single.element.string=value",
-                "single.element.integer:Integer=10"
-        });
+        ComponentPropertyParser.assertOneToOneMapping(
+                SingleElementString.class,
+                new String[] {"single.element.string=value", "single.element.integer:Integer=10"});
     }
 }

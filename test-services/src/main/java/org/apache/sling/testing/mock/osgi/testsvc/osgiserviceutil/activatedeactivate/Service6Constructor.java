@@ -32,10 +32,11 @@ public class Service6Constructor {
     private boolean activated;
     private ComponentContext componentContext;
     private BundleContext bundleContext;
-    private Map<String,Object> map;
+    private Map<String, Object> map;
 
     @Activate
-    public Service6Constructor(ComponentContext componentContext, BundleContext bundleContext, Map<String,Object> map) {
+    public Service6Constructor(
+            ComponentContext componentContext, BundleContext bundleContext, Map<String, Object> map) {
         this.activated = true;
         this.componentContext = componentContext;
         this.bundleContext = bundleContext;
@@ -43,7 +44,7 @@ public class Service6Constructor {
     }
 
     @Deactivate
-    private void deactivate(Map<String,Object> map, BundleContext bundleContext, int value1, Integer value2) {
+    private void deactivate(Map<String, Object> map, BundleContext bundleContext, int value1, Integer value2) {
         this.activated = false;
         this.componentContext = null;
         this.bundleContext = null;
@@ -65,5 +66,4 @@ public class Service6Constructor {
     public Map<String, Object> getMap() {
         return map;
     }
-
 }

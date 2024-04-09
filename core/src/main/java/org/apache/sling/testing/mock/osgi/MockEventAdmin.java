@@ -50,9 +50,13 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = EventAdmin.class)
 public final class MockEventAdmin implements EventAdmin {
 
-    @Reference(name="eventHandler", service=EventHandler.class,
-            cardinality=ReferenceCardinality.MULTIPLE, policy=ReferencePolicy.DYNAMIC,
-            bind="bindEventHandler", unbind="unbindEventHandler")
+    @Reference(
+            name = "eventHandler",
+            service = EventHandler.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "bindEventHandler",
+            unbind = "unbindEventHandler")
     private final Map<Object, EventHandlerItem> eventHandlers = new TreeMap<>();
 
     private ExecutorService asyncHandler;
@@ -83,10 +87,10 @@ public final class MockEventAdmin implements EventAdmin {
                     distributeEvent(event);
                 }
             });
-        }
-        catch (RejectedExecutionException ex) {
+        } catch (RejectedExecutionException ex) {
             // ignore
-            log.debug("Ignore rejected execution: " + ex.getMessage(), ex);;
+            log.debug("Ignore rejected execution: " + ex.getMessage(), ex);
+            ;
         }
     }
 
@@ -101,12 +105,19 @@ public final class MockEventAdmin implements EventAdmin {
                 if (item.matches(event)) {
                     try {
                         if (log.isDebugEnabled()) {
-                            log.debug("Distribute event: {} to {}, bundleContext={}", event.getTopic(), item.getEventHandler().getClass(), this.bundleContext);
+                            log.debug(
+                                    "Distribute event: {} to {}, bundleContext={}",
+                                    event.getTopic(),
+                                    item.getEventHandler().getClass(),
+                                    this.bundleContext);
                         }
                         item.getEventHandler().handleEvent(event);
-                    }
-                    catch (Throwable ex) {
-                        log.error("Error handling event {} in {}", event, item.getEventHandler().getClass(), ex);
+                    } catch (Throwable ex) {
+                        log.error(
+                                "Error handling event {} in {}",
+                                event,
+                                item.getEventHandler().getClass(),
+                                ex);
                     }
                 }
             }
@@ -115,7 +126,9 @@ public final class MockEventAdmin implements EventAdmin {
 
     protected void bindEventHandler(EventHandler eventHandler, Map<String, Object> props) {
         synchronized (eventHandlers) {
-            eventHandlers.put(ServiceUtil.getComparableForServiceRanking(props, Order.DESCENDING), new EventHandlerItem(eventHandler, props));
+            eventHandlers.put(
+                    ServiceUtil.getComparableForServiceRanking(props, Order.DESCENDING),
+                    new EventHandlerItem(eventHandler, props));
         }
     }
 
@@ -160,18 +173,15 @@ public final class MockEventAdmin implements EventAdmin {
             String[] topics;
             if (topic == null) {
                 topics = new String[0];
-            }
-            else if (topic instanceof String) {
-                topics = new String[] { (String)topic };
-            }
-            else if (topic instanceof String[]) {
-                topics = (String[])topic;
-            }
-            else {
+            } else if (topic instanceof String) {
+                topics = new String[] {(String) topic};
+            } else if (topic instanceof String[]) {
+                topics = (String[]) topic;
+            } else {
                 throw new IllegalArgumentException("Invalid topic: " + topic);
             }
             Pattern[] patterns = new Pattern[topics.length];
-            for (int i=0; i<topics.length; i++) {
+            for (int i = 0; i < topics.length; i++) {
                 patterns[i] = toWildcardPattern(topics[i]);
             }
             return patterns;
@@ -186,13 +196,11 @@ public final class MockEventAdmin implements EventAdmin {
             Matcher matcher = WILDCARD_PATTERN.matcher(wildcard);
             StringBuffer result = new StringBuffer();
             while (matcher.find()) {
-                if(matcher.group(1) != null) matcher.appendReplacement(result, ".*");
+                if (matcher.group(1) != null) matcher.appendReplacement(result, ".*");
                 else matcher.appendReplacement(result, "\\\\Q" + matcher.group(0) + "\\\\E");
             }
             matcher.appendTail(result);
             return Pattern.compile(result.toString());
         }
-
     }
-
 }

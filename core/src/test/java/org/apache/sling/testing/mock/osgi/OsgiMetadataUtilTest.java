@@ -18,11 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +31,11 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeacti
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceWithDefaultValuesConstructor;
 import org.junit.Test;
 import org.osgi.framework.Constants;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class OsgiMetadataUtilTest {
 
@@ -53,8 +53,10 @@ public class OsgiMetadataUtilTest {
         assertEquals(3, props.size());
         assertEquals(5000, props.get(Constants.SERVICE_RANKING));
         assertEquals("The Apache Software Foundation", props.get(Constants.SERVICE_VENDOR));
-        assertArrayEquals(new String[] { "org.apache.sling.api.resource.Resource", "org.apache.sling.api.resource.ResourceResolver" },
-                (String[])props.get("adaptables"));
+        assertArrayEquals(
+                new String[] {"org.apache.sling.api.resource.Resource", "org.apache.sling.api.resource.ResourceResolver"
+                },
+                (String[]) props.get("adaptables"));
     }
 
     @Test
@@ -110,5 +112,4 @@ public class OsgiMetadataUtilTest {
     static class ServiceWithoutMetadata {
         // empty class
     }
-
 }

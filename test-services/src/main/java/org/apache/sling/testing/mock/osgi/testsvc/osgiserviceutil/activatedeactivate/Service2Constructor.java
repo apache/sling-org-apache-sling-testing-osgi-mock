@@ -48,5 +48,4 @@ public class Service2Constructor {
     public BundleContext getBundleContext() {
         return bundleContext;
     }
-
 }

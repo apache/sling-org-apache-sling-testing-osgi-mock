@@ -46,5 +46,4 @@ public interface Service3OsgiR6 {
     ComponentContext getComponentContext();
 
     Map<String, Object> getConfig();
-
 }

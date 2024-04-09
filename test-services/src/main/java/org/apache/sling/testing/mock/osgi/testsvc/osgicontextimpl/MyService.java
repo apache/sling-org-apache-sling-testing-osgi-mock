@@ -21,5 +21,4 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl;
 public interface MyService {
 
     String foo();
-
 }

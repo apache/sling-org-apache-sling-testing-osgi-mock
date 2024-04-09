@@ -31,13 +31,13 @@ public class Service3 {
     private Map<String, Object> map;
 
     @Activate
-    private void activate(Map<String,Object> map) {
+    private void activate(Map<String, Object> map) {
         this.activated = true;
         this.map = map;
     }
 
     @Deactivate
-    private void deactivate(Map<String,Object> map) {
+    private void deactivate(Map<String, Object> map) {
         this.activated = false;
         this.map = null;
     }
@@ -49,5 +49,4 @@ public class Service3 {
     public Map<String, Object> getMap() {
         return map;
     }
-
 }

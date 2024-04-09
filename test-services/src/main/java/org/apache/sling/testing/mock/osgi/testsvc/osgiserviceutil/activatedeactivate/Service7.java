@@ -33,7 +33,7 @@ public class Service7 {
     private boolean activated;
     private ComponentContext componentContext;
     private BundleContext bundleContext;
-    private Map<String,Object> map;
+    private Map<String, Object> map;
 
     @Activate
     private void activate(ComponentContext componentContext, ServiceConfig config, BundleContext bundleContext) {
@@ -68,11 +68,10 @@ public class Service7 {
     }
 
     static Map<String, Object> readAnnotationToMap(final ServiceConfig config) {
-        Map<String,Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("prop1", config.prop1());
         map.put("prop2.with.periods", config.prop2_with_periods());
         map.put("prop3-with-hyphens", config.prop3$_$with$_$hyphens());
         return map;
     }
-
 }

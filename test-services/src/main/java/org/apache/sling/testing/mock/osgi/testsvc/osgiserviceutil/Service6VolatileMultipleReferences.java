@@ -31,10 +31,9 @@ public class Service6VolatileMultipleReferences {
 
     public String getRanks() {
         StringBuilder builder = new StringBuilder();
-        for(RankedService rankedService : rankedServices) {
+        for (RankedService rankedService : rankedServices) {
             builder.append(rankedService.getClass().getSimpleName()).append("=").append(rankedService.getRanking());
         }
         return builder.toString();
     }
-
 }

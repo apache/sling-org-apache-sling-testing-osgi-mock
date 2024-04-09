@@ -20,9 +20,9 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
 import org.osgi.service.component.annotations.Component;
 
-@Component(service = ServiceInterface3.class, property = {
-        "prop1=abc"
-})
+@Component(
+        service = ServiceInterface3.class,
+        property = {"prop1=abc"})
 public class ServiceInterface3Impl implements ServiceInterface3 {
 
     // no methods

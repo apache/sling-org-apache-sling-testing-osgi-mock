@@ -21,7 +21,7 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.propertytypes.ServiceRanking;
 
-@Component(service = { ServiceInterface2.class, ServiceInterface3.class })
+@Component(service = {ServiceInterface2.class, ServiceInterface3.class})
 @ServiceRanking(200)
 public class Service2 implements ServiceInterface2, ServiceInterface3 {
 

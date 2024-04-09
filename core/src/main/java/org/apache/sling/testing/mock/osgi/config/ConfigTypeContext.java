@@ -55,9 +55,10 @@ public final class ConfigTypeContext {
      * @param updatedProperties  a map of properties to update the configuration
      * @throws RuntimeException if an IOException is thrown by {@link ConfigurationAdmin}
      */
-    static void updatePropertiesForConfigPid(@NotNull Map<String, Object> updatedProperties,
-                                             @NotNull String pid,
-                                             @Nullable ConfigurationAdmin configurationAdmin) {
+    static void updatePropertiesForConfigPid(
+            @NotNull Map<String, Object> updatedProperties,
+            @NotNull String pid,
+            @Nullable ConfigurationAdmin configurationAdmin) {
         if (configurationAdmin != null) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(pid);
@@ -77,13 +78,15 @@ public final class ConfigTypeContext {
      * @throws RuntimeException              if an IOException is thrown by {@link ConfigurationAdmin#getConfiguration(String)}
      * @throws UnsupportedOperationException if an immutable map is passed
      */
-    static void mergePropertiesFromConfigPid(@NotNull Map<String, Object> mergedProperties,
-                                             @NotNull String pid,
-                                             @Nullable ConfigurationAdmin configurationAdmin) {
+    static void mergePropertiesFromConfigPid(
+            @NotNull Map<String, Object> mergedProperties,
+            @NotNull String pid,
+            @Nullable ConfigurationAdmin configurationAdmin) {
         if (configurationAdmin != null) {
             try {
                 Configuration configuration = configurationAdmin.getConfiguration(pid);
-                Optional.ofNullable(MapUtil.toMap(configuration.getProperties())).ifPresent(mergedProperties::putAll);
+                Optional.ofNullable(MapUtil.toMap(configuration.getProperties()))
+                        .ifPresent(mergedProperties::putAll);
             } catch (IOException e) {
                 throw new IllegalStateException("Unable to read config for pid " + pid, e);
             }
@@ -154,20 +157,22 @@ public final class ConfigTypeContext {
      * @return a concrete instance of the type specified by the provided {@link ConfigType#type()}
      */
     @SuppressWarnings("null")
-    public Object constructConfigType(@NotNull final ConfigType annotation,
-                                      @Nullable final String applyPid) {
+    public Object constructConfigType(@NotNull final ConfigType annotation, @Nullable final String applyPid) {
         if (!annotation.type().isAnnotation() && !annotation.type().isInterface()) {
             throw new IllegalArgumentException("illegal value for ConfigType type " + annotation.type());
         }
         if (!annotation.lenient()) {
             ComponentPropertyParser.assertOneToOneMapping(annotation.type(), annotation.property());
         }
-        final Map<String, Object> merged = new HashMap<>(
-                ComponentPropertyParser.parse(annotation.type(), annotation.property()));
-        Optional.ofNullable(applyPid).filter(pid -> !pid.isEmpty())
+        final Map<String, Object> merged =
+                new HashMap<>(ComponentPropertyParser.parse(annotation.type(), annotation.property()));
+        Optional.ofNullable(applyPid)
+                .filter(pid -> !pid.isEmpty())
                 .or(() -> getConfigurationPid(annotation.pid(), annotation.component()))
-                .ifPresent(pid -> mergePropertiesFromConfigPid(merged, pid, osgiContext.getService(ConfigurationAdmin.class)));
-        return Annotations.toObject(annotation.type(), merged, osgiContext.bundleContext().getBundle(), false);
+                .ifPresent(pid ->
+                        mergePropertiesFromConfigPid(merged, pid, osgiContext.getService(ConfigurationAdmin.class)));
+        return Annotations.toObject(
+                annotation.type(), merged, osgiContext.bundleContext().getBundle(), false);
     }
 
     /**
@@ -188,15 +193,13 @@ public final class ConfigTypeContext {
      * @param applyPid   optional non-empty configuration pid to apply if annotation is a {@link ConfigType}
      * @return a typed config
      */
-    @SuppressWarnings({ "rawtypes", "null" })
-    public TypedConfig newTypedConfig(@NotNull final Annotation annotation,
-                                         @Nullable final String applyPid) {
+    @SuppressWarnings({"rawtypes", "null"})
+    public TypedConfig newTypedConfig(@NotNull final Annotation annotation, @Nullable final String applyPid) {
         if (annotation instanceof ConfigType) {
             ConfigType osgiConfig = (ConfigType) annotation;
             Class<?> mappingType = osgiConfig.type();
-            return AnnotationTypedConfig.newInstance(mappingType,
-                    mappingType.cast(constructConfigType(osgiConfig, applyPid)),
-                    annotation);
+            return AnnotationTypedConfig.newInstance(
+                    mappingType, mappingType.cast(constructConfigType(osgiConfig, applyPid)), annotation);
         } else {
             return AnnotationTypedConfig.newInstance(annotation.annotationType(), annotation, annotation);
         }

@@ -18,10 +18,10 @@
  */
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
+import java.util.Optional;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.util.Optional;
 
 @Component
 public class Service3OsgiR8OptionalFieldImpl implements Service3OsgiR8OptionalField {

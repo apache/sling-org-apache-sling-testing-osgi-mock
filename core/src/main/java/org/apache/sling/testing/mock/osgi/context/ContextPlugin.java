@@ -56,5 +56,4 @@ public interface ContextPlugin<T extends OsgiContextImpl> {
      * @throws Exception exception
      */
     void afterTearDown(@NotNull T context) throws Exception;
-
 }

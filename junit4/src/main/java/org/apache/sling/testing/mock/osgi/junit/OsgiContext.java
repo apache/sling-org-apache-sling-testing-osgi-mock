@@ -60,7 +60,9 @@ public final class OsgiContext extends OsgiContextImpl implements TestRule {
      * @param afterSetUpCallback Allows the application to register an own callback function that is called after the built-in setup rules are executed.
      * @param beforeTearDownCallback Allows the application to register an own callback function that is called before the built-in teardown rules are executed.
      */
-    public <U extends OsgiContextImpl, V extends OsgiContextImpl> OsgiContext(@NotNull final ContextCallback<U> afterSetUpCallback, @NotNull final ContextCallback<V> beforeTearDownCallback) {
+    public <U extends OsgiContextImpl, V extends OsgiContextImpl> OsgiContext(
+            @NotNull final ContextCallback<U> afterSetUpCallback,
+            @NotNull final ContextCallback<V> beforeTearDownCallback) {
         this(new ContextPlugins(afterSetUpCallback, beforeTearDownCallback));
     }
 
@@ -93,5 +95,4 @@ public final class OsgiContext extends OsgiContextImpl implements TestRule {
     public Statement apply(final Statement base, final Description description) {
         return this.delegate.apply(base, description);
     }
-
 }

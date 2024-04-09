@@ -18,14 +18,13 @@
  */
 package org.apache.sling.testing.mock.osgi.junit5;
 
-import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
  * Helper class managing storage of linked {@link org.apache.sling.testing.mock.osgi.context.OsgiContextImpl} in
@@ -74,7 +73,9 @@ final class OsgiConfigParametersStore {
     @SuppressWarnings("java:S3011")
     static Optional<Field> getFieldFromTestClass(@NotNull Class<?> instanceClass) {
         Field contextField = Arrays.stream(instanceClass.getDeclaredFields())
-                .filter(field -> OsgiContextImpl.class.isAssignableFrom(field.getType())).findFirst().orElse(null);
+                .filter(field -> OsgiContextImpl.class.isAssignableFrom(field.getType()))
+                .findFirst()
+                .orElse(null);
         if (contextField != null) {
             contextField.setAccessible(true);
             return Optional.of(contextField);
@@ -106,12 +107,12 @@ final class OsgiConfigParametersStore {
      * @param testInstance     Test instance
      * @param osgiContext      OSGi context
      */
-    public static void storeOsgiContext(ExtensionContext extensionContext, Object testInstance, OsgiContextImpl osgiContext) {
+    public static void storeOsgiContext(
+            ExtensionContext extensionContext, Object testInstance, OsgiContextImpl osgiContext) {
         getStore(extensionContext).put(testInstance, osgiContext);
     }
 
     private static ExtensionContext.Store getStore(ExtensionContext context) {
         return context.getStore(NAMESPACE);
     }
-
 }

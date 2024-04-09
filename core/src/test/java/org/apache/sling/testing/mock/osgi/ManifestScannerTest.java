@@ -18,12 +18,12 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collection;
 
 import org.junit.Test;
 import org.osgi.framework.Constants;
+
+import static org.junit.Assert.assertTrue;
 
 public class ManifestScannerTest {
 
@@ -39,5 +39,4 @@ public class ManifestScannerTest {
         assertTrue(includeResource.contains("META-INF/LICENSE.txt=LICENSE.txt"));
         assertTrue(includeResource.contains("META-INF/NOTICE.txt=NOTICE.txt"));
     }
-
 }

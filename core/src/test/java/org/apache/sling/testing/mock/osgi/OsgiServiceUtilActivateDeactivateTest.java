@@ -18,12 +18,6 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -47,14 +41,19 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Test different variants of activate/deactivate methods with varying signatures.
  */
 public class OsgiServiceUtilActivateDeactivateTest {
 
-    private Map<String,Object> map = Map.<String, Object>of("prop1", "value1",
-            "prop2.with.periods", "value2",
-            "prop3-with-hyphens", "value3");
+    private Map<String, Object> map =
+            Map.<String, Object>of("prop1", "value1", "prop2.with.periods", "value2", "prop3-with-hyphens", "value3");
     private BundleContext bundleContext = MockOsgi.newBundleContext();
 
     @Test
@@ -95,7 +94,8 @@ public class OsgiServiceUtilActivateDeactivateTest {
 
     @Test
     public void testService2Constructor() {
-        Service2Constructor service = MockOsgi.activateInjectServices(Service2Constructor.class, bundleContext, "prop1", "value1");
+        Service2Constructor service =
+                MockOsgi.activateInjectServices(Service2Constructor.class, bundleContext, "prop1", "value1");
 
         assertNotNull(service);
         assertTrue(service.isActivated());
@@ -237,8 +237,12 @@ public class OsgiServiceUtilActivateDeactivateTest {
             MockOsgi.activateInjectServices(ServiceReferenceInConstructor.class, bundleContext);
             Assert.fail("Unresolvable mandatory reference in constructor should lead to ReferenceViolationException");
         } catch (ReferenceViolationException e) {
-            String regex = "Unable to inject mandatory reference '.*' " + Pattern.quote("(org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service1) into constructor parameter 0 for class org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceReferenceInConstructor : no matching services were found.");
-            assertTrue("Expected exception message matching regex:\n" + regex + "\nbut got:\n" + e.getMessage(), e.getMessage().matches(regex));
+            String regex = "Unable to inject mandatory reference '.*' "
+                    + Pattern.quote(
+                            "(org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service1) into constructor parameter 0 for class org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.ServiceReferenceInConstructor : no matching services were found.");
+            assertTrue(
+                    "Expected exception message matching regex:\n" + regex + "\nbut got:\n" + e.getMessage(),
+                    e.getMessage().matches(regex));
         }
     }
 
@@ -253,5 +257,4 @@ public class OsgiServiceUtilActivateDeactivateTest {
         MockOsgi.deactivate(service, bundleContext, map);
         assertEquals(Service9.class, service.getDeactivateFromClass());
     }
-
 }

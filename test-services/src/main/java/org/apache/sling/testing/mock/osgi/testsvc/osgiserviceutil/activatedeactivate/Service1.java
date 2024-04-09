@@ -48,5 +48,4 @@ public class Service1 {
     public ComponentContext getComponentContext() {
         return componentContext;
     }
-
 }

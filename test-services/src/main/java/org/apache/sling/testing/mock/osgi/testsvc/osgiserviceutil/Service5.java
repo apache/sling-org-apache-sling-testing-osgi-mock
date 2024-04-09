@@ -20,12 +20,11 @@ package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
 import org.osgi.service.component.annotations.Component;
 
-@Component(service = { ServiceInterface5.class })
+@Component(service = {ServiceInterface5.class})
 public class Service5 implements ServiceInterface5 {
 
     @Override
     public boolean doRemoteThing() {
         return false;
     }
-
 }

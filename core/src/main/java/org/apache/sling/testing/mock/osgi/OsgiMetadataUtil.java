@@ -18,6 +18,16 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -33,16 +43,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
-
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.TreeBidiMap;
@@ -72,6 +72,7 @@ final class OsgiMetadataUtil {
     private static final String METADATA_METATYPE_PATH = "OSGI-INF/metatype/";
 
     private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY;
+
     static {
         DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
         DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
@@ -80,6 +81,7 @@ final class OsgiMetadataUtil {
     private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
 
     private static final BidiMap<String, String> NAMESPACES = new TreeBidiMap<>();
+
     static {
         NAMESPACES.put("scr", "http://www.osgi.org/xmlns/scr/v1.1.0");
     }
@@ -107,7 +109,7 @@ final class OsgiMetadataUtil {
      * The OSGI metadata XML files do not change during the unit test runs because static part of classpath.
      * So we can cache the parsing step if we need them multiple times.
      */
-    private static final Map<String,Document> METADATA_DOCUMENT_CACHE = initMetadataDocumentCache();
+    private static final Map<String, Document> METADATA_DOCUMENT_CACHE = initMetadataDocumentCache();
     private static final ConcurrentMap<Class, OsgiMetadata> METADATA_CACHE = new ConcurrentHashMap<>();
 
     private OsgiMetadataUtil() {
@@ -130,8 +132,7 @@ final class OsgiMetadataUtil {
         });
         if (metadata == NULL_METADATA) {
             return null;
-        }
-        else {
+        } else {
             return metadata;
         }
     }
@@ -140,16 +141,15 @@ final class OsgiMetadataUtil {
      * Reads all SCR metadata XML documents located at OSGI-INF/ and caches them with quick access by implementation class.
      * @return Cache map
      */
-    private static Map<String,Document> initMetadataDocumentCache() {
-        Map<String,Document> cacheMap = new HashMap<>();
+    private static Map<String, Document> initMetadataDocumentCache() {
+        Map<String, Document> cacheMap = new HashMap<>();
 
         XPath xpath = XPATH_FACTORY.newXPath();
         xpath.setNamespaceContext(NAMESPACE_CONTEXT);
         XPathExpression xpathExpression;
         try {
             xpathExpression = xpath.compile("//*[implementation/@class]");
-        }
-        catch (XPathExpressionException ex) {
+        } catch (XPathExpressionException ex) {
             throw new RuntimeException("Compiling XPath expression failed.", ex);
         }
 
@@ -159,33 +159,38 @@ final class OsgiMetadataUtil {
         Set<String> paths = reflections.getResources(xmlFilesPattern);
 
         // filter out OSGi metatype files and parse all found XML documents
-        Pattern metatypeFilesPattern = Pattern.compile("^" + Pattern.quote(METADATA_METATYPE_PATH )+ ".*$");
+        Pattern metatypeFilesPattern = Pattern.compile("^" + Pattern.quote(METADATA_METATYPE_PATH) + ".*$");
         paths.stream()
-            .filter(path -> !metatypeFilesPattern.matcher(path).matches())
-            .forEach(path -> parseMetadataDocuments(cacheMap, path, xpathExpression));
+                .filter(path -> !metatypeFilesPattern.matcher(path).matches())
+                .forEach(path -> parseMetadataDocuments(cacheMap, path, xpathExpression));
 
         return cacheMap;
     }
 
-    private static void parseMetadataDocuments(Map<String,Document> cacheMap, String resourcePath, XPathExpression xpathExpression) {
+    private static void parseMetadataDocuments(
+            Map<String, Document> cacheMap, String resourcePath, XPathExpression xpathExpression) {
         try {
-            Enumeration<URL> resourceUrls = OsgiMetadataUtil.class.getClassLoader().getResources(resourcePath);
+            Enumeration<URL> resourceUrls =
+                    OsgiMetadataUtil.class.getClassLoader().getResources(resourcePath);
             while (resourceUrls.hasMoreElements()) {
                 URL resourceUrl = resourceUrls.nextElement();
                 try (InputStream fileStream = resourceUrl.openStream()) {
                     parseMetadataDocument(cacheMap, resourcePath, fileStream, xpathExpression);
                 }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.warn("Error reading SCR metadata XML document from " + resourcePath, ex);
         }
     }
 
-    private static void parseMetadataDocument(Map<String,Document> cacheMap, String resourcePath,
-            InputStream fileStream, XPathExpression xpathExpression) throws XPathExpressionException {
+    private static void parseMetadataDocument(
+            Map<String, Document> cacheMap,
+            String resourcePath,
+            InputStream fileStream,
+            XPathExpression xpathExpression)
+            throws XPathExpressionException {
         Document metadata = toXmlDocument(fileStream, resourcePath);
-        NodeList nodes = (NodeList)xpathExpression.evaluate(metadata, XPathConstants.NODESET);
+        NodeList nodes = (NodeList) xpathExpression.evaluate(metadata, XPathConstants.NODESET);
         if (nodes != null) {
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node node = nodes.item(i);
@@ -300,14 +305,11 @@ final class OsgiMetadataUtil {
                 String type = getAttributeValue(node, "type");
                 if (StringUtils.equals("Integer", type)) {
                     props.put(name, Integer.parseInt(value));
-                }
-                else if (StringUtils.equals("Long", type)) {
+                } else if (StringUtils.equals("Long", type)) {
                     props.put(name, Long.parseLong(value));
-                }
-                else if (StringUtils.equals("Boolean", type)) {
+                } else if (StringUtils.equals("Boolean", type)) {
                     props.put(name, Boolean.parseBoolean(value));
-                }
-                else {
+                } else {
                     props.put(name, value);
                 }
             }
@@ -319,7 +321,7 @@ final class OsgiMetadataUtil {
                 Node node = nodes.item(i);
                 String name = getAttributeValue(node, "name");
                 String[] value = StringUtils.split(StringUtils.trim(node.getTextContent()), "\n\r");
-                for (int j = 0; j<value.length; j++) {
+                for (int j = 0; j < value.length; j++) {
                     value[j] = StringUtils.trim(value[j]);
                 }
                 props.put(name, value);
@@ -426,7 +428,7 @@ final class OsgiMetadataUtil {
         public String getPID() {
             String pid = null;
             if (properties != null) {
-                pid = (String)properties.get(Constants.SERVICE_PID);
+                pid = (String) properties.get(Constants.SERVICE_PID);
             }
             return Objects.toString(pid, name);
         }
@@ -458,7 +460,6 @@ final class OsgiMetadataUtil {
         public String getModifiedMethodName() {
             return modifiedMethodName;
         }
-
     }
 
     static class Reference {
@@ -493,10 +494,10 @@ final class OsgiMetadataUtil {
                 try {
                     this.targetFilter = new FilterImpl(this.target);
                 } catch (InvalidSyntaxException ex) {
-                    throw new RuntimeException("Invalid target filter in reference '" + this.name + "' of class " + clazz.getName(), ex);
+                    throw new RuntimeException(
+                            "Invalid target filter in reference '" + this.name + "' of class " + clazz.getName(), ex);
                 }
-            }
-            else {
+            } else {
                 this.targetFilter = null;
             }
             String parameterString = getAttributeValue(node, "parameter");
@@ -632,7 +633,6 @@ final class OsgiMetadataUtil {
             }
             return FieldCollectionType.SERVICE;
         }
-
     }
 
     static class DynamicReference extends Reference {
@@ -643,10 +643,10 @@ final class OsgiMetadataUtil {
                 try {
                     this.targetFilter = new FilterImpl(this.target);
                 } catch (InvalidSyntaxException ex) {
-                    throw new RuntimeException("Invalid target filter in reference '" + this.name + "' of class " + clazz.getName(), ex);
+                    throw new RuntimeException(
+                            "Invalid target filter in reference '" + this.name + "' of class " + clazz.getName(), ex);
                 }
-            }
-            else {
+            } else {
                 this.targetFilter = null;
             }
         }
@@ -697,7 +697,6 @@ final class OsgiMetadataUtil {
         public String getCardinalityString() {
             return this.cardinalityString;
         }
-
     }
 
     /**
@@ -716,7 +715,6 @@ final class OsgiMetadataUtil {
          */
         DYNAMIC;
     }
-
 
     /**
      * Options for {@link Reference#policyOption()} property.
@@ -775,5 +773,4 @@ final class OsgiMetadataUtil {
          */
         TUPLE;
     }
-
 }

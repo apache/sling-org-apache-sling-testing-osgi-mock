@@ -47,30 +47,47 @@ public class Service3OsgiR6ComponentServiceObjectsImpl implements Service3OsgiR6
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
     private volatile ComponentServiceObjects<ServiceInterface1Optional> reference1Optional;
 
-    @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            cardinality = ReferenceCardinality.AT_LEAST_ONE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ComponentServiceObjects<ServiceInterface2>> references2 = new ArrayList<>();
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ComponentServiceObjects<ServiceSuperInterface3>> references3;
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE, target="(prop1=abc)",
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            target = "(prop1=abc)",
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile List<ComponentServiceObjects<ServiceSuperInterface3>> references3Filtered;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
+    @Reference(
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY,
             name = "reference3DynamicFiltered")
     private volatile ComponentServiceObjects<ServiceSuperInterface3> reference3DynamicFiltered;
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY,
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY,
             fieldOption = FieldOption.UPDATE)
     private volatile Set<ComponentServiceObjects<ServiceSuperInterface3>> references3Set;
 
-    @Reference(service = ServiceInterface3.class, cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            service = ServiceInterface3.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY)
     private volatile Collection<ComponentServiceObjects<ServiceSuperInterface3>> references3Collection;
 
     private ComponentContext componentContext;
@@ -88,14 +105,14 @@ public class Service3OsgiR6ComponentServiceObjectsImpl implements Service3OsgiR6
     }
 
     @Modified
-    private void modified(Map<String,Object> newConfig) {
+    private void modified(Map<String, Object> newConfig) {
         this.config = newConfig;
     }
 
     public ServiceInterface1 getReference1() {
         return Optional.ofNullable(this.reference1)
-            .map(ComponentServiceObjects::getService)
-            .orElse(null);
+                .map(ComponentServiceObjects::getService)
+                .orElse(null);
     }
 
     public ServiceInterface1Optional getReference1Optional() {
@@ -105,9 +122,7 @@ public class Service3OsgiR6ComponentServiceObjectsImpl implements Service3OsgiR6
     }
 
     public List<ServiceInterface2> getReferences2() {
-        return references2.stream()
-                .map(ComponentServiceObjects::getService)
-                .collect(Collectors.toList());
+        return references2.stream().map(ComponentServiceObjects::getService).collect(Collectors.toList());
     }
 
     public List<ServiceSuperInterface3> getReferences3() {
@@ -147,5 +162,4 @@ public class Service3OsgiR6ComponentServiceObjectsImpl implements Service3OsgiR6
     public Map<String, Object> getConfig() {
         return config;
     }
-
 }
