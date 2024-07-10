@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.ReferencePolicyOption
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -1029,13 +1031,13 @@ final class OsgiServiceUtil {
 
         public ServiceInfo(T serviceInstance, Map<String, Object> serviceConfig, ServiceReference<T> serviceReference) {
             this.serviceInstance = serviceInstance;
-            this.serviceConfig = serviceConfig;
+            this.serviceConfig = new ComparableMap(serviceConfig);
             this.serviceReference = serviceReference;
         }
 
         public ServiceInfo(MockServiceRegistration<T> registration) {
             this.serviceInstance = registration.getService();
-            this.serviceConfig = registration.getPropertiesAsMap();
+            this.serviceConfig = new ComparableMap(registration.getPropertiesAsMap());
             this.serviceReference = registration.getReference();
         }
 
@@ -1069,6 +1071,46 @@ final class OsgiServiceUtil {
                 return serviceInstance.equals(((ServiceInfo) obj).serviceInstance);
             }
             return false;
+        }
+    }
+
+    static class ComparableMap extends Hashtable<String, Object> implements Comparable<ComparableMap> {
+
+        private static final long serialVersionUID = 1L;
+
+        public ComparableMap(final Map<String, Object> map) {
+            super(map);
+        }
+
+        @Override
+        public int compareTo(final ComparableMap o) {
+            Long id = (Long) this.get(Constants.SERVICE_ID);
+            Long otherId = (Long) o.get(Constants.SERVICE_ID);
+
+            if (id.equals(otherId)) {
+                return 0; // same service
+            }
+
+            Object rankObj = get(Constants.SERVICE_RANKING);
+            Object otherRankObj = o.get(Constants.SERVICE_RANKING);
+
+            // If no rank, then spec says it defaults to zero.
+            rankObj = (rankObj == null) ? new Integer(0) : rankObj;
+            otherRankObj = (otherRankObj == null) ? new Integer(0) : otherRankObj;
+
+            // If rank is not Integer, then spec says it defaults to zero.
+            Integer rank = (rankObj instanceof Integer) ? (Integer) rankObj : new Integer(0);
+            Integer otherRank = (otherRankObj instanceof Integer) ? (Integer) otherRankObj : new Integer(0);
+
+            // Sort by rank in ascending order.
+            if (rank.compareTo(otherRank) < 0) {
+                return -1; // lower rank
+            } else if (rank.compareTo(otherRank) > 0) {
+                return 1; // higher rank
+            }
+
+            // If ranks are equal, then sort by service id in descending order.
+            return (id.compareTo(otherId) < 0) ? 1 : -1;
         }
     }
 
