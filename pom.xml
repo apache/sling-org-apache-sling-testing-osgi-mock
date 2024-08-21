@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
-        <version>3.5.0-SNAPSHOT</version>
+        <version>3.5.0</version>
         <relativePath>parent/pom.xml</relativePath>
     </parent>
 
@@ -44,7 +44,7 @@
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>org.apache.sling.testing.osgi-mock.reactor-3.5.0</tag>
         <url>https://github.com/apache/sling-org-apache-sling-testing-osgi-mock.git</url>
     </scm>
 
