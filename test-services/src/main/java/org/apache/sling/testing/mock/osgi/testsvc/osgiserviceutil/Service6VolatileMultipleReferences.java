@@ -36,4 +36,8 @@ public class Service6VolatileMultipleReferences {
         }
         return builder.toString();
     }
+
+    public List<RankedService> getRankedServices() {
+        return this.rankedServices;
+    }
 }
