@@ -194,7 +194,8 @@ class MockBundleContext implements BundleContext {
                         OsgiServiceUtil.invokeBindMethod(
                                 reference,
                                 referenceInfo.getServiceRegistration().getService(),
-                                new ServiceInfo(registration));
+                                new ServiceInfo(registration),
+                                this);
                         break;
                     default:
                         throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
@@ -289,7 +290,8 @@ class MockBundleContext implements BundleContext {
                         OsgiServiceUtil.invokeUnbindMethod(
                                 reference,
                                 referenceInfo.getServiceRegistration().getService(),
-                                new ServiceInfo(registration));
+                                new ServiceInfo(registration),
+                                this);
                         break;
                     default:
                         throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());

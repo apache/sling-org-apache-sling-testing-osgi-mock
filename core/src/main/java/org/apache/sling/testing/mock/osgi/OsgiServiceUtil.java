@@ -24,19 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -695,7 +683,7 @@ final class OsgiServiceUtil {
             }
 
             // make sure at least empty array or empty Optional is set
-            invokeBindUnbindMethod(reference, target, null, true);
+            invokeBindUnbindMethod(reference, target, null, true, bundleContext);
         }
 
         // multiple references found? inject only first one with highest ranking
@@ -712,12 +700,12 @@ final class OsgiServiceUtil {
 
         // try to invoke bind method
         for (ServiceInfo<?> matchingService : matchingServices) {
-            invokeBindUnbindMethod(reference, target, matchingService, true);
+            invokeBindUnbindMethod(reference, target, matchingService, true, bundleContext);
         }
     }
 
     private static void invokeBindUnbindMethod(
-            Reference reference, Object target, ServiceInfo<?> serviceInfo, boolean bind) {
+            Reference reference, Object target, ServiceInfo<?> serviceInfo, boolean bind, BundleContext bundleContext) {
         Class<?> targetClass = target.getClass();
 
         // try to invoke bind method
@@ -808,11 +796,9 @@ final class OsgiServiceUtil {
                         }
                         Field field = getCollectionField(targetClass, fieldName);
                         if (field != null) {
-                            if (bind) {
-                                addToCollection(target, field, item);
-                            } else {
-                                removeFromCollection(target, field, item);
-                            }
+                            // to make sure components are consistently sorted (according to Felix sorting)
+                            // we (re-)bind the entire collection field every time a reference is added or removed
+                            bindCollectionReference(reference, bundleContext, target, field);
                             return;
                         }
                         break;
@@ -859,37 +845,21 @@ final class OsgiServiceUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static void addToCollection(Object target, Field field, Object item) {
+    private static void bindCollectionReference(
+            Reference reference, BundleContext bundleContext, Object target, Field field) {
         try {
             field.setAccessible(true);
-            Collection<Object> collection = (Collection<Object>) field.get(target);
-            if (collection == null) {
-                collection = newCollectionInstance(field.getType());
-            }
-            if (item != null) {
-                collection.add(item);
-            }
-            field.set(target, collection);
+            List<ServiceInfo<?>> matchingServices =
+                    getMatchingServices(reference.getInterfaceTypeAsClass(), bundleContext, reference.getTarget());
+            matchingServices.sort(Comparator.comparing(ServiceInfo::getServiceReference));
 
-        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
-            throw new RuntimeException(
-                    "Unable to set field '" + field.getName() + "' for class "
-                            + target.getClass().getName(),
-                    ex);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void removeFromCollection(Object target, Field field, Object item) {
-        try {
-            field.setAccessible(true);
-            Collection<Object> collection = (Collection<Object>) field.get(target);
-            if (collection == null) {
-                collection = newCollectionInstance(field.getType());
-            }
-            if (item != null) {
-                collection.remove(item);
+            Collection<Object> collection = newCollectionInstance(field.getType());
+            if (FieldCollectionType.REFERENCE.equals(reference.getFieldCollectionType())) {
+                matchingServices.stream().map(ServiceInfo::getServiceReference).forEach(collection::add);
+            } else if (FieldCollectionType.SERVICE.equals(reference.getFieldCollectionType())) {
+                matchingServices.stream().map(ServiceInfo::getService).forEach(collection::add);
+            } else {
+                collection.addAll(matchingServices);
             }
             field.set(target, collection);
 
@@ -923,8 +893,9 @@ final class OsgiServiceUtil {
      * @param serviceInfo Service on which to invoke the method
      * @param bundleContext Bundle context
      */
-    public static void invokeBindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo) {
-        invokeBindUnbindMethod(reference, target, serviceInfo, true);
+    public static void invokeBindMethod(
+            Reference reference, Object target, ServiceInfo<?> serviceInfo, BundleContext bundleContext) {
+        invokeBindUnbindMethod(reference, target, serviceInfo, true, bundleContext);
     }
 
     /**
@@ -934,8 +905,9 @@ final class OsgiServiceUtil {
      * @param serviceInfo Service on which to invoke the method
      * @param bundleContext Bundle context
      */
-    public static void invokeUnbindMethod(Reference reference, Object target, ServiceInfo<?> serviceInfo) {
-        invokeBindUnbindMethod(reference, target, serviceInfo, false);
+    public static void invokeUnbindMethod(
+            Reference reference, Object target, ServiceInfo<?> serviceInfo, BundleContext bundleContext) {
+        invokeBindUnbindMethod(reference, target, serviceInfo, false, bundleContext);
     }
 
     @SuppressWarnings("unchecked")
