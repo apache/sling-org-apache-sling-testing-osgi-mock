@@ -845,15 +845,22 @@ final class OsgiServiceUtil {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static void bindCollectionReference(
             Reference reference, BundleContext bundleContext, Object target, Field field) {
         try {
             field.setAccessible(true);
+            Collection<Object> collection = (Collection<Object>) field.get(target);
+            if (collection == null) {
+                collection = newCollectionInstance(field.getType());
+            } else {
+                collection.clear();
+            }
+
             List<ServiceInfo<?>> matchingServices =
                     getMatchingServices(reference.getInterfaceTypeAsClass(), bundleContext, reference.getTarget());
             matchingServices.sort(Comparator.comparing(ServiceInfo::getServiceReference));
 
-            Collection<Object> collection = newCollectionInstance(field.getType());
             if (FieldCollectionType.REFERENCE.equals(reference.getFieldCollectionType())) {
                 matchingServices.stream().map(ServiceInfo::getServiceReference).forEach(collection::add);
             } else if (FieldCollectionType.SERVICE.equals(reference.getFieldCollectionType())) {
