@@ -431,12 +431,7 @@ final class OsgiServiceUtil {
         try {
             field.setAccessible(true);
             field.set(target, value);
-        } catch (IllegalAccessException ex) {
-            throw new RuntimeException(
-                    "Unable to set field '" + field.getName() + "' for class "
-                            + target.getClass().getName(),
-                    ex);
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalAccessException | IllegalArgumentException ex) {
             throw new RuntimeException(
                     "Unable to set field '" + field.getName() + "' for class "
                             + target.getClass().getName(),
@@ -785,21 +780,11 @@ final class OsgiServiceUtil {
                     case SERVICE:
                     case REFERENCE:
                     case SERVICEOBJECTS:
-                        Object item = null;
-                        if (serviceInfo != null) {
-                            item = serviceInfo.getService();
-                            if (reference.getFieldCollectionType() == FieldCollectionType.REFERENCE) {
-                                item = serviceInfo.getServiceReference();
-                            } else if (reference.getFieldCollectionType() == FieldCollectionType.SERVICEOBJECTS) {
-                                item = serviceInfo;
-                            }
-                        }
                         Field field = getCollectionField(targetClass, fieldName);
                         if (field != null) {
                             // to make sure components are consistently sorted (according to Felix sorting)
                             // we (re-)bind the entire collection field every time a reference is added or removed
                             bindCollectionReference(reference, bundleContext, target, field);
-                            return;
                         }
                         break;
                     default:
@@ -839,7 +824,6 @@ final class OsgiServiceUtil {
                 field = getField(targetClass, fieldName, Optional.class);
                 if (field != null) {
                     setField(target, field, servicePresent ? Optional.of(serviceInfo.getService()) : Optional.empty());
-                    return;
                 }
             }
         }
@@ -1074,12 +1058,12 @@ final class OsgiServiceUtil {
             Object otherRankObj = o.get(Constants.SERVICE_RANKING);
 
             // If no rank, then spec says it defaults to zero.
-            rankObj = (rankObj == null) ? new Integer(0) : rankObj;
-            otherRankObj = (otherRankObj == null) ? new Integer(0) : otherRankObj;
+            rankObj = (rankObj == null) ? Integer.valueOf(0) : rankObj;
+            otherRankObj = (otherRankObj == null) ? Integer.valueOf(0) : otherRankObj;
 
             // If rank is not Integer, then spec says it defaults to zero.
-            Integer rank = (rankObj instanceof Integer) ? (Integer) rankObj : new Integer(0);
-            Integer otherRank = (otherRankObj instanceof Integer) ? (Integer) otherRankObj : new Integer(0);
+            Integer rank = (rankObj instanceof Integer) ? (Integer) rankObj : Integer.valueOf(0);
+            Integer otherRank = (otherRankObj instanceof Integer) ? (Integer) otherRankObj : Integer.valueOf(0);
 
             // Sort by rank in ascending order.
             if (rank.compareTo(otherRank) < 0) {

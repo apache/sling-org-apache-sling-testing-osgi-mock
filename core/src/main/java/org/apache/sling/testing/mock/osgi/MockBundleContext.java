@@ -116,7 +116,6 @@ class MockBundleContext implements BundleContext {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceRegistration registerService(final String clazz, final Object service, final Dictionary properties) {
         String[] clazzes;
@@ -165,9 +164,7 @@ class MockBundleContext implements BundleContext {
      * Check for already registered services that may be affected by the service registration - either
      * adding by additional optional references, or creating a conflict in the dependencies.
      * @param registration Service registration
-     * @param bundleContext Bundle context
      */
-    @SuppressWarnings("unchecked")
     private void handleRefsUpdateOnRegister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
@@ -194,11 +191,11 @@ class MockBundleContext implements BundleContext {
                         OsgiServiceUtil.invokeBindMethod(
                                 reference,
                                 referenceInfo.getServiceRegistration().getService(),
-                                new ServiceInfo(registration),
+                                new ServiceInfo<>(registration),
                                 this);
                         break;
                     default:
-                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                        throw new RuntimeException("Unexpected cardinality: " + reference.getCardinality());
                 }
             }
         }
@@ -220,7 +217,7 @@ class MockBundleContext implements BundleContext {
                         servicesToRestart.add(referenceInfo.getServiceRegistration());
                         break;
                     default:
-                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                        throw new RuntimeException("Unexpected cardinality: " + reference.getCardinality());
                 }
             }
         }
@@ -269,9 +266,7 @@ class MockBundleContext implements BundleContext {
      * Check for already registered services that may be affected by the service unregistration - either
      * adding by removing optional references, or creating a conflict in the dependencies.
      * @param registration Service registration
-     * @param bundleContext Bundle context
      */
-    @SuppressWarnings("unchecked")
     private void handleRefsUpdateOnUnregister(MockServiceRegistration<?> registration) {
 
         // handle DYNAMIC references to this registration
@@ -290,11 +285,11 @@ class MockBundleContext implements BundleContext {
                         OsgiServiceUtil.invokeUnbindMethod(
                                 reference,
                                 referenceInfo.getServiceRegistration().getService(),
-                                new ServiceInfo(registration),
+                                new ServiceInfo<>(registration),
                                 this);
                         break;
                     default:
-                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                        throw new RuntimeException("Unexpected cardinality: " + reference.getCardinality());
                 }
             }
         }
@@ -314,14 +309,13 @@ class MockBundleContext implements BundleContext {
                         servicesToRestart.add(referenceInfo.getServiceRegistration());
                         break;
                     default:
-                        throw new RuntimeException("Unepxected cardinality: " + reference.getCardinality());
+                        throw new RuntimeException("Unexpected cardinality: " + reference.getCardinality());
                 }
             }
         }
         servicesToRestart.forEach(this::restartService);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceReference getServiceReference(final String clazz) {
         try {
@@ -341,7 +335,6 @@ class MockBundleContext implements BundleContext {
         return getServiceReference(clazz.getName());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceReference[] getServiceReferences(final String clazz, final String filter)
             throws InvalidSyntaxException {
@@ -375,7 +368,6 @@ class MockBundleContext implements BundleContext {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ServiceReference[] getAllServiceReferences(final String clazz, final String filter)
             throws InvalidSyntaxException {
