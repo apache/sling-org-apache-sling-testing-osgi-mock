@@ -124,8 +124,8 @@ public class MockServiceReferencesSortTest {
         // random order of instantiation and registration
         RankedService serviceRanking0 = Mockito.mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRanking0, createServiceRankingDictionary(0));
-        RankedService serviceRanking_5 = Mockito.mock(RankedService.class);
-        bundleContext.registerService(RankedService.class, serviceRanking_5, createServiceRankingDictionary(-5));
+        RankedService serviceRankingMin5 = Mockito.mock(RankedService.class);
+        bundleContext.registerService(RankedService.class, serviceRankingMin5, createServiceRankingDictionary(-5));
         RankedService serviceRanking5 = Mockito.mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRanking5, createServiceRankingDictionary(5));
 
@@ -134,20 +134,20 @@ public class MockServiceReferencesSortTest {
         List<RankedService> referencedServices = service.getRankedServices();
         assertNotNull(referencedServices);
         assertEquals(3, referencedServices.size());
-        assertEquals(serviceRanking_5, referencedServices.get(0));
+        assertEquals(serviceRankingMin5, referencedServices.get(0));
         assertEquals(serviceRanking0, referencedServices.get(1));
         assertEquals(serviceRanking5, referencedServices.get(2));
 
         // register some more services
-        RankedService serviceRanking_999 = Mockito.mock(RankedService.class);
-        bundleContext.registerService(RankedService.class, serviceRanking_999, createServiceRankingDictionary(-999));
+        RankedService serviceRankingMin999 = Mockito.mock(RankedService.class);
+        bundleContext.registerService(RankedService.class, serviceRankingMin999, createServiceRankingDictionary(-999));
         RankedService serviceRanking1 = Mockito.mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRanking1, createServiceRankingDictionary(1));
 
         // check that the collection has been updated and sorted correctly
         assertEquals(5, referencedServices.size());
-        assertEquals(serviceRanking_999, referencedServices.get(0));
-        assertEquals(serviceRanking_5, referencedServices.get(1));
+        assertEquals(serviceRankingMin999, referencedServices.get(0));
+        assertEquals(serviceRankingMin5, referencedServices.get(1));
         assertEquals(serviceRanking0, referencedServices.get(2));
         assertEquals(serviceRanking1, referencedServices.get(3));
         assertEquals(serviceRanking5, referencedServices.get(4));
