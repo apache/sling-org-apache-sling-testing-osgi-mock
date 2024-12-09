@@ -76,11 +76,6 @@ final class OsgiMetadataUtil {
 
     static {
         DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
-        try {
-            DOCUMENT_BUILDER_FACTORY.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        } catch (ParserConfigurationException ex) {
-            throw new IllegalStateException("Error setting FEATURE_SECURE_PROCESSING.", ex);
-        }
         DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
     }
 
@@ -225,7 +220,9 @@ final class OsgiMetadataUtil {
 
     private static Document toXmlDocument(InputStream inputStream, String path) {
         try {
-            DocumentBuilder documentBuilder = DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             return documentBuilder.parse(inputStream);
         } catch (ParserConfigurationException ex) {
             throw new RuntimeException("Unable to read classpath resource: " + path, ex);
