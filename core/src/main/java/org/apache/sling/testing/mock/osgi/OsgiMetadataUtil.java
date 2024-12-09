@@ -72,15 +72,6 @@ final class OsgiMetadataUtil {
     private static final String METADATA_PATH = "OSGI-INF";
     private static final String METADATA_METATYPE_PATH = "OSGI-INF/metatype/";
 
-    private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY;
-
-    static {
-        DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
-        DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
-    }
-
-    private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
-
     private static final BidiMap<String, String> NAMESPACES = new TreeBidiMap<>();
 
     static {
@@ -145,7 +136,7 @@ final class OsgiMetadataUtil {
     private static Map<String, Document> initMetadataDocumentCache() {
         Map<String, Document> cacheMap = new HashMap<>();
 
-        XPath xpath = XPATH_FACTORY.newXPath();
+        XPath xpath = XPathFactory.newInstance().newXPath();
         xpath.setNamespaceContext(NAMESPACE_CONTEXT);
         XPathExpression xpathExpression;
         try {
@@ -356,7 +347,7 @@ final class OsgiMetadataUtil {
 
     private static NodeList queryNodes(Document metadata, String xpathQuery) {
         try {
-            XPath xpath = XPATH_FACTORY.newXPath();
+            XPath xpath = XPathFactory.newInstance().newXPath();
             xpath.setNamespaceContext(NAMESPACE_CONTEXT);
             return (NodeList) xpath.evaluate(xpathQuery, metadata, XPathConstants.NODESET);
         } catch (XPathExpressionException ex) {
@@ -366,7 +357,7 @@ final class OsgiMetadataUtil {
 
     private static Node queryNode(Document metadata, String xpathQuery) {
         try {
-            XPath xpath = XPATH_FACTORY.newXPath();
+            XPath xpath = XPathFactory.newInstance().newXPath();
             xpath.setNamespaceContext(NAMESPACE_CONTEXT);
             return (Node) xpath.evaluate(xpathQuery, metadata, XPathConstants.NODE);
         } catch (XPathExpressionException ex) {
