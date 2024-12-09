@@ -18,6 +18,7 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
+import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -220,6 +221,7 @@ final class OsgiMetadataUtil {
     private static Document toXmlDocument(InputStream inputStream, String path) {
         try {
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             return documentBuilder.parse(inputStream);
         } catch (ParserConfigurationException ex) {
