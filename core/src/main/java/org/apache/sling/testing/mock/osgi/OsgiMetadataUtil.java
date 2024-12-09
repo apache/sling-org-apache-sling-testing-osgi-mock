@@ -211,9 +211,10 @@ final class OsgiMetadataUtil {
 
     private static Document toXmlDocument(InputStream inputStream, String path) {
         try {
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setExpandEntityReferences(false);
+            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
             return documentBuilder.parse(inputStream);
         } catch (ParserConfigurationException ex) {
             throw new RuntimeException("Unable to read classpath resource: " + path, ex);
