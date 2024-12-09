@@ -72,20 +72,6 @@ final class OsgiMetadataUtil {
     private static final String METADATA_PATH = "OSGI-INF";
     private static final String METADATA_METATYPE_PATH = "OSGI-INF/metatype/";
 
-    private static final DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY;
-
-    static {
-        DOCUMENT_BUILDER_FACTORY = DocumentBuilderFactory.newInstance();
-        try {
-            DOCUMENT_BUILDER_FACTORY.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        } catch (ParserConfigurationException ex) {
-            throw new IllegalStateException("Error setting FEATURE_SECURE_PROCESSING.", ex);
-        }
-        DOCUMENT_BUILDER_FACTORY.setNamespaceAware(true);
-    }
-
-    private static final XPathFactory XPATH_FACTORY = XPathFactory.newInstance();
-
     private static final BidiMap<String, String> NAMESPACES = new TreeBidiMap<>();
 
     static {
@@ -150,7 +136,7 @@ final class OsgiMetadataUtil {
     private static Map<String, Document> initMetadataDocumentCache() {
         Map<String, Document> cacheMap = new HashMap<>();
 
-        XPath xpath = XPATH_FACTORY.newXPath();
+        XPath xpath = XPathFactory.newInstance().newXPath();
         xpath.setNamespaceContext(NAMESPACE_CONTEXT);
         XPathExpression xpathExpression;
         try {
@@ -225,7 +211,10 @@ final class OsgiMetadataUtil {
 
     private static Document toXmlDocument(InputStream inputStream, String path) {
         try {
-            DocumentBuilder documentBuilder = DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setExpandEntityReferences(false);
+            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
             return documentBuilder.parse(inputStream);
         } catch (ParserConfigurationException ex) {
             throw new RuntimeException("Unable to read classpath resource: " + path, ex);
@@ -359,7 +348,7 @@ final class OsgiMetadataUtil {
 
     private static NodeList queryNodes(Document metadata, String xpathQuery) {
         try {
-            XPath xpath = XPATH_FACTORY.newXPath();
+            XPath xpath = XPathFactory.newInstance().newXPath();
             xpath.setNamespaceContext(NAMESPACE_CONTEXT);
             return (NodeList) xpath.evaluate(xpathQuery, metadata, XPathConstants.NODESET);
         } catch (XPathExpressionException ex) {
@@ -369,7 +358,7 @@ final class OsgiMetadataUtil {
 
     private static Node queryNode(Document metadata, String xpathQuery) {
         try {
-            XPath xpath = XPATH_FACTORY.newXPath();
+            XPath xpath = XPathFactory.newInstance().newXPath();
             xpath.setNamespaceContext(NAMESPACE_CONTEXT);
             return (Node) xpath.evaluate(xpathQuery, metadata, XPathConstants.NODE);
         } catch (XPathExpressionException ex) {
