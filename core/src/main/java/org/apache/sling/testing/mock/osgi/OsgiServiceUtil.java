@@ -24,7 +24,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -845,9 +857,9 @@ final class OsgiServiceUtil {
                     getMatchingServices(reference.getInterfaceTypeAsClass(), bundleContext, reference.getTarget());
             matchingServices.sort(Comparator.comparing(ServiceInfo::getServiceReference));
 
-            if (FieldCollectionType.REFERENCE.equals(reference.getFieldCollectionType())) {
+            if (reference.getFieldCollectionType() == FieldCollectionType.REFERENCE) {
                 matchingServices.stream().map(ServiceInfo::getServiceReference).forEach(collection::add);
-            } else if (FieldCollectionType.SERVICE.equals(reference.getFieldCollectionType())) {
+            } else if (reference.getFieldCollectionType() == FieldCollectionType.SERVICE) {
                 matchingServices.stream().map(ServiceInfo::getService).forEach(collection::add);
             } else {
                 collection.addAll(matchingServices);
