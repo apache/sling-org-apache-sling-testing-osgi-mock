@@ -18,13 +18,19 @@
  */
 package org.apache.sling.testing.mock.osgi;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.*;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.RankedService;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.RankedServiceFive;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.RankedServiceTen;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service6VolatileMultipleReferences;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -34,6 +40,7 @@ import org.osgi.framework.ServiceRegistration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test the service-ranking based sorting of mock service references
@@ -122,11 +129,11 @@ public class MockServiceReferencesSortTest {
     @Test
     public void testConsistentRankedServicesSorting() {
         // random order of instantiation and registration
-        RankedService serviceRanking0 = Mockito.mock(RankedService.class);
+        RankedService serviceRanking0 = mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRanking0, createServiceRankingDictionary(0));
-        RankedService serviceRankingMin5 = Mockito.mock(RankedService.class);
+        RankedService serviceRankingMin5 = mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRankingMin5, createServiceRankingDictionary(-5));
-        RankedService serviceRanking5 = Mockito.mock(RankedService.class);
+        RankedService serviceRanking5 = mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRanking5, createServiceRankingDictionary(5));
 
         Service6VolatileMultipleReferences service =
@@ -139,9 +146,9 @@ public class MockServiceReferencesSortTest {
         assertEquals(serviceRanking5, referencedServices.get(2));
 
         // register some more services
-        RankedService serviceRankingMin999 = Mockito.mock(RankedService.class);
+        RankedService serviceRankingMin999 = mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRankingMin999, createServiceRankingDictionary(-999));
-        RankedService serviceRanking1 = Mockito.mock(RankedService.class);
+        RankedService serviceRanking1 = mock(RankedService.class);
         bundleContext.registerService(RankedService.class, serviceRanking1, createServiceRankingDictionary(1));
 
         // check that the collection has been updated and sorted correctly
