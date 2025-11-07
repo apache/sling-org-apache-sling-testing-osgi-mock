@@ -196,6 +196,37 @@ public class MockConfigurationAdminTest {
         assertTrue(configurationNew.updateIfDifferent(propertiesNew));
     }
 
+    @Test
+    public void testGetFactoryConfigurationViaConfigAdmin_NonExisting() throws IOException {
+        Configuration config = underTest.getFactoryConfiguration("my.factory1", "name1");
+        assertNotNull(config);
+        assertEquals("my.factory1~name1", config.getPid());
+        assertEquals("my.factory1", config.getFactoryPid());
+
+        config = underTest.getFactoryConfiguration("my.factory2", "name2", "location1");
+        assertNotNull(config);
+        assertEquals("my.factory2~name2", config.getPid());
+        assertEquals("my.factory2", config.getFactoryPid());
+    }
+
+    @Test
+    public void testGetFactoryConfigurationViaConfigAdmin_Existing() throws IOException {
+        MockOsgi.setFactoryConfigForPid(context.bundleContext(), "my.factory3", "name3", "prop1", 1);
+
+        Configuration config = underTest.getFactoryConfiguration("my.factory3", "name3");
+        assertNotNull(config);
+        assertEquals("my.factory3~name3", config.getPid());
+        assertEquals("my.factory3", config.getFactoryPid());
+        assertEquals(1, config.getProperties().get("prop1"));
+
+        MockOsgi.setFactoryConfigForPid(context.bundleContext(), "my.factory4", "name4", Map.of("prop1", 2));
+        config = underTest.getFactoryConfiguration("my.factory4", "name4", "location1");
+        assertNotNull(config);
+        assertEquals("my.factory4~name4", config.getPid());
+        assertEquals("my.factory4", config.getFactoryPid());
+        assertEquals(2, config.getProperties().get("prop1"));
+    }
+
     static class ServiceWithConfigurationPID {}
 
     static class ServiceWithMultipleConfigurationPID {}

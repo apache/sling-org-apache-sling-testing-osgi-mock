@@ -36,6 +36,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 class MockConfiguration implements Configuration {
 
     private final String pid;
+    private final String factoryPid;
     private Dictionary<String, Object> props;
 
     /**
@@ -43,11 +44,26 @@ class MockConfiguration implements Configuration {
      */
     public MockConfiguration(String pid) {
         this.pid = pid;
+        this.factoryPid = null;
+    }
+
+    /**
+     * @param pid PID
+     * @param factoryPid factory PID
+     */
+    public MockConfiguration(String pid, String factoryPid) {
+        this.pid = pid;
+        this.factoryPid = factoryPid;
     }
 
     @Override
     public String getPid() {
         return pid;
+    }
+
+    @Override
+    public String getFactoryPid() {
+        return factoryPid;
     }
 
     @Override
@@ -108,11 +124,6 @@ class MockConfiguration implements Configuration {
 
     @Override
     public String getBundleLocation() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getFactoryPid() {
         throw new UnsupportedOperationException();
     }
 
