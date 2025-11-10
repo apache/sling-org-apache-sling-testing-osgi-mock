@@ -198,6 +198,17 @@ public class MockConfigurationAdminTest {
     }
 
     @Test
+    public void testNoArgUpdateAfterGetFactoryConfiguration() throws IOException {
+        Configuration configurationNew = underTest.getFactoryConfiguration("my.factory1", "name1");
+        assertNull(configurationNew.getProperties());
+        configurationNew.update();
+
+        Configuration configurationExisting = underTest.getFactoryConfiguration("my.factory1", "name1");
+        assertNotNull(configurationExisting.getProperties().get(Constants.SERVICE_PID));
+        assertNotNull(configurationExisting.getProperties().get(ConfigurationAdmin.SERVICE_FACTORYPID));
+    }
+
+    @Test
     public void testGetUpdateDeleteGetFactoryConfiguration() throws IOException {
         Configuration configurationNew = underTest.getFactoryConfiguration("my.factory1", "name1");
         assertNull(configurationNew.getProperties());

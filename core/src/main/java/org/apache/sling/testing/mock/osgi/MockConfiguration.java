@@ -113,8 +113,7 @@ class MockConfiguration implements Configuration {
     }
 
     private static Dictionary<String, Object> newConfig(String pid, String factoryPid) {
-        Dictionary<String, Object> config = new Hashtable<>();
-        config.put(Constants.SERVICE_PID, pid);
+        Dictionary<String, Object> config = MapUtil.toDictionary(Constants.SERVICE_PID, pid);
         if (factoryPid != null) {
             config.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
         }
