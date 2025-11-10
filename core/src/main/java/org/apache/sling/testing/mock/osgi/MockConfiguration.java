@@ -80,13 +80,16 @@ class MockConfiguration implements Configuration {
         // the updating of services already registered in mock-osgi is currently not supported.
         // still allow calling this method to allow usage of {@link update(Dictionary)}, but it works
         // only if applied before registering a service in mock-osgi.
-        props = newConfig(pid);
+        props = newConfig(pid, factoryPid);
     }
 
     @Override
     public void update(Dictionary<String, ?> properties) {
         this.props = new Hashtable<>(MapUtil.toMap(properties));
         this.props.put(Constants.SERVICE_PID, pid);
+        if (factoryPid != null) {
+            this.props.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -109,9 +112,12 @@ class MockConfiguration implements Configuration {
         return props.toString();
     }
 
-    private static Dictionary<String, Object> newConfig(String pid) {
-        Dictionary<String, Object> config = new Hashtable<String, Object>();
+    private static Dictionary<String, Object> newConfig(String pid, String factoryPid) {
+        Dictionary<String, Object> config = new Hashtable<>();
         config.put(Constants.SERVICE_PID, pid);
+        if (factoryPid != null) {
+            config.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
+        }
         return config;
     }
 

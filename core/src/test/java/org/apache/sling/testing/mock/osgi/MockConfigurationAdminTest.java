@@ -169,6 +169,7 @@ public class MockConfigurationAdminTest {
         Configuration configurationExisting = underTest.getConfiguration("new-pid");
         assertEquals("value", configurationNew.getProperties().get("key"));
         assertNotNull(configurationExisting.getProperties().get(Constants.SERVICE_PID));
+        assertNull(configurationExisting.getProperties().get(ConfigurationAdmin.SERVICE_FACTORYPID));
         configurationExisting.delete();
 
         Configuration configurationDeleted = underTest.getConfiguration("new-pid");
@@ -194,6 +195,24 @@ public class MockConfigurationAdminTest {
         assertTrue(configurationNew.updateIfDifferent(propertiesNew));
         propertiesNew.put("keyCollection", Arrays.asList("X", "Y", "Z"));
         assertTrue(configurationNew.updateIfDifferent(propertiesNew));
+    }
+
+    @Test
+    public void testGetUpdateDeleteGetFactoryConfiguration() throws IOException {
+        Configuration configurationNew = underTest.getFactoryConfiguration("my.factory1", "name1");
+        assertNull(configurationNew.getProperties());
+        Dictionary<String, Object> properties = new Hashtable<>();
+        properties.put("key", "value");
+        configurationNew.update(properties);
+
+        Configuration configurationExisting = underTest.getFactoryConfiguration("my.factory1", "name1");
+        assertEquals("value", configurationNew.getProperties().get("key"));
+        assertNotNull(configurationExisting.getProperties().get(Constants.SERVICE_PID));
+        assertNotNull(configurationExisting.getProperties().get(ConfigurationAdmin.SERVICE_FACTORYPID));
+        configurationExisting.delete();
+
+        Configuration configurationDeleted = underTest.getFactoryConfiguration("my.factory1", "name1");
+        assertNull(configurationDeleted.getProperties());
     }
 
     @Test
