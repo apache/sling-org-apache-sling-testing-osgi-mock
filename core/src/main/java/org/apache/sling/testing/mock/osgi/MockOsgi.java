@@ -515,6 +515,55 @@ public final class MockOsgi {
     }
 
     /**
+     * Set factory configuration via ConfigurationAdmin service in bundle context for component with given pid.
+     * @param bundleContext Bundle context
+     * @param factoryPid factory PID
+     * @param name the name for Configuration
+     * @param properties Configuration properties
+     */
+    public static void setFactoryConfigForPid(
+            @NotNull BundleContext bundleContext,
+            @NotNull String factoryPid,
+            @NotNull String name,
+            @Nullable Map<String, Object> properties) {
+        setFactoryConfigForPid(bundleContext, factoryPid, name, toDictionary(properties));
+    }
+
+    /**
+     * Set factory configuration via ConfigurationAdmin service in bundle context for component with given pid.
+     * @param bundleContext Bundle context
+     * @param factoryPid factory PID
+     * @param name the name for Configuration
+     * @param properties Configuration properties
+     */
+    public static void setFactoryConfigForPid(
+            @NotNull BundleContext bundleContext,
+            @NotNull String factoryPid,
+            @NotNull String name,
+            @NotNull Object @NotNull ... properties) {
+        setFactoryConfigForPid(bundleContext, factoryPid, name, toDictionary(properties));
+    }
+
+    private static void setFactoryConfigForPid(
+            @NotNull BundleContext bundleContext,
+            @NotNull String factoryPid,
+            @NotNull String name,
+            @Nullable Dictionary<String, Object> properties) {
+        ConfigurationAdmin configAdmin = getConfigAdmin(bundleContext);
+        if (configAdmin == null) {
+            throw new RuntimeException("ConfigurationAdmin service is not registered in bundle context.");
+        }
+        try {
+            Configuration config = configAdmin.getFactoryConfiguration(factoryPid, name);
+            config.update(properties);
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                    "Unable to update factory configuration for factoryPid '" + factoryPid + " and name " + name + "'.",
+                    ex);
+        }
+    }
+
+    /**
      * Deactivates all bundles registered in the mocked bundle context.
      * @param bundleContext Bundle context
      */

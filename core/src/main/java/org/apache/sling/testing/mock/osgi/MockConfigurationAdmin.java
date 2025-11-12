@@ -64,6 +64,19 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
         return null;
     }
 
+    @Override
+    public Configuration getFactoryConfiguration(final String factoryPid, final String name, final String location)
+            throws IOException {
+        return getFactoryConfiguration(factoryPid, name);
+    }
+
+    @Override
+    public Configuration getFactoryConfiguration(final String factoryPid, final String name) throws IOException {
+        String pid = String.format("%s~%s", factoryPid, name);
+        configs.putIfAbsent(pid, new MockConfiguration(pid, factoryPid));
+        return configs.get(pid);
+    }
+
     // --- unsupported operations ---
 
     @Override
@@ -73,17 +86,6 @@ class MockConfigurationAdmin implements ConfigurationAdmin {
 
     @Override
     public Configuration createFactoryConfiguration(final String factoryPid, final String location) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Configuration getFactoryConfiguration(final String factoryPid, final String name, final String location)
-            throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Configuration getFactoryConfiguration(final String factoryPid, final String name) throws IOException {
         throw new UnsupportedOperationException();
     }
 }
