@@ -28,7 +28,7 @@
     </parent>
 
     <artifactId>org.apache.sling.testing.osgi-mock.parent</artifactId>
-    <version>3.5.3-SNAPSHOT</version>
+    <version>3.5.4</version>
     <packaging>pom</packaging>
 
     <name>Apache Sling Testing OSGi Mock Parent</name>
@@ -37,12 +37,12 @@
     <scm>
         <connection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</connection>
         <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/sling-org-apache-sling-testing-osgi-mock.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>org.apache.sling.testing.osgi-mock.reactor-3.5.4</tag>
         <url>https://gitbox.apache.org/repos/asf?p=sling-org-apache-sling-testing-osgi-mock.git</url>
     </scm>
 
     <properties>
-        <project.build.outputTimestamp>2024-12-09T17:08:53Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2025-11-13T01:14:31Z</project.build.outputTimestamp>
         <sling.java.version>11</sling.java.version>
     </properties>
 
