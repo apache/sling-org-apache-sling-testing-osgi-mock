@@ -59,6 +59,9 @@ public class Service3 implements ServiceInterface2 {
             unbind = "unbindReference1Optional")
     private volatile ServiceInterface1Optional reference1Optional;
 
+    private boolean bindReference1OptionalCalled = false;
+    private boolean unbindReference1OptionalCalled = false;
+
     private List<ServiceReference<ServiceInterface2>> references2 = new ArrayList<>();
 
     @Reference(
@@ -70,6 +73,9 @@ public class Service3 implements ServiceInterface2 {
             bind = "bindReference3",
             unbind = "unbindReference3")
     private volatile List<ServiceSuperInterface3> references3 = new ArrayList<>();
+
+    private boolean bindReference3Called = false;
+    private boolean unbindReference3Called = false;
 
     private List<Map<String, Object>> reference3Configs = new ArrayList<>();
 
@@ -138,11 +144,19 @@ public class Service3 implements ServiceInterface2 {
     }
 
     void bindReference1Optional(ServiceInterface1Optional service) {
-        reference1Optional = service;
+        bindReference1OptionalCalled = true;
     }
 
     void unbindReference1Optional(ServiceInterface1Optional service) {
-        reference1Optional = null;
+        unbindReference1OptionalCalled = true;
+    }
+
+    public boolean isBindReference1OptionalCalled() {
+        return bindReference1OptionalCalled;
+    }
+
+    public boolean isUnbindReference1OptionalCalled() {
+        return unbindReference1OptionalCalled;
     }
 
     void bindReference1(ServiceInterface1 service) {
@@ -162,13 +176,21 @@ public class Service3 implements ServiceInterface2 {
     }
 
     void bindReference3(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3.add(service);
+        bindReference3Called = true;
         reference3Configs.add(serviceConfig);
     }
 
     void unbindReference3(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
-        references3.remove(service);
+        unbindReference3Called = true;
         reference3Configs.remove(serviceConfig);
+    }
+
+    public boolean isBindReference3Called() {
+        return bindReference3Called;
+    }
+
+    public boolean isUnbindReference3Called() {
+        return unbindReference3Called;
     }
 
     void bindReference3Set(ServiceSuperInterface3 service, Map<String, Object> serviceConfig) {
