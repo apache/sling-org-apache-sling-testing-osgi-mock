@@ -19,6 +19,7 @@
 package org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
 
-@Component(service = ServiceFactory1.class, servicefactory = true)
+@Component(service = ServiceFactory1.class, scope = ServiceScope.PROTOTYPE)
 public class ServiceFactory1 {}

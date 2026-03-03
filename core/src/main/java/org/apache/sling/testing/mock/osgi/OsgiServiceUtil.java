@@ -41,6 +41,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.felix.scr.impl.inject.internal.Annotations;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.FieldCollectionType;
@@ -290,7 +291,7 @@ final class OsgiServiceUtil {
     private static Method getMethod(Class clazz, String methodName, Class<?>[] types) {
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (StringUtils.equals(method.getName(), methodName) && method.getParameterTypes().length == types.length) {
+            if (Strings.CS.equals(method.getName(), methodName) && method.getParameterTypes().length == types.length) {
                 boolean foundMismatch = false;
                 for (int i = 0; i < types.length; i++) {
                     if (!((method.getParameterTypes()[i] == types[i])
@@ -310,7 +311,7 @@ final class OsgiServiceUtil {
     private static Method getMethodWithAssignableTypes(Class clazz, String methodName, Class<?>[] types) {
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (StringUtils.equals(method.getName(), methodName) && method.getParameterTypes().length == types.length) {
+            if (Strings.CS.equals(method.getName(), methodName) && method.getParameterTypes().length == types.length) {
                 boolean foundMismatch = false;
                 for (int i = 0; i < types.length; i++) {
                     if (!method.getParameterTypes()[i].isAssignableFrom(types[i])) {
@@ -330,7 +331,7 @@ final class OsgiServiceUtil {
     private static Method getMethodWithAnyCombinationArgs(Class clazz, String methodName, Class<?>[] types) {
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
-            if (StringUtils.equals(method.getName(), methodName) && method.getParameterTypes().length > 1) {
+            if (Strings.CS.equals(method.getName(), methodName) && method.getParameterTypes().length > 1) {
                 boolean foundMismatch = false;
                 for (Class<?> parameterType : method.getParameterTypes()) {
                     boolean foundAnyMatch = false;
@@ -395,8 +396,7 @@ final class OsgiServiceUtil {
     private static Field getField(Class clazz, String fieldName, Class<?> type) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (StringUtils.equals(field.getName(), fieldName)
-                    && field.getType().equals(type)) {
+            if (Strings.CS.equals(field.getName(), fieldName) && field.getType().equals(type)) {
                 return field;
             }
         }
@@ -411,8 +411,7 @@ final class OsgiServiceUtil {
     private static Field getFieldWithAssignableType(Class clazz, String fieldName, Class<?> type) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (StringUtils.equals(field.getName(), fieldName)
-                    && field.getType().isAssignableFrom(type)) {
+            if (Strings.CS.equals(field.getName(), fieldName) && field.getType().isAssignableFrom(type)) {
                 return field;
             }
         }
@@ -427,7 +426,7 @@ final class OsgiServiceUtil {
     private static Field getCollectionField(Class clazz, String fieldName) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (StringUtils.equals(field.getName(), fieldName) && Collection.class.isAssignableFrom(field.getType())) {
+            if (Strings.CS.equals(field.getName(), fieldName) && Collection.class.isAssignableFrom(field.getType())) {
                 return field;
             }
         }
@@ -957,7 +956,7 @@ final class OsgiServiceUtil {
                     }
                     if (reference.getPolicy() == ReferencePolicy.DYNAMIC) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (StringUtils.equals(serviceInterface, reference.getInterfaceType())) {
+                            if (Strings.CS.equals(serviceInterface, reference.getInterfaceType())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
@@ -987,7 +986,7 @@ final class OsgiServiceUtil {
                     if (reference.getPolicy() == ReferencePolicy.STATIC
                             && reference.getPolicyOption() == ReferencePolicyOption.GREEDY) {
                         for (String serviceInterface : registration.getClasses()) {
-                            if (StringUtils.equals(serviceInterface, reference.getInterfaceType())) {
+                            if (Strings.CS.equals(serviceInterface, reference.getInterfaceType())) {
                                 references.add(new ReferenceInfo(existingRegistration, reference));
                             }
                         }
