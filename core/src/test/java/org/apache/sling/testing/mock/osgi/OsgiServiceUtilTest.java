@@ -99,6 +99,8 @@ public class OsgiServiceUtilTest {
         List<ServiceSuperInterface3> references3 = service3.getReferences3();
         assertEquals(1, references3.size());
         assertSame(service2, references3.get(0));
+        assertTrue(service3.isBindReference3Called());
+        assertFalse(service3.isUnbindReference3Called());
 
         List<Map<String, Object>> reference3Configs = service3.getReference3Configs();
         assertEquals(1, reference3Configs.size());

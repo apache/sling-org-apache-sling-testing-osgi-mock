@@ -783,7 +783,7 @@ final class OsgiServiceUtil {
         }
 
         // OSGi declarative services 1.3 supports modifying the field directly
-        else if (StringUtils.isNotEmpty(fieldName)) {
+        if (StringUtils.isNotEmpty(fieldName)) {
 
             // check for field with list/collection reference
             if (reference.isCardinalityMultiple()) {
