@@ -48,7 +48,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.TreeBidiMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.apache.felix.framework.FilterImpl;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -298,11 +297,11 @@ final class OsgiMetadataUtil {
                 String name = getAttributeValue(node, "name");
                 String value = getAttributeValue(node, "value");
                 String type = getAttributeValue(node, "type");
-                if (Strings.CS.equals("Integer", type)) {
+                if (StringUtils.equals("Integer", type)) {
                     props.put(name, Integer.parseInt(value));
-                } else if (Strings.CS.equals("Long", type)) {
+                } else if (StringUtils.equals("Long", type)) {
                     props.put(name, Long.parseLong(value));
-                } else if (Strings.CS.equals("Boolean", type)) {
+                } else if (StringUtils.equals("Boolean", type)) {
                     props.put(name, Boolean.parseBoolean(value));
                 } else {
                     props.put(name, value);
@@ -595,7 +594,7 @@ final class OsgiMetadataUtil {
 
         private static ReferenceCardinality toCardinality(String value) {
             for (ReferenceCardinality item : ReferenceCardinality.values()) {
-                if (Strings.CS.equals(item.getCardinalityString(), value)) {
+                if (StringUtils.equals(item.getCardinalityString(), value)) {
                     return item;
                 }
             }
@@ -604,7 +603,7 @@ final class OsgiMetadataUtil {
 
         private static ReferencePolicy toPolicy(String value) {
             for (ReferencePolicy item : ReferencePolicy.values()) {
-                if (Strings.CI.equals(item.name(), value)) {
+                if (StringUtils.equalsIgnoreCase(item.name(), value)) {
                     return item;
                 }
             }
@@ -613,7 +612,7 @@ final class OsgiMetadataUtil {
 
         private static ReferencePolicyOption toPolicyOption(String value) {
             for (ReferencePolicyOption item : ReferencePolicyOption.values()) {
-                if (Strings.CI.equals(item.name(), value)) {
+                if (StringUtils.equalsIgnoreCase(item.name(), value)) {
                     return item;
                 }
             }
@@ -622,7 +621,7 @@ final class OsgiMetadataUtil {
 
         private static FieldCollectionType toFieldCollectionType(String value) {
             for (FieldCollectionType item : FieldCollectionType.values()) {
-                if (Strings.CI.equals(item.name(), value)) {
+                if (StringUtils.equalsIgnoreCase(item.name(), value)) {
                     return item;
                 }
             }
