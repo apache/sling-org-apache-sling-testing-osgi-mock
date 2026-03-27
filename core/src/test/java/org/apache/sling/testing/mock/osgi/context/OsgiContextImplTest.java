@@ -31,6 +31,7 @@ import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service8CustomName;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service8;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -205,7 +206,7 @@ public class OsgiContextImplTest {
 
     @Test
     public void testRegisterInjectActivateWithAdditionalManualServiceRegistration() {
-        context.registerInjectActivateService(new Service8CustomName());
+        context.registerInjectActivateService(new Service8());
     }
 
     @Test(expected = RuntimeException.class)
