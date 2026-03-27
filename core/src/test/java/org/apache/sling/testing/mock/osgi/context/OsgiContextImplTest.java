@@ -28,9 +28,9 @@ import org.apache.sling.testing.mock.osgi.NoScrMetadataException;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyComponent;
 import org.apache.sling.testing.mock.osgi.testsvc.osgicontextimpl.MyService;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service3;
+import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.Service8CustomName;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface1;
 import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.ServiceInterface2;
-import org.apache.sling.testing.mock.osgi.testsvc.osgiserviceutil.activatedeactivate.Service8;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -144,6 +144,13 @@ public class OsgiContextImplTest {
     }
 
     @Test
+    public void testRegisterInjectActivate_Class_CustomComponentName() {
+        Service8CustomName service = context.registerInjectActivateService(Service8CustomName.class);
+        assertEquals("Service8_this_is_a_custom_name", service.getConfig().get("component.name"));
+        assertNotNull(service.getConfig().get("component.id"));
+    }
+
+    @Test
     public void testRegisterInjectActivateWithProperties_Instance() {
         context.registerService(ServiceInterface1.class, mock(ServiceInterface1.class));
         context.registerService(ServiceInterface2.class, mock(ServiceInterface2.class));
@@ -198,7 +205,7 @@ public class OsgiContextImplTest {
 
     @Test
     public void testRegisterInjectActivateWithAdditionalManualServiceRegistration() {
-        context.registerInjectActivateService(new Service8());
+        context.registerInjectActivateService(new Service8CustomName());
     }
 
     @Test(expected = RuntimeException.class)

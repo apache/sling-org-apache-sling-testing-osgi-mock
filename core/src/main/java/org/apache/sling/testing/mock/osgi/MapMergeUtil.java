@@ -77,6 +77,7 @@ final class MapMergeUtil {
         Map<String, Object> mergedProperties = new HashMap<>();
 
         OsgiMetadata metadata = OsgiMetadataUtil.getMetadata(targetClass);
+        String componentName = targetClass.getName();
         if (metadata != null) {
             Map<String, Object> metadataProperties = metadata.getProperties();
             if (metadataProperties != null) {
@@ -99,6 +100,9 @@ final class MapMergeUtil {
                     }
                 }
             }
+            if (metadata.getName() != null) {
+                componentName = metadata.getName();
+            }
         }
 
         // merge with properties from calling unit test code
@@ -107,7 +111,7 @@ final class MapMergeUtil {
         }
 
         // add non overwritable auto-generated properties
-        mergedProperties.put(ComponentConstants.COMPONENT_NAME, targetClass.getName());
+        mergedProperties.put(ComponentConstants.COMPONENT_NAME, componentName);
         mergedProperties.put(ComponentConstants.COMPONENT_ID, COMPONENT_ID_COUNTER.getAndIncrement());
         return mergedProperties;
     }
