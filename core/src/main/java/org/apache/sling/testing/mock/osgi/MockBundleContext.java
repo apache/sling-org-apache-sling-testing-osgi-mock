@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.felix.framework.FilterImpl;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.DynamicReference;
 import org.apache.sling.testing.mock.osgi.OsgiMetadataUtil.Reference;
@@ -528,7 +529,7 @@ class MockBundleContext implements BundleContext {
 
     @Override
     public Bundle getBundle(String location) {
-        if (StringUtils.equals(location, Constants.SYSTEM_BUNDLE_LOCATION)) {
+        if (Strings.CS.equals(location, Constants.SYSTEM_BUNDLE_LOCATION)) {
             return systemBundle;
         }
         // otherwise return null - no bundle found
